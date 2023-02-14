@@ -8,6 +8,7 @@ specifiers:
   '@typescript-eslint/eslint-plugin': ^5.45.0
   '@typescript-eslint/parser': ^5.45.0
   autoprefixer: ^10.4.7
+  colord: ^2.9.3
   daisyui: ^2.50.0
   eslint: ^8.28.0
   eslint-config-prettier: ^8.5.0
@@ -29,9 +30,9 @@ specifiers:
   vitest: ^0.25.3
 
 dependencies:
+  colord: 2.9.3
   daisyui: 2.50.0_gbtt6ss3tbiz4yjtvdr6fbrj44
   fabric: 5.3.0
-  svelte-awesome-color-picker: 2.4.1
 
 devDependencies:
   '@playwright/test': 1.30.0
@@ -50,6 +51,7 @@ devDependencies:
   prettier-plugin-svelte: 2.9.0_jrsxveqmsx2uadbqiuq74wlc4u
   prettier-plugin-tailwindcss: 0.2.2_yjdjpc7im5hvpskij45owfsns4
   svelte: 3.55.1
+  svelte-awesome-color-picker: 2.4.1
   svelte-check: 3.0.3_gqx7lw3sljhsd4bstor5m2aa2u
   svelte-preprocess: 4.10.7_b25a55hc532q56kmuqlrolam2i
   tailwindcss: 3.2.6_postcss@8.4.21
@@ -880,7 +882,6 @@ packages:
 
   /colord/2.9.3:
     resolution: {integrity: sha512-jeC1axXpnb0/2nn/Y1LPuLdgXBLH7aDcHu4KEKfqw3CUhX7ZpfBSlPKyqXE6btIgEzfWtrX3/tyBCaCvXvMkOw==}
-    dev: false
 
   /combined-stream/1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -2480,7 +2481,7 @@ packages:
     resolution: {integrity: sha512-IzICGgaMRMgyK4uukm27UdTFfN7s0QN3eoFyIGiXXY8FCPumS9T+vffVG4rNhiuUUP4ga5SoGUE+KXuNj5dsrw==}
     dependencies:
       colord: 2.9.3
-    dev: false
+    dev: true
 
   /svelte-check/3.0.3_gqx7lw3sljhsd4bstor5m2aa2u:
     resolution: {integrity: sha512-ByBFXo3bfHRGIsYEasHkdMhLkNleVfszX/Ns1oip58tPJlKdo5Ssr8kgVIuo5oq00hss8AIcdesuy0Xt0BcTvg==}

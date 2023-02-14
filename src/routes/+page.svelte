@@ -1,12 +1,12 @@
 <script lang="ts">
+	import type { RgbaColor } from 'colord';
 	import { fabric } from 'fabric';
 	import { onMount } from 'svelte';
-	import ColorPicker, { type RgbaColor } from 'svelte-awesome-color-picker';
 	import MyColorPicker from '../lib/components/MyColorPicker.svelte';
 
 	const navHeight = 150;
 	const minusHeight = -navHeight;
-	let rgb: RgbaColor;
+	let rgba: RgbaColor;
 
 	let canvas: fabric.Canvas;
 	let activeObject: fabric.Object | null = null;
@@ -69,8 +69,13 @@
 		canvas.sendBackwards(activeObject);
 	};
 
-	const handleColorChange = () => {
-		console.log('handleColorChange');
+	const stringifyRGB = (rgba: RgbaColor) => Object.values(rgba).join();
+
+	const handleColorChange = (e: CustomEvent) => {
+		const { rgba } = e.detail;
+		if (!activeObject || !rgba) return;
+		activeObject.set('fill', `rgba(${stringifyRGB(rgba)})`);
+		canvas.renderAll();
 	};
 
 	onMount(() => {
@@ -101,13 +106,9 @@
 			canvas.calcOffset();
 		});
 	});
-
-	$: {
-		console.log(activeObject);
-	}
 </script>
 
-<div class="relative flex flex-col items-center justify-around overflow-hidden bg-slate-300">
+<div class="relative flex flex-col overflow-hidden bg-slate-200">
 	<nav
 		class="flex h-[{navHeight}] w-full items-center justify-around space-x-3 bg-blue-500 px-6 shadow-md"
 	>
@@ -116,9 +117,9 @@
 				<span class="text-xl font-bold text-base-300">Svelte Canvas</span>
 			</li>
 		</ul>
-		<ul>
+		<!-- <ul>
 			<ColorPicker bind:rgb />
-		</ul>
+		</ul> -->
 		<ul>
 			<li class="">
 				<button class="btn-primary btn" on:click={addRect}>Add Rect</button>
@@ -154,13 +155,13 @@
 			</li>
 		</ul>
 	</nav>
-	<main class="grid grid-cols-10">
-		<div on:click={updateSelection} on:keypress={updateSelection} class="col-span-7 bg-slate-300">
+	<main class="relative">
+		<div on:click={updateSelection} on:keypress={updateSelection} class="flex-1 bg-slate-200">
 			<canvas id="canvas" />
 		</div>
-		<div class="col-span-3 bg-amber-300">
-			Color Picker
-			<MyColorPicker />
+		<div class="absolute top-0 right-0 z-10 h-full max-w-xs flex-none bg-slate-500 px-3 py-5">
+			<h3 class="text-bold mb-2 text-center text-2xl font-medium text-base-100">Color Picker</h3>
+			<MyColorPicker on:colorChange={handleColorChange} />
 		</div>
 	</main>
 
