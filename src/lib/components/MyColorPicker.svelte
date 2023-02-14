@@ -228,7 +228,7 @@
 			bind:this={slider}
 		>
 			<div
-				class="slider-indicator z-1 pointer-events-none absolute left-1/2 box-border h-[10px] w-[10px] -translate-x-1/2 transform rounded-full bg-white"
+				class="slider-indicator pointer-events-none absolute left-1/2 z-10 box-border h-[10px] w-[10px] -translate-x-1/2 transform rounded-full bg-white"
 				style={`top:calc(${(sliderPos / 200) * 186}% + 2px)`}
 			/>
 		</div>
@@ -243,7 +243,7 @@
 			class="alpha"
 		>
 			<div
-				class="z-1 pointer-events-none absolute left-1/2 box-border h-[9px] w-[9px] -translate-x-1/2 transform rounded-full bg-black"
+				class="pointer-events-none absolute left-1/2 z-10 box-border h-[9px] w-[9px] -translate-x-1/2 transform rounded-full bg-black"
 				style={`top:calc(${(alphaPos / 200) * 186}% + 2px)`}
 			/>
 		</div>
