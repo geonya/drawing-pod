@@ -1,11 +1,20 @@
+const colors = require('tailwindcss/colors');
+
 const config = {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 
 	theme: {
-		extend: {},
+		extend: {
+			fontFamily: {
+				sans: ['Nanum Pen Script'],
+			},
+			colors: {
+				base: colors.neutral,
+			},
+		},
 	},
 
-	plugins: [require('daisyui')],
+	plugins: [],
 };
 
 module.exports = config;

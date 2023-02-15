@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
 	import '../app.postcss';
 </script>
 
-<div class="min-h-screen w-full font-medium">
+<div class="">
 	<slot />
 </div>
