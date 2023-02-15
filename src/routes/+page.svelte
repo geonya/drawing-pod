@@ -1,7 +1,9 @@
 <script lang="ts">
 	import MainCanvas from '$lib/components/MainCanvas.svelte';
+	import { CANVAS_DATA } from '$lib/constants';
 	import { fabric } from 'fabric';
 	import { onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 	enum MouseState {
 		DEFAULT = 'default',
 		DRAWING = 'drawing',
@@ -12,8 +14,7 @@
 	let canvasWrapper: HTMLElement;
 	let activeObject: fabric.Object | null = null;
 	let mouseState: MouseState = MouseState.DEFAULT;
-	let drawingMode = false;
-	let draggingMode = false;
+	let interval: NodeJS.Timer | null = null;
 
 	const handleBringForward = () => {
 		setMouseStateDefault();
@@ -165,10 +166,33 @@
 	};
 
 	const handleSave = () => {
-		setMouseStateDefault();
 		if (!canvas) return;
 		const storageString = JSON.stringify(canvas.toJSON());
-		localStorage.setItem('canvas-data', storageString);
+		localStorage.setItem(CANVAS_DATA, storageString);
+		console.log('data saved');
+	};
+	const handleDownloadSVG = () => {
+		const group = new fabric.Group(canvas.getObjects());
+		const newCanvas = new fabric.Canvas('newCanvas', {
+			width: group.width,
+			height: group.height,
+			backgroundColor: 'green',
+		});
+		newCanvas.add(group);
+		const svgData = newCanvas.toSVG();
+		let blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+		let url = URL.createObjectURL(blob);
+		let a = document.createElement('a');
+		a.download = 'canvas.svg';
+		a.href = url;
+		a.click();
+		URL.revokeObjectURL(url);
+	};
+
+	const handleSaveWithButton = () => {
+		setMouseStateDefault();
+		handleSave();
+		handleDownloadSVG();
 	};
 
 	const setMouseStateDefault = () => {
@@ -183,17 +207,16 @@
 	$: handleDrawingAndDragging(mouseState);
 
 	onMount(() => {
-		const storageString = localStorage.getItem('canvas-data');
+		const storageString = localStorage.getItem(CANVAS_DATA);
 		canvas = new fabric.Canvas('canvas', {
 			snapAngle: 0,
 			fireRightClick: true,
 			preserveObjectStacking: true,
 			backgroundColor: 'white',
-		});
-		canvas.setDimensions({
 			height: canvasWrapper.getBoundingClientRect().height,
 			width: canvasWrapper.getBoundingClientRect().width,
 		});
+
 		if (storageString) {
 			canvas.loadFromJSON(JSON.parse(storageString), () => {
 				console.log('Saved Data Loaded');
@@ -210,10 +233,18 @@
 			});
 			canvas.calcOffset();
 		});
+		interval = setInterval(() => {
+			handleSave();
+		}, 10000);
+	});
+	onDestroy(() => {
+		if (interval) {
+			clearInterval(interval);
+		}
 	});
 </script>
 
-<div
+<!-- <div
 	class="fixed top-0 left-0 right-0 z-10 grid h-8 w-full grid-cols-3 items-center justify-items-center bg-base-300"
 >
 	<div class="">
@@ -221,9 +252,10 @@
 	</div>
 	<div class="">Sveltraw</div>
 	<div class="">230215</div>
-</div>
-<header class="fixed top-8 left-0 right-0 z-10 h-24 w-full">
+</div> -->
+<header class="fixed top-0 left-0 right-0 z-10 h-24 w-full">
 	<div class="grid h-full w-full grid-cols-10">
+		<!-- // left side -->
 		<div class="col-span-2 place-self-center justify-self-start pl-9">
 			<button class="self-start">
 				<svg
@@ -242,9 +274,10 @@
 				</svg>
 			</button>
 		</div>
+		<!-- // center side -->
 		<div class="col-span-6 self-center">
 			<div
-				class="flex items-center justify-around space-x-4 rounded-md border-2 bg-white px-3 py-2 text-xl shadow-2xl"
+				class="flex items-center justify-around space-x-4 rounded-md border-2 px-3 py-2 text-xl shadow-2xl backdrop-blur"
 			>
 				<button class="자물쇠">
 					<svg
@@ -370,7 +403,7 @@
 						/>
 					</svg>
 				</button>
-				<button>
+				<button class="저장" on:click={handleSaveWithButton}>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
@@ -430,7 +463,7 @@
 	</div>
 </header>
 <nav
-	class="fixed top-32 left-0 z-10 hidden h-full max-h-[400px] w-36 overflow-auto border shadow-md backdrop-blur md:block"
+	class="fixed top-32 left-5 z-10 hidden h-full max-h-[600px] w-36 overflow-auto border shadow-md backdrop-blur md:block"
 >
 	<div class="flex h-full justify-around">
 		<button class="">
@@ -492,4 +525,6 @@
 <main class="min-h-[200vh] min-w-[200vw]" bind:this={canvasWrapper}>
 	<canvas id="canvas" />
 </main>
-<footer class="fixed bottom-0 right-0 left-0 h-12 w-full bg-orange-400">toaster</footer>
+<footer class="fixed bottom-0 right-0 left-0 grid h-12 w-full place-content-center backdrop-blur">
+	Copyright Geony 2023. All rights reserved.
+</footer>
