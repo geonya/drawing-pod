@@ -1,20 +1,20 @@
 <script lang="ts">
-	import MainCanvas from '$lib/components/MainCanvas.svelte';
+	import MyColorPicker from '$lib/components/MyColorPicker.svelte';
 	import { CANVAS_DATA } from '$lib/constants';
+	import { MouseState } from '$lib/types';
+
+	import type { RgbaColor } from 'colord';
 	import { fabric } from 'fabric';
 	import { onMount } from 'svelte';
 	import { onDestroy } from 'svelte';
-	enum MouseState {
-		DEFAULT = 'default',
-		DRAWING = 'drawing',
-		DRAGGING = 'dragging',
-	}
+	import { fade } from 'svelte/transition';
 
 	let canvas: fabric.Canvas;
 	let canvasWrapper: HTMLElement;
 	let activeObject: fabric.Object | null = null;
 	let mouseState: MouseState = MouseState.DEFAULT;
 	let interval: NodeJS.Timer | null = null;
+	let colorModalOpen = false;
 
 	const handleBringForward = () => {
 		setMouseStateDefault();
@@ -204,6 +204,36 @@
 		handleDragging(mouseState);
 	};
 
+	const stringifyRGB = (rgba: RgbaColor) => Object.values(rgba).join();
+
+	const handleColorChange = (e: CustomEvent) => {
+		const { rgba } = e.detail;
+		if (!activeObject || !rgba) return;
+		activeObject.set('fill', `rgba(${stringifyRGB(rgba)})`);
+		canvas.renderAll();
+	};
+	const handleColorModal = () => {
+		// if (!activeObject) {
+		// 	colorModalOpen = false;
+		// 	return;
+		// }
+		colorModalOpen = !colorModalOpen;
+	};
+
+	const handleColorModalClose = () => {
+		colorModalOpen = false;
+	};
+
+	const handleAutoSave = () => {
+		// interval = setInterval(() => {
+		// 	handleSave();
+		// }, 10000);
+	};
+
+	$: {
+		console.log(colorModalOpen);
+	}
+
 	$: handleDrawingAndDragging(mouseState);
 
 	onMount(() => {
@@ -233,9 +263,6 @@
 			});
 			canvas.calcOffset();
 		});
-		interval = setInterval(() => {
-			handleSave();
-		}, 10000);
 	});
 	onDestroy(() => {
 		if (interval) {
@@ -462,68 +489,107 @@
 		</div>
 	</div>
 </header>
+
+<!-- Modal Overlay -->
+{#if colorModalOpen}
+	<div
+		transition:fade
+		class="fixed inset-0 z-20 h-full w-full overflow-y-auto bg-base-600 opacity-10"
+		on:click={handleColorModalClose}
+		on:keypress={handleColorModalClose}
+	/>
+{/if}
+<!-- Side bar -->
 <nav
-	class="fixed top-32 left-5 z-10 hidden h-full max-h-[600px] w-36 overflow-auto border shadow-md backdrop-blur md:block"
+	class="fixed top-32 left-5 z-10 h-full max-h-[600px] w-32 rounded-md border shadow-md backdrop-blur md:block"
 >
-	<div class="flex h-full justify-around">
-		<button class="">
-			<svg
-				class="h-6 w-6"
-				aria-hidden="true"
-				focusable="false"
-				role="img"
-				viewBox="0 0 20 20"
-				fill="none"
-				stroke="currentColor"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				><g
-					clip-path="url(#a)"
+	<div class="scroll-none scroll scrollbar-hide h-full w-full overflow-y-auto">
+		<div class="컨트롤 박스 grid-auto-row grid gap-2 p-3">
+			{#if !colorModalOpen}
+				<div class="모달 absolute left-24 top-10 z-20 h-28 w-44 rounded-md bg-base-300">
+					<div class="컬러박스 h-7 w-7 rounded-md bg-base-500" />
+				</div>
+			{/if}
+
+			<div class="선">
+				<label for="stroke">
+					<span class="">선</span>
+				</label>
+				<div class="grid grid-flow-col items-center gap-2">
+					<button class="컬러박스 h-7 w-7 rounded-md bg-base-500" on:click={handleColorModal} />
+					<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
+				</div>
+			</div>
+			<div class="채우기">
+				<label for="fill">
+					<span class="">채우기</span>
+				</label>
+				<div class="grid grid-flow-col items-center gap-2">
+					<button class="컬러박스 h-7 w-7 rounded-md bg-base-500" on:click={handleColorModal} />
+					<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
+				</div>
+			</div>
+		</div>
+		<div class="flex h-[200vh] justify-around">
+			<button class="앞으로" on:click={handleBringForward}>
+				<svg
+					class="h-6 w-6"
+					aria-hidden="true"
+					focusable="false"
+					role="img"
+					viewBox="0 0 20 20"
+					fill="none"
 					stroke="currentColor"
-					stroke-width="1.25"
 					stroke-linecap="round"
 					stroke-linejoin="round"
-					><path
-						fill-rule="evenodd"
-						clip-rule="evenodd"
-						d="M6.944 12.5H12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
-						fill="currentColor"
-					/><path
-						d="M13.889 4.167H8.333c-.767 0-1.389.621-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.768-.622-1.39-1.39-1.39Z"
-					/></g
-				><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
-			>
-		</button>
-		<button>
-			<svg
-				aria-hidden="true"
-				focusable="false"
-				role="img"
-				viewBox="0 0 20 20"
-				class="h-6 w-6"
-				fill="none"
-				stroke="currentColor"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				><g
-					clip-path="url(#a)"
+					><g
+						clip-path="url(#a)"
+						stroke="currentColor"
+						stroke-width="1.25"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><path
+							fill-rule="evenodd"
+							clip-rule="evenodd"
+							d="M6.944 12.5H12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
+							fill="currentColor"
+						/><path
+							d="M13.889 4.167H8.333c-.767 0-1.389.621-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.768-.622-1.39-1.39-1.39Z"
+						/></g
+					><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
+				>
+			</button>
+			<button class="뒤로" on:click={handleBringForward}>
+				<svg
+					aria-hidden="true"
+					focusable="false"
+					role="img"
+					viewBox="0 0 20 20"
+					class="h-6 w-6"
+					fill="none"
 					stroke="currentColor"
-					stroke-width="1.25"
 					stroke-linecap="round"
 					stroke-linejoin="round"
-					><path
-						d="M13.889 4.167H8.333c-.767 0-1.389.622-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.767-.622-1.39-1.39-1.39Z"
-						fill="currentColor"
-					/><path
-						d="M12.5 12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
-					/></g
-				><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
-			>
-		</button>
+					><g
+						clip-path="url(#a)"
+						stroke="currentColor"
+						stroke-width="1.25"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><path
+							d="M13.889 4.167H8.333c-.767 0-1.389.622-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.767-.622-1.39-1.39-1.39Z"
+							fill="currentColor"
+						/><path
+							d="M12.5 12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
+						/></g
+					><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
+				>
+			</button>
+		</div>
 	</div>
 </nav>
-<main class="min-h-[200vh] min-w-[200vw]" bind:this={canvasWrapper}>
-	<canvas id="canvas" />
+<main class="scrollbar-hide min-h-[200vh]" bind:this={canvasWrapper}>
+	<canvas id="canvas" class="" />
 </main>
 <footer class="fixed bottom-0 right-0 left-0 grid h-12 w-full place-content-center backdrop-blur">
 	Copyright Geony 2023. All rights reserved.
