@@ -1,37 +1,52 @@
 <script lang="ts">
 	import { CANVAS_DATA } from '$lib/constants';
 	import { MouseState } from '$lib/types';
-
 	import { colord, type HsvaColor, type RgbaColor } from 'colord';
 	import { fabric } from 'fabric';
 	import { onMount } from 'svelte';
 	import { onDestroy } from 'svelte';
-
-	import { fade } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
 
 	let canvas: fabric.Canvas;
 	let canvasWrapper: HTMLElement;
 	let activeObject: fabric.Object | null = null;
 	let mouseState: MouseState = MouseState.DEFAULT;
 	let interval: NodeJS.Timer | null = null;
-	let colorModalOpen = false;
+	let navOpen = false;
+	let colorBoxOpen = false;
 	let bgHsva: HsvaColor | undefined;
-	let bgColor: string | undefined;
+	let bgColorByHex: string | undefined;
 	let colorBox: HTMLElement;
 	let colorIndicatorRadius = 4;
-	let colorPickerPos = { x: 0, y: 0 };
+	let pickerPosition = { x: 0, y: 0 };
 	let isMouseDown = false;
 	let colorSliderPosition = { y: 0 }; // %
 	let alphaSlider: HTMLElement;
-	let alphaSliderPosition = { y: 100 }; // %
+	let alphaSliderPosition = { y: 94 }; // %
 
 	let hsva: HsvaColor | undefined = { h: 0, s: 0, v: 100, a: 1 };
 	let rgba: RgbaColor | undefined = { r: 255, g: 255, b: 255, a: 1 };
 
 	let colorSlider: HTMLElement;
 
-	const changeBgColor = (bgHsva: HsvaColor | undefined) => {
+	const changeBgColorByHex = (bgHsva: HsvaColor | undefined) => {
 		return handleCalcHex(bgHsva);
+	};
+
+	const convertStringToRgba = (color: string | null) => {
+		if (!color) return;
+		const rgbaNumbers = color
+			.replace('rgba(', '')
+			.replace(')', '')
+			.split(',')
+			.map((c) => parseFloat(c));
+		const keyArray = ['r', 'g', 'b', 'a'];
+		const rgba = rgbaNumbers.reduce((acc, curr: number, i: number) => {
+			const key = keyArray[i];
+			acc = { ...acc, [key]: curr };
+			return acc;
+		}, {}) as RgbaColor;
+		return rgba;
 	};
 
 	const handleBringForward = () => {
@@ -106,6 +121,17 @@
 	const handleSelect = () => {
 		setMouseStateDefault();
 		activeObject = canvas.getActiveObject();
+		if (activeObject) {
+			console.log(activeObject.fill);
+			if (!activeObject.fill) return;
+			const _rgba = convertStringToRgba(activeObject.fill as string);
+			if (!_rgba) return;
+			if (typeof rgba?.a === 'number') {
+				const hsv = colord(_rgba).toHsv();
+				const _hsva = { ...hsv, a: _rgba.a };
+				hsva = _hsva;
+			}
+		}
 	};
 
 	const handleDragging = (mouseState: MouseState) => {
@@ -227,18 +253,31 @@
 		if (!canvas || !activeObject || !rgba) return null;
 		activeObject.set('fill', `rgba(${stringifyRGB(rgba)})`);
 		canvas.renderAll();
-		return activeObject;
-	};
-	const handleColorModal = () => {
-		if (!activeObject) {
-			colorModalOpen = false;
-			return;
-		}
-		colorModalOpen = !colorModalOpen;
 	};
 
-	const handleColorModalClose = () => {
-		colorModalOpen = false;
+	const handleNavOpen = (activeObject: fabric.Object | null) => {
+		if (!activeObject) {
+			navOpen = false;
+			return;
+		}
+		const realActiveObject = canvas.getActiveObject();
+		if (!realActiveObject) {
+			navOpen = false;
+			return;
+		}
+		navOpen = true;
+	};
+
+	const handleColorBoxOpen = () => {
+		colorBoxOpen = true;
+		const colorBoxTimer = setTimeout(() => handleColorBoxPickerPosition(hsva), 0);
+		const sliderTimer = setTimeout(() => handleSliderPickerPosition(hsva), 0);
+		const alphaTimer = setTimeout(() => handleAlphaSliderPosition(hsva), 0);
+		return () => {
+			clearTimeout(colorBoxTimer);
+			clearTimeout(sliderTimer);
+			clearTimeout(alphaTimer);
+		};
 	};
 
 	const handleMouseDown = () => {
@@ -273,7 +312,7 @@
 
 	const handleColorPickerValue = (value: { x: number; y: number } | undefined) => {
 		if (!value) return;
-		colorPickerPos = value;
+		pickerPosition = value;
 	};
 
 	const handleSliderValue = (value: { y: number } | undefined) => {
@@ -338,6 +377,41 @@
 		hsva.a = a;
 	};
 
+	const syncCanvasColor = (activeObject: fabric.Object | null) => {
+		if (!canvas || !hsva) return;
+		bgColorByHex = changeBgColorByHex(hsva);
+	};
+
+	const handleColorBoxPickerPosition = (hsva: HsvaColor | undefined) => {
+		if (!hsva) return;
+		if (colorBoxOpen && colorBox) {
+			let x = (hsva.s / 100) * colorBox.getBoundingClientRect().width;
+			let y =
+				colorBox.getBoundingClientRect().height -
+				(hsva.v / 100) * colorBox.getBoundingClientRect().height;
+			const position = { x, y };
+			pickerPosition = position;
+			console.log(pickerPosition);
+		}
+	};
+	const handleSliderPickerPosition = (hsva: HsvaColor | undefined) => {
+		if (!hsva) return;
+		if (colorSlider) {
+			let y = hsva.h / 3.6;
+			const position = { y };
+			colorSliderPosition = position;
+		}
+	};
+
+	const handleAlphaSliderPosition = (hsva: HsvaColor | undefined) => {
+		if (!hsva) return;
+		if (alphaSlider) {
+			let y = hsva.a * 100;
+			const position = { y };
+			alphaSliderPosition = position;
+		}
+	};
+
 	const handleAutoSave = (time: number) => {
 		return setInterval(() => {
 			handleSave();
@@ -354,14 +428,16 @@
 		canvas.calcOffset();
 	};
 
+	// event react
+	$: canvas && handleNavOpen(activeObject);
 	$: handleDrawingAndDragging(mouseState);
-	$: handleCalcColor(colorPickerPos);
+	$: handleCalcColor(pickerPosition);
 	$: handleCalcColorWithSlider(colorSliderPosition);
 	$: handleCalcAlphaValue(alphaSliderPosition);
 	$: rgba = handleCalcRbga(hsva);
-	$: bgColor = changeBgColor(bgHsva);
-	$: activeObject = handleActiveObjectColorChange(rgba);
-	$: console.log(rgba);
+	$: syncCanvasColor(activeObject);
+	$: bgColorByHex = changeBgColorByHex(bgHsva);
+	$: handleActiveObjectColorChange(rgba);
 
 	onMount(() => {
 		const storageString = localStorage.getItem(CANVAS_DATA);
@@ -381,6 +457,7 @@
 		}
 		canvas.on('selection:created', () => handleSelect());
 		canvas.on('selection:updated', () => handleSelect());
+		canvas.on('selection:cleared', () => handleSelect());
 		canvas.on('object:moving', preventExitCanvas);
 
 		interval = handleAutoSave(10000);
@@ -612,163 +689,166 @@
 	</div>
 </header>
 
-<!-- Modal Overlay -->
-{#if colorModalOpen}
-	<div
-		transition:fade
-		class="fixed inset-0 z-20 h-full w-full overflow-y-auto bg-base-600 opacity-10"
-		on:click={handleColorModalClose}
-		on:keypress={handleColorModalClose}
-	/>
-{/if}
-<!-- Side bar -->
-<nav
-	class="fixed top-32 left-8 z-10 h-full max-h-[600px] w-40 rounded-md border shadow-md backdrop-blur md:block"
->
-	<div class="scroll-none scroll scrollbar-hide h-full w-full overflow-y-auto">
-		<div class="컨트롤 박스 grid-auto-row grid gap-2 p-3">
-			{#if !colorModalOpen}
-				<div
-					class="모달 absolute -left-2 top-5 z-20 flex h-32 w-44 items-center space-x-3 rounded-md bg-base-300 bg-opacity-90 p-3"
-				>
+{#if navOpen}
+	<nav
+		transition:fly={{ x: -200, duration: 500 }}
+		class="fixed top-48 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
+	>
+		<div class="scroll-none scroll scrollbar-hide h-full w-full overflow-y-auto">
+			<div class="컨트롤 박스 grid-auto-row grid gap-2 p-3">
+				{#if colorBoxOpen}
 					<div
-						on:mousedown={handleMouseDown}
-						on:mousemove={(e) => {
-							handleColorPickerValue(handleIndicatorMove(e, colorBox));
-						}}
-						on:mouseup={handleMouseUp}
-						bind:this={colorBox}
-						class="colorBox relative h-full w-24 rounded-md  focus:cursor-grab"
-						style="--bg-color:{bgColor || '#ff0000'};"
+						transition:fly={{ y: -200, duration: 500 }}
+						class="모달 absolute -top-28 left-0 z-30 flex h-32 w-full items-center rounded-md bg-base-300 bg-opacity-90 p-3 shadow-xl"
 					>
-						<div
-							on:mousedown={(e) => {
-								if (e.button !== 0) return;
-								isMouseDown = true;
-							}}
-							class="absolute rounded-full bg-base-500"
-							style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
-								2}px; translate(0, 0); left:{colorPickerPos.x}px; top:{colorPickerPos.y}px;"
-						/>
-					</div>
-					<!-- color slider -->
-					<div
-						bind:this={colorSlider}
-						on:mouseup={handleMouseUp}
-						on:mousedown={handleMouseDown}
-						on:mousemove={(e) => {
-							handleSliderValue(handleIndicatorMoveWithVertical(e, colorSlider));
-						}}
-						class="slider relative h-full w-3 rounded-md"
-						style=""
-					>
-						<div
-							on:mousedown={handleMouseDown}
-							class="z-1 absolute left-0 right-0 m-auto cursor-grab
+						<div class="flex h-full w-full space-x-3">
+							<div
+								on:mousedown={handleMouseDown}
+								on:mousemove={(e) => {
+									handleColorPickerValue(handleIndicatorMove(e, colorBox));
+								}}
+								on:mouseup={handleMouseUp}
+								bind:this={colorBox}
+								class="colorBox relative h-full w-24 rounded-md  focus:cursor-grab"
+								style="--bg-color:{bgColorByHex || '#ff0000'};"
+							>
+								<div
+									on:mousedown={(e) => {
+										if (e.button !== 0) return;
+										isMouseDown = true;
+									}}
+									class="absolute rounded-full bg-base-500"
+									style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
+										2}px; translate(0, 0); left:{pickerPosition.x}px; top:{pickerPosition.y}px;"
+								/>
+							</div>
+							<!-- color slider -->
+							<div
+								bind:this={colorSlider}
+								on:mouseup={handleMouseUp}
+								on:mousedown={handleMouseDown}
+								on:mousemove={(e) => {
+									handleSliderValue(handleIndicatorMoveWithVertical(e, colorSlider));
+								}}
+								class="slider relative h-full w-3 rounded-md"
+								style=""
+							>
+								<div
+									on:mousedown={handleMouseDown}
+									class="z-1 absolute left-0 right-0 m-auto cursor-grab
 							rounded-full bg-base-500"
-							style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
-								2}px; translate(0, 0); top:{colorSliderPosition.y}%;"
-						/>
-					</div>
-					<!-- alpha slider -->
-					<div
-						bind:this={alphaSlider}
-						on:mouseup={handleMouseUp}
-						on:mousedown={handleMouseDown}
-						on:mousemove={(e) => {
-							handleAlphaSliderValue(handleIndicatorMoveWithVertical(e, alphaSlider));
-						}}
-						class="alpha relative h-full w-3 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
-						style="--alpha-color: {handleCalcHex(hsva)?.substring(0, 7)}"
-					>
-						<div
-							on:mousedown={handleMouseDown}
-							class="쩜 z-1 absolute left-0 right-0 mx-auto cursor-grab 
+									style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
+										2}px; translate(0, 0); top:{colorSliderPosition.y}%;"
+								/>
+							</div>
+							<!-- alpha slider -->
+							<div
+								bind:this={alphaSlider}
+								on:mouseup={handleMouseUp}
+								on:mousedown={handleMouseDown}
+								on:mousemove={(e) => {
+									handleAlphaSliderValue(handleIndicatorMoveWithVertical(e, alphaSlider));
+								}}
+								class="alpha relative h-full w-3 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
+								style="--alpha-color: {handleCalcHex(hsva)?.substring(0, 7)}"
+							>
+								<div
+									on:mousedown={handleMouseDown}
+									class="쩜 z-1 absolute left-0 right-0 mx-auto cursor-grab 
 						rounded-full bg-base-500"
-							style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
-								2}px; translate(0, 0); top:{alphaSliderPosition.y}%;"
+									style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
+										2}px; translate(0, 0); top:{alphaSliderPosition.y}%;"
+								/>
+							</div>
+						</div>
+					</div>
+				{/if}
+				<div class="선">
+					<label for="stroke">
+						<span class="">선</span>
+					</label>
+					<div class="grid grid-flow-col items-center gap-2">
+						<button
+							class="컬러박스 h-7 w-7 rounded-md"
+							style="background-color:{bgColorByHex || 'black'};"
+							on:click={handleColorBoxOpen}
 						/>
+						<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>
 				</div>
-			{/if}
-
-			<div class="선">
-				<label for="stroke">
-					<span class="">선</span>
-				</label>
-				<div class="grid grid-flow-col items-center gap-2">
-					<button class="컬러박스 h-7 w-7 rounded-md bg-base-500" on:click={handleColorModal} />
-					<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
+				<div class="채우기">
+					<label for="fill">
+						<span class="">채우기</span>
+					</label>
+					<div class="grid grid-flow-col items-center gap-2">
+						<button
+							class="컬러박스 h-7 w-7 rounded-md "
+							on:click={handleColorBoxOpen}
+							style="background-color:{handleCalcHex(hsva)};"
+						/>
+						<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
+					</div>
 				</div>
 			</div>
-			<div class="채우기">
-				<label for="fill">
-					<span class="">채우기</span>
-				</label>
-				<div class="grid grid-flow-col items-center gap-2">
-					<button class="컬러박스 h-7 w-7 rounded-md bg-base-500" on:click={handleColorModal} />
-					<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
-				</div>
+			<div class="flex h-full justify-around">
+				<button class="앞으로" on:click={handleBringForward}>
+					<svg
+						class="h-6 w-6"
+						aria-hidden="true"
+						focusable="false"
+						role="img"
+						viewBox="0 0 20 20"
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><g
+							clip-path="url(#a)"
+							stroke="currentColor"
+							stroke-width="1.25"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path
+								fill-rule="evenodd"
+								clip-rule="evenodd"
+								d="M6.944 12.5H12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
+								fill="currentColor"
+							/><path
+								d="M13.889 4.167H8.333c-.767 0-1.389.621-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.768-.622-1.39-1.39-1.39Z"
+							/></g
+						><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
+					>
+				</button>
+				<button class="뒤로" on:click={handleBringForward}>
+					<svg
+						aria-hidden="true"
+						focusable="false"
+						role="img"
+						viewBox="0 0 20 20"
+						class="h-6 w-6"
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><g
+							clip-path="url(#a)"
+							stroke="currentColor"
+							stroke-width="1.25"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path
+								d="M13.889 4.167H8.333c-.767 0-1.389.622-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.767-.622-1.39-1.39-1.39Z"
+								fill="currentColor"
+							/><path
+								d="M12.5 12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
+							/></g
+						><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
+					>
+				</button>
 			</div>
 		</div>
-		<div class="flex h-[200vh] justify-around">
-			<button class="앞으로" on:click={handleBringForward}>
-				<svg
-					class="h-6 w-6"
-					aria-hidden="true"
-					focusable="false"
-					role="img"
-					viewBox="0 0 20 20"
-					fill="none"
-					stroke="currentColor"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					><g
-						clip-path="url(#a)"
-						stroke="currentColor"
-						stroke-width="1.25"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						><path
-							fill-rule="evenodd"
-							clip-rule="evenodd"
-							d="M6.944 12.5H12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
-							fill="currentColor"
-						/><path
-							d="M13.889 4.167H8.333c-.767 0-1.389.621-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.768-.622-1.39-1.39-1.39Z"
-						/></g
-					><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
-				>
-			</button>
-			<button class="뒤로" on:click={handleBringForward}>
-				<svg
-					aria-hidden="true"
-					focusable="false"
-					role="img"
-					viewBox="0 0 20 20"
-					class="h-6 w-6"
-					fill="none"
-					stroke="currentColor"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					><g
-						clip-path="url(#a)"
-						stroke="currentColor"
-						stroke-width="1.25"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						><path
-							d="M13.889 4.167H8.333c-.767 0-1.389.622-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.767-.622-1.39-1.39-1.39Z"
-							fill="currentColor"
-						/><path
-							d="M12.5 12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
-						/></g
-					><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
-				>
-			</button>
-		</div>
-	</div>
-</nav>
+	</nav>
+{/if}
 <main class="scrollbar-hide min-h-[200vh]" bind:this={canvasWrapper}>
 	<canvas id="canvas" class="" />
 </main>
