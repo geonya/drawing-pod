@@ -1,53 +1,25 @@
 <script lang="ts">
+	import ColorPicker from '$lib/components/ColorPicker.svelte';
 	import { CANVAS_DATA } from '$lib/constants';
 	import { MouseState } from '$lib/types';
-	import { colord, type HsvaColor, type RgbaColor } from 'colord';
+	import { convertStringToRgba, stringifyRGB } from '$lib/utils';
+	import { colord, type RgbaColor } from 'colord';
 	import { fabric } from 'fabric';
 	import { onMount } from 'svelte';
-	import { onDestroy } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 
 	let canvas: fabric.Canvas;
+	let navOpen = false;
 	let canvasWrapper: HTMLElement;
 	let activeObject: fabric.Object | null = null;
 	let mouseState: MouseState = MouseState.DEFAULT;
-	let interval: NodeJS.Timer | null = null;
-	let navOpen = false;
-	let colorBoxOpen = false;
-	let bgHsva: HsvaColor | undefined;
-	let bgColorByHex: string | undefined;
-	let colorBox: HTMLElement;
-	let colorIndicatorRadius = 4;
-	let pickerPosition = { x: 0, y: 0 };
-	let isMouseDown = false;
-	let colorSliderPosition = { y: 0 }; // %
-	let alphaSlider: HTMLElement;
-	let alphaSliderPosition = { y: 94 }; // %
+	let fillColorBoxOpen = false,
+		strokeColorBoxOpen = false;
 
-	let hsva: HsvaColor | undefined = { h: 0, s: 0, v: 100, a: 1 };
-	let rgba: RgbaColor | undefined = { r: 255, g: 255, b: 255, a: 1 };
-
-	let colorSlider: HTMLElement;
-
-	const changeBgColorByHex = (bgHsva: HsvaColor | undefined) => {
-		return handleCalcHex(bgHsva);
-	};
-
-	const convertStringToRgba = (color: string | null) => {
-		if (!color) return;
-		const rgbaNumbers = color
-			.replace('rgba(', '')
-			.replace(')', '')
-			.split(',')
-			.map((c) => parseFloat(c));
-		const keyArray = ['r', 'g', 'b', 'a'];
-		const rgba = rgbaNumbers.reduce((acc, curr: number, i: number) => {
-			const key = keyArray[i];
-			acc = { ...acc, [key]: curr };
-			return acc;
-		}, {}) as RgbaColor;
-		return rgba;
-	};
+	let fillColorHex: string | undefined;
+	let fillColorRgba: RgbaColor | undefined;
+	let strokeColorHex: string | undefined;
+	let strokeColorRgba: RgbaColor | undefined;
 
 	const handleBringForward = () => {
 		setMouseStateDefault();
@@ -117,20 +89,34 @@
 			activeObject = null;
 		}
 	};
+	const getObjectColor = (object: fabric.Object) => {
+		const _fillColorRgba = convertStringToRgba(object.fill as string);
+		const _strokeColorRgba = convertStringToRgba(object.stroke as string);
+		if (typeof _fillColorRgba?.a === 'number') {
+			fillColorRgba = _fillColorRgba;
+			fillColorHex = colord(_fillColorRgba).toHex();
+		}
+		if (typeof _strokeColorRgba?.a === 'number') {
+			strokeColorRgba = _strokeColorRgba;
+			strokeColorHex = colord(_strokeColorRgba).toHex();
+		}
+	};
+	const setObjectColor = (fillColorRgba: RgbaColor, strokeColorRgba: RgbaColor) => {
+		if (!activeObject) return;
+		if (fillColorRgba) {
+			activeObject.set('fill', stringifyRGB(fillColorRgba));
+		}
+		if (strokeColorRgba) {
+			activeObject.set('stroke', stringifyRGB(strokeColorRgba));
+		}
+		canvas.renderAll();
+	};
 
-	const handleSelect = () => {
-		setMouseStateDefault();
+	const handleObjectSelect = () => {
+		setMouseStateDefault(); // dragging / drawing mode off
 		activeObject = canvas.getActiveObject();
 		if (activeObject) {
-			console.log(activeObject.fill);
-			if (!activeObject.fill) return;
-			const _rgba = convertStringToRgba(activeObject.fill as string);
-			if (!_rgba) return;
-			if (typeof rgba?.a === 'number') {
-				const hsv = colord(_rgba).toHsv();
-				const _hsva = { ...hsv, a: _rgba.a };
-				hsva = _hsva;
-			}
+			getObjectColor(activeObject);
 		}
 	};
 
@@ -247,14 +233,6 @@
 		handleDragging(mouseState);
 	};
 
-	const stringifyRGB = (rgba: RgbaColor): string => Object.values(rgba).join();
-
-	const handleActiveObjectColorChange = (rgba: RgbaColor | undefined) => {
-		if (!canvas || !activeObject || !rgba) return null;
-		activeObject.set('fill', `rgba(${stringifyRGB(rgba)})`);
-		canvas.renderAll();
-	};
-
 	const handleNavOpen = (activeObject: fabric.Object | null) => {
 		if (!activeObject) {
 			navOpen = false;
@@ -268,148 +246,24 @@
 		navOpen = true;
 	};
 
-	const handleColorBoxOpen = () => {
-		colorBoxOpen = true;
-		const colorBoxTimer = setTimeout(() => handleColorBoxPickerPosition(hsva), 0);
-		const sliderTimer = setTimeout(() => handleSliderPickerPosition(hsva), 0);
-		const alphaTimer = setTimeout(() => handleAlphaSliderPosition(hsva), 0);
-		return () => {
-			clearTimeout(colorBoxTimer);
-			clearTimeout(sliderTimer);
-			clearTimeout(alphaTimer);
-		};
-	};
-
-	const handleMouseDown = () => {
-		isMouseDown = true;
-	};
-
-	const handleMouseUp = () => {
-		isMouseDown = false;
-	};
-
-	const handleIndicatorMove = (e: MouseEvent, wrapper: HTMLElement) => {
-		if (!isMouseDown) return;
-		if (!wrapper || !e) return;
-		const { width, height, left, top } = wrapper.getBoundingClientRect();
-		let x = e.clientX - left - colorIndicatorRadius;
-		let y = e.clientY - top - colorIndicatorRadius;
-		if (x <= 0) {
-			x = 0;
-		}
-		if (x >= width - colorIndicatorRadius * 2) {
-			x = width - colorIndicatorRadius * 2;
-		}
-		if (y <= 0) {
-			y = 0;
-		}
-		if (y >= height - colorIndicatorRadius * 2) {
-			y = height - colorIndicatorRadius * 2;
-		}
-
-		return { x, y };
-	};
-
-	const handleColorPickerValue = (value: { x: number; y: number } | undefined) => {
-		if (!value) return;
-		pickerPosition = value;
-	};
-
-	const handleSliderValue = (value: { y: number } | undefined) => {
-		if (!value) return;
-		colorSliderPosition = value;
-	};
-	const handleAlphaSliderValue = (value: { y: number } | undefined) => {
-		if (!value) return;
-		alphaSliderPosition = value;
-	};
-
-	const handleIndicatorMoveWithVertical = (e: MouseEvent, wrapper: HTMLElement) => {
-		if (!isMouseDown) return;
-		if (!wrapper || !e) return;
-		const { top, height } = wrapper.getBoundingClientRect();
-		let h = e.clientY - top - colorIndicatorRadius;
-		if (h <= 0) {
-			h = 0;
-		}
-		if (h >= height - colorIndicatorRadius * 2) {
-			h = height - colorIndicatorRadius * 2;
-		}
-		let y = (h / height) * 100;
-		return { y };
-	};
-
-	const handleCalcRbga = (hsva?: HsvaColor) => {
-		if (!hsva) return;
-		return colord(hsva).toRgb();
-	};
-	const handleCalcHex = (hsva?: HsvaColor) => {
-		if (!hsva) return;
-		return colord(hsva).toHex();
-	};
-
-	const handleCalcColor = (position: { x: number; y: number }) => {
-		if (!colorBox || !hsva) return;
-
-		let s = Math.min(Math.max(0, position.x / colorBox.getBoundingClientRect().width), 1) * 100;
-		let v =
-			Math.min(
-				Math.max(
-					0,
-					(colorBox.getBoundingClientRect().height - position.y) /
-						colorBox.getBoundingClientRect().height,
-				),
-				1,
-			) * 100;
-		hsva.s = s;
-		hsva.v = v;
-	};
-	const handleCalcColorWithSlider = (colorSliderPosition: { y: number }) => {
-		if (!colorSlider || !hsva) return;
-		let h = colorSliderPosition.y * 3.6;
-		hsva.h = h;
-		bgHsva = { ...hsva };
-	};
-
-	const handleCalcAlphaValue = (alphaSliderPosition: { y: number }) => {
-		if (!alphaSlider || !hsva) return;
-		let a = alphaSliderPosition.y / 100;
-		hsva.a = a;
-	};
-
-	const syncCanvasColor = (activeObject: fabric.Object | null) => {
-		if (!canvas || !hsva) return;
-		bgColorByHex = changeBgColorByHex(hsva);
-	};
-
-	const handleColorBoxPickerPosition = (hsva: HsvaColor | undefined) => {
-		if (!hsva) return;
-		if (colorBoxOpen && colorBox) {
-			let x = (hsva.s / 100) * colorBox.getBoundingClientRect().width;
-			let y =
-				colorBox.getBoundingClientRect().height -
-				(hsva.v / 100) * colorBox.getBoundingClientRect().height;
-			const position = { x, y };
-			pickerPosition = position;
-			console.log(pickerPosition);
-		}
-	};
-	const handleSliderPickerPosition = (hsva: HsvaColor | undefined) => {
-		if (!hsva) return;
-		if (colorSlider) {
-			let y = hsva.h / 3.6;
-			const position = { y };
-			colorSliderPosition = position;
+	const handleColorBoxOpen = (type: 'fill' | 'stroke') => {
+		if (type === 'fill') {
+			fillColorBoxOpen = !fillColorBoxOpen;
+			strokeColorBoxOpen = false;
+		} else if (type === 'stroke') {
+			strokeColorBoxOpen = !strokeColorBoxOpen;
+			fillColorBoxOpen = false;
 		}
 	};
 
-	const handleAlphaSliderPosition = (hsva: HsvaColor | undefined) => {
-		if (!hsva) return;
-		if (alphaSlider) {
-			let y = hsva.a * 100;
-			const position = { y };
-			alphaSliderPosition = position;
-		}
+	const windowResize = () => {
+		if (!canvas) return;
+		console.log('window resizing...');
+		canvas.setDimensions({
+			height: canvasWrapper.getBoundingClientRect().height,
+			width: canvasWrapper.getBoundingClientRect().width,
+		});
+		canvas.calcOffset();
 	};
 
 	const handleAutoSave = (time: number) => {
@@ -418,26 +272,10 @@
 		}, time);
 	};
 
-	const windowResize = () => {
-		if (!canvas) return;
-		console.log('window resizing');
-		canvas.setDimensions({
-			height: canvasWrapper.getBoundingClientRect().height,
-			width: canvasWrapper.getBoundingClientRect().width,
-		});
-		canvas.calcOffset();
-	};
-
 	// event react
 	$: canvas && handleNavOpen(activeObject);
 	$: handleDrawingAndDragging(mouseState);
-	$: handleCalcColor(pickerPosition);
-	$: handleCalcColorWithSlider(colorSliderPosition);
-	$: handleCalcAlphaValue(alphaSliderPosition);
-	$: rgba = handleCalcRbga(hsva);
-	$: syncCanvasColor(activeObject);
-	$: bgColorByHex = changeBgColorByHex(bgHsva);
-	$: handleActiveObjectColorChange(rgba);
+	$: setObjectColor(fillColorRgba, strokeColorRgba);
 
 	onMount(() => {
 		const storageString = localStorage.getItem(CANVAS_DATA);
@@ -455,30 +293,19 @@
 				console.log('Saved Data Loaded');
 			});
 		}
-		canvas.on('selection:created', () => handleSelect());
-		canvas.on('selection:updated', () => handleSelect());
-		canvas.on('selection:cleared', () => handleSelect());
+		canvas.on('selection:created', () => handleObjectSelect());
+		canvas.on('selection:updated', () => handleObjectSelect());
+		canvas.on('selection:cleared', () => handleObjectSelect());
 		canvas.on('object:moving', preventExitCanvas);
 
-		interval = handleAutoSave(10000);
-	});
-	onDestroy(() => {
-		if (interval) {
+		let interval = handleAutoSave(10000);
+		return () => {
 			clearInterval(interval);
-		}
+		};
 	});
 </script>
 
-<!-- <div
-	class="fixed top-0 left-0 right-0 z-10 grid h-8 w-full grid-cols-3 items-center justify-items-center bg-base-300"
->
-	<div class="">
-		<a href="https://github.com/geonya">Github</a>
-	</div>
-	<div class="">Sveltraw</div>
-	<div class="">230215</div>
-</div> -->
-<svelte:window on:resize={windowResize} on:mouseup={handleMouseUp} />
+<svelte:window on:resize={windowResize} />
 <header class="fixed top-0 left-0 right-0 z-10 h-24 w-full">
 	<div class="grid h-full w-full grid-cols-10">
 		<!-- // left side -->
@@ -689,79 +516,18 @@
 	</div>
 </header>
 
-{#if navOpen}
+{#if navOpen && activeObject}
 	<nav
 		transition:fly={{ x: -200, duration: 500 }}
 		class="fixed top-48 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
 	>
 		<div class="scroll-none scroll scrollbar-hide h-full w-full overflow-y-auto">
 			<div class="컨트롤 박스 grid-auto-row grid gap-2 p-3">
-				{#if colorBoxOpen}
-					<div
-						transition:fly={{ y: -200, duration: 500 }}
-						class="모달 absolute -top-28 left-0 z-30 flex h-32 w-full items-center rounded-md bg-base-300 bg-opacity-90 p-3 shadow-xl"
-					>
-						<div class="flex h-full w-full space-x-3">
-							<div
-								on:mousedown={handleMouseDown}
-								on:mousemove={(e) => {
-									handleColorPickerValue(handleIndicatorMove(e, colorBox));
-								}}
-								on:mouseup={handleMouseUp}
-								bind:this={colorBox}
-								class="colorBox relative h-full w-24 rounded-md  focus:cursor-grab"
-								style="--bg-color:{bgColorByHex || '#ff0000'};"
-							>
-								<div
-									on:mousedown={(e) => {
-										if (e.button !== 0) return;
-										isMouseDown = true;
-									}}
-									class="absolute rounded-full bg-base-500"
-									style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
-										2}px; translate(0, 0); left:{pickerPosition.x}px; top:{pickerPosition.y}px;"
-								/>
-							</div>
-							<!-- color slider -->
-							<div
-								bind:this={colorSlider}
-								on:mouseup={handleMouseUp}
-								on:mousedown={handleMouseDown}
-								on:mousemove={(e) => {
-									handleSliderValue(handleIndicatorMoveWithVertical(e, colorSlider));
-								}}
-								class="slider relative h-full w-3 rounded-md"
-								style=""
-							>
-								<div
-									on:mousedown={handleMouseDown}
-									class="z-1 absolute left-0 right-0 m-auto cursor-grab
-							rounded-full bg-base-500"
-									style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
-										2}px; translate(0, 0); top:{colorSliderPosition.y}%;"
-								/>
-							</div>
-							<!-- alpha slider -->
-							<div
-								bind:this={alphaSlider}
-								on:mouseup={handleMouseUp}
-								on:mousedown={handleMouseDown}
-								on:mousemove={(e) => {
-									handleAlphaSliderValue(handleIndicatorMoveWithVertical(e, alphaSlider));
-								}}
-								class="alpha relative h-full w-3 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
-								style="--alpha-color: {handleCalcHex(hsva)?.substring(0, 7)}"
-							>
-								<div
-									on:mousedown={handleMouseDown}
-									class="쩜 z-1 absolute left-0 right-0 mx-auto cursor-grab 
-						rounded-full bg-base-500"
-									style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
-										2}px; translate(0, 0); top:{alphaSliderPosition.y}%;"
-								/>
-							</div>
-						</div>
-					</div>
+				{#if fillColorBoxOpen}
+					<ColorPicker bind:hex={fillColorHex} bind:rgba={fillColorRgba} />
+				{/if}
+				{#if strokeColorBoxOpen}
+					<ColorPicker bind:hex={strokeColorHex} bind:rgba={strokeColorRgba} />
 				{/if}
 				<div class="선">
 					<label for="stroke">
@@ -770,8 +536,8 @@
 					<div class="grid grid-flow-col items-center gap-2">
 						<button
 							class="컬러박스 h-7 w-7 rounded-md"
-							style="background-color:{bgColorByHex || 'black'};"
-							on:click={handleColorBoxOpen}
+							style="background-color:{strokeColorHex || 'black'};"
+							on:click={() => handleColorBoxOpen('stroke')}
 						/>
 						<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>
@@ -783,8 +549,8 @@
 					<div class="grid grid-flow-col items-center gap-2">
 						<button
 							class="컬러박스 h-7 w-7 rounded-md "
-							on:click={handleColorBoxOpen}
-							style="background-color:{handleCalcHex(hsva)};"
+							on:click={() => handleColorBoxOpen('fill')}
+							style="background-color:{fillColorHex || 'black'};"
 						/>
 						<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>
@@ -855,24 +621,3 @@
 <footer class="fixed bottom-0 right-0 left-0 grid h-12 w-full place-content-center backdrop-blur">
 	Copyright Geony 2023. All rights reserved.
 </footer>
-
-<style>
-	.colorBox {
-		background: linear-gradient(#ffffff00, #000000ff),
-			linear-gradient(0.25turn, #ffffffff, #00000000), var(--bg-color);
-	}
-	.slider {
-		--gradient: #ff0000, #ffff00 17.2%, #ffff00 18.2%, #00ff00 33.3%, #00ffff 49.5%, #00ffff 51.5%,
-			#0000ff 67.7%, #ff00ff 83.3%, #ff0000;
-		background: linear-gradient(var(--gradient));
-	}
-	.alpha:before {
-		background: linear-gradient(#00000000, var(--alpha-color));
-	}
-	.alpha {
-		background-image: linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%),
-			linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%);
-		background-size: var(--pattern-size-2x, 12px) var(--pattern-size-2x, 12px);
-		background-position: 0 0, var(--pattern-size, 6px) var(--pattern-size, 6px);
-	}
-</style>
