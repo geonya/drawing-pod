@@ -261,20 +261,12 @@
 		background: linear-gradient(var(--gradient));
 	}
 	.alpha:after {
-		position: absolute;
-		content: '';
-		inset: 0;
-		background: linear-gradient(#00000000, var(--alpha-color));
-		z-index: 0;
 	}
 	.alpha {
 		position: relative;
 		width: 100%;
 		height: 100%;
-		background-image: linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%),
-			linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%);
-		background-size: var(--pattern-size-2x, 12px) var(--pattern-size-2x, 12px);
-		background-position: 0 0, var(--pattern-size, 6px) var(--pattern-size, 6px);
+
 		outline: none;
 		user-select: none;
 	}

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import MyColorPicker from '$lib/components/MyColorPicker.svelte';
 	import { CANVAS_DATA } from '$lib/constants';
 	import { MouseState } from '$lib/types';
 
-	import type { RgbaColor } from 'colord';
+	import { colord, type HsvaColor, type RgbaColor } from 'colord';
 	import { fabric } from 'fabric';
 	import { onMount } from 'svelte';
 	import { onDestroy } from 'svelte';
+
 	import { fade } from 'svelte/transition';
 
 	let canvas: fabric.Canvas;
@@ -15,6 +15,24 @@
 	let mouseState: MouseState = MouseState.DEFAULT;
 	let interval: NodeJS.Timer | null = null;
 	let colorModalOpen = false;
+	let bgHsva: HsvaColor | undefined;
+	let bgColor: string | undefined;
+	let colorBox: HTMLElement;
+	let colorIndicatorRadius = 4;
+	let colorPickerPos = { x: 0, y: 0 };
+	let isMouseDown = false;
+	let colorSliderPosition = { y: 0 }; // %
+	let alphaSlider: HTMLElement;
+	let alphaSliderPosition = { y: 100 }; // %
+
+	let hsva: HsvaColor | undefined = { h: 0, s: 0, v: 100, a: 1 };
+	let rgba: RgbaColor | undefined = { r: 255, g: 255, b: 255, a: 1 };
+
+	let colorSlider: HTMLElement;
+
+	const changeBgColor = (bgHsva: HsvaColor | undefined) => {
+		return handleCalcHex(bgHsva);
+	};
 
 	const handleBringForward = () => {
 		setMouseStateDefault();
@@ -82,7 +100,6 @@
 		if (activeObject) {
 			canvas.remove(activeObject);
 			activeObject = null;
-			console.log(activeObject);
 		}
 	};
 
@@ -204,19 +221,19 @@
 		handleDragging(mouseState);
 	};
 
-	const stringifyRGB = (rgba: RgbaColor) => Object.values(rgba).join();
+	const stringifyRGB = (rgba: RgbaColor): string => Object.values(rgba).join();
 
-	const handleColorChange = (e: CustomEvent) => {
-		const { rgba } = e.detail;
-		if (!activeObject || !rgba) return;
+	const handleActiveObjectColorChange = (rgba: RgbaColor | undefined) => {
+		if (!canvas || !activeObject || !rgba) return null;
 		activeObject.set('fill', `rgba(${stringifyRGB(rgba)})`);
 		canvas.renderAll();
+		return activeObject;
 	};
 	const handleColorModal = () => {
-		// if (!activeObject) {
-		// 	colorModalOpen = false;
-		// 	return;
-		// }
+		if (!activeObject) {
+			colorModalOpen = false;
+			return;
+		}
 		colorModalOpen = !colorModalOpen;
 	};
 
@@ -224,17 +241,127 @@
 		colorModalOpen = false;
 	};
 
-	const handleAutoSave = () => {
-		// interval = setInterval(() => {
-		// 	handleSave();
-		// }, 10000);
+	const handleMouseDown = () => {
+		isMouseDown = true;
 	};
 
-	$: {
-		console.log(colorModalOpen);
-	}
+	const handleMouseUp = () => {
+		isMouseDown = false;
+	};
+
+	const handleIndicatorMove = (e: MouseEvent, wrapper: HTMLElement) => {
+		if (!isMouseDown) return;
+		if (!wrapper || !e) return;
+		const { width, height, left, top } = wrapper.getBoundingClientRect();
+		let x = e.clientX - left - colorIndicatorRadius;
+		let y = e.clientY - top - colorIndicatorRadius;
+		if (x <= 0) {
+			x = 0;
+		}
+		if (x >= width - colorIndicatorRadius * 2) {
+			x = width - colorIndicatorRadius * 2;
+		}
+		if (y <= 0) {
+			y = 0;
+		}
+		if (y >= height - colorIndicatorRadius * 2) {
+			y = height - colorIndicatorRadius * 2;
+		}
+
+		return { x, y };
+	};
+
+	const handleColorPickerValue = (value: { x: number; y: number } | undefined) => {
+		if (!value) return;
+		colorPickerPos = value;
+	};
+
+	const handleSliderValue = (value: { y: number } | undefined) => {
+		if (!value) return;
+		colorSliderPosition = value;
+	};
+	const handleAlphaSliderValue = (value: { y: number } | undefined) => {
+		if (!value) return;
+		alphaSliderPosition = value;
+	};
+
+	const handleIndicatorMoveWithVertical = (e: MouseEvent, wrapper: HTMLElement) => {
+		if (!isMouseDown) return;
+		if (!wrapper || !e) return;
+		const { top, height } = wrapper.getBoundingClientRect();
+		let h = e.clientY - top - colorIndicatorRadius;
+		if (h <= 0) {
+			h = 0;
+		}
+		if (h >= height - colorIndicatorRadius * 2) {
+			h = height - colorIndicatorRadius * 2;
+		}
+		let y = (h / height) * 100;
+		return { y };
+	};
+
+	const handleCalcRbga = (hsva?: HsvaColor) => {
+		if (!hsva) return;
+		return colord(hsva).toRgb();
+	};
+	const handleCalcHex = (hsva?: HsvaColor) => {
+		if (!hsva) return;
+		return colord(hsva).toHex();
+	};
+
+	const handleCalcColor = (position: { x: number; y: number }) => {
+		if (!colorBox || !hsva) return;
+
+		let s = Math.min(Math.max(0, position.x / colorBox.getBoundingClientRect().width), 1) * 100;
+		let v =
+			Math.min(
+				Math.max(
+					0,
+					(colorBox.getBoundingClientRect().height - position.y) /
+						colorBox.getBoundingClientRect().height,
+				),
+				1,
+			) * 100;
+		hsva.s = s;
+		hsva.v = v;
+	};
+	const handleCalcColorWithSlider = (colorSliderPosition: { y: number }) => {
+		if (!colorSlider || !hsva) return;
+		let h = colorSliderPosition.y * 3.6;
+		hsva.h = h;
+		bgHsva = { ...hsva };
+	};
+
+	const handleCalcAlphaValue = (alphaSliderPosition: { y: number }) => {
+		if (!alphaSlider || !hsva) return;
+		let a = alphaSliderPosition.y / 100;
+		hsva.a = a;
+	};
+
+	const handleAutoSave = (time: number) => {
+		return setInterval(() => {
+			handleSave();
+		}, time);
+	};
+
+	const windowResize = () => {
+		if (!canvas) return;
+		console.log('window resizing');
+		canvas.setDimensions({
+			height: canvasWrapper.getBoundingClientRect().height,
+			width: canvasWrapper.getBoundingClientRect().width,
+		});
+		canvas.calcOffset();
+	};
 
 	$: handleDrawingAndDragging(mouseState);
+	$: handleCalcColor(colorPickerPos);
+	$: handleCalcColorWithSlider(colorSliderPosition);
+	$: handleCalcAlphaValue(alphaSliderPosition);
+	$: rgba = handleCalcRbga(hsva);
+	$: bgColor = changeBgColor(bgHsva);
+	$: activeObject = handleActiveObjectColorChange(rgba);
+	$: console.log(rgba);
 
 	onMount(() => {
 		const storageString = localStorage.getItem(CANVAS_DATA);
@@ -255,14 +382,8 @@
 		canvas.on('selection:created', () => handleSelect());
 		canvas.on('selection:updated', () => handleSelect());
 		canvas.on('object:moving', preventExitCanvas);
-		window.addEventListener('resize', () => {
-			console.log('window resizing');
-			canvas.setDimensions({
-				height: canvasWrapper.getBoundingClientRect().height,
-				width: canvasWrapper.getBoundingClientRect().width,
-			});
-			canvas.calcOffset();
-		});
+
+		interval = handleAutoSave(10000);
 	});
 	onDestroy(() => {
 		if (interval) {
@@ -280,6 +401,7 @@
 	<div class="">Sveltraw</div>
 	<div class="">230215</div>
 </div> -->
+<svelte:window on:resize={windowResize} on:mouseup={handleMouseUp} />
 <header class="fixed top-0 left-0 right-0 z-10 h-24 w-full">
 	<div class="grid h-full w-full grid-cols-10">
 		<!-- // left side -->
@@ -306,7 +428,7 @@
 			<div
 				class="flex items-center justify-around space-x-4 rounded-md border-2 px-3 py-2 text-xl shadow-2xl backdrop-blur"
 			>
-				<button class="자물쇠">
+				<button class="자물쇠">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
@@ -501,13 +623,72 @@
 {/if}
 <!-- Side bar -->
 <nav
-	class="fixed top-32 left-5 z-10 h-full max-h-[600px] w-32 rounded-md border shadow-md backdrop-blur md:block"
+	class="fixed top-32 left-8 z-10 h-full max-h-[600px] w-40 rounded-md border shadow-md backdrop-blur md:block"
 >
 	<div class="scroll-none scroll scrollbar-hide h-full w-full overflow-y-auto">
 		<div class="컨트롤 박스 grid-auto-row grid gap-2 p-3">
 			{#if !colorModalOpen}
-				<div class="모달 absolute left-24 top-10 z-20 h-28 w-44 rounded-md bg-base-300">
-					<div class="컬러박스 h-7 w-7 rounded-md bg-base-500" />
+				<div
+					class="모달 absolute -left-2 top-5 z-20 flex h-32 w-44 items-center space-x-3 rounded-md bg-base-300 bg-opacity-90 p-3"
+				>
+					<div
+						on:mousedown={handleMouseDown}
+						on:mousemove={(e) => {
+							handleColorPickerValue(handleIndicatorMove(e, colorBox));
+						}}
+						on:mouseup={handleMouseUp}
+						bind:this={colorBox}
+						class="colorBox relative h-full w-24 rounded-md  focus:cursor-grab"
+						style="--bg-color:{bgColor || '#ff0000'};"
+					>
+						<div
+							on:mousedown={(e) => {
+								if (e.button !== 0) return;
+								isMouseDown = true;
+							}}
+							class="absolute rounded-full bg-base-500"
+							style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
+								2}px; translate(0, 0); left:{colorPickerPos.x}px; top:{colorPickerPos.y}px;"
+						/>
+					</div>
+					<!-- color slider -->
+					<div
+						bind:this={colorSlider}
+						on:mouseup={handleMouseUp}
+						on:mousedown={handleMouseDown}
+						on:mousemove={(e) => {
+							handleSliderValue(handleIndicatorMoveWithVertical(e, colorSlider));
+						}}
+						class="slider relative h-full w-3 rounded-md"
+						style=""
+					>
+						<div
+							on:mousedown={handleMouseDown}
+							class="z-1 absolute left-0 right-0 m-auto cursor-grab
+							rounded-full bg-base-500"
+							style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
+								2}px; translate(0, 0); top:{colorSliderPosition.y}%;"
+						/>
+					</div>
+					<!-- alpha slider -->
+					<div
+						bind:this={alphaSlider}
+						on:mouseup={handleMouseUp}
+						on:mousedown={handleMouseDown}
+						on:mousemove={(e) => {
+							handleAlphaSliderValue(handleIndicatorMoveWithVertical(e, alphaSlider));
+						}}
+						class="alpha relative h-full w-3 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
+						style="--alpha-color: {handleCalcHex(hsva)?.substring(0, 7)}"
+					>
+						<div
+							on:mousedown={handleMouseDown}
+							class="쩜 z-1 absolute left-0 right-0 mx-auto cursor-grab 
+						rounded-full bg-base-500"
+							style="width:{colorIndicatorRadius * 2}px; height:{colorIndicatorRadius *
+								2}px; translate(0, 0); top:{alphaSliderPosition.y}%;"
+						/>
+					</div>
 				</div>
 			{/if}
 
@@ -594,3 +775,24 @@
 <footer class="fixed bottom-0 right-0 left-0 grid h-12 w-full place-content-center backdrop-blur">
 	Copyright Geony 2023. All rights reserved.
 </footer>
+
+<style>
+	.colorBox {
+		background: linear-gradient(#ffffff00, #000000ff),
+			linear-gradient(0.25turn, #ffffffff, #00000000), var(--bg-color);
+	}
+	.slider {
+		--gradient: #ff0000, #ffff00 17.2%, #ffff00 18.2%, #00ff00 33.3%, #00ffff 49.5%, #00ffff 51.5%,
+			#0000ff 67.7%, #ff00ff 83.3%, #ff0000;
+		background: linear-gradient(var(--gradient));
+	}
+	.alpha:before {
+		background: linear-gradient(#00000000, var(--alpha-color));
+	}
+	.alpha {
+		background-image: linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%),
+			linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%);
+		background-size: var(--pattern-size-2x, 12px) var(--pattern-size-2x, 12px);
+		background-position: 0 0, var(--pattern-size, 6px) var(--pattern-size, 6px);
+	}
+</style>
