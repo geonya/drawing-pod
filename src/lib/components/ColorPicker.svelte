@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { rgbaToHsva } from '$lib/utils';
 
+	export let activeObject: fabric.Object | null;
 	export let rgba: RgbaColor = { r: 255, g: 255, b: 255, a: 1 };
 	export let hex: string = '#ffffff';
 
@@ -17,7 +18,8 @@
 	let alphaSlider: HTMLElement;
 	let isMouseDown = false;
 
-	const handleActiveObjectColorChange = (hsva: HsvaColor) => {
+	const handleActiveObjectColorChange = (hsva: HsvaColor, activeObject: fabric.Object | null) => {
+		if (!activeObject) return;
 		rgba = colord(hsva).toRgb();
 	};
 
@@ -67,15 +69,16 @@
 	const handleIndicatorMoveWithVertical = (e: MouseEvent, wrapper: HTMLElement) => {
 		if (!isMouseDown) return;
 		if (!wrapper || !e) return;
+		let y = 0;
 		const { top, height } = wrapper.getBoundingClientRect();
 		let h = e.clientY - top - colorIndicatorRadius;
 		if (h <= 0) {
 			h = 0;
 		}
-		if (h >= height - colorIndicatorRadius * 2) {
-			h = height - colorIndicatorRadius * 2;
+		if (h >= height + colorIndicatorRadius * 2) {
+			h = height + colorIndicatorRadius * 2;
 		}
-		let y = (h / height) * 100;
+		y = (h / height) * 100;
 		return { y };
 	};
 
@@ -136,9 +139,8 @@
 	$: colorBox && handleCalcColor(pickerPosition);
 	$: colorSlider && handleCalcColorWithSlider(colorSliderPosition);
 	$: alphaSlider && handleCalcAlphaValue(alphaSliderPosition);
-	$: handleActiveObjectColorChange(hsva);
+	$: handleActiveObjectColorChange(hsva, activeObject);
 	$: hex = colord(hsva).toHex();
-	$: console.log(hsva);
 
 	onMount(() => {});
 </script>

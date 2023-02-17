@@ -16,10 +16,10 @@
 	let fillColorBoxOpen = false,
 		strokeColorBoxOpen = false;
 
-	let fillColorHex: string | undefined;
-	let fillColorRgba: RgbaColor | undefined;
-	let strokeColorHex: string | undefined;
-	let strokeColorRgba: RgbaColor | undefined;
+	let fillColorHex: string;
+	let fillColorRgba: RgbaColor;
+	let strokeColorHex: string;
+	let strokeColorRgba: RgbaColor;
 
 	const handleBringForward = () => {
 		setMouseStateDefault();
@@ -236,6 +236,8 @@
 	const handleNavOpen = (activeObject: fabric.Object | null) => {
 		if (!activeObject) {
 			navOpen = false;
+			fillColorBoxOpen = false;
+			strokeColorBoxOpen = false;
 			return;
 		}
 		const realActiveObject = canvas.getActiveObject();
@@ -524,10 +526,10 @@
 		<div class="scroll-none scroll scrollbar-hide h-full w-full overflow-y-auto">
 			<div class="컨트롤 박스 grid-auto-row grid gap-2 p-3">
 				{#if fillColorBoxOpen}
-					<ColorPicker bind:hex={fillColorHex} bind:rgba={fillColorRgba} />
+					<ColorPicker bind:hex={fillColorHex} bind:rgba={fillColorRgba} bind:activeObject />
 				{/if}
 				{#if strokeColorBoxOpen}
-					<ColorPicker bind:hex={strokeColorHex} bind:rgba={strokeColorRgba} />
+					<ColorPicker bind:hex={strokeColorHex} bind:rgba={strokeColorRgba} bind:activeObject />
 				{/if}
 				<div class="선">
 					<label for="stroke">
@@ -615,7 +617,7 @@
 		</div>
 	</nav>
 {/if}
-<main class="scrollbar-hide min-h-[200vh]" bind:this={canvasWrapper}>
+<main class="scrollbar-hide min-h-[100vh]" bind:this={canvasWrapper}>
 	<canvas id="canvas" class="" />
 </main>
 <footer class="fixed bottom-0 right-0 left-0 grid h-12 w-full place-content-center backdrop-blur">
