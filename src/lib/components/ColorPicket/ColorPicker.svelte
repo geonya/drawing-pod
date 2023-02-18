@@ -3,7 +3,6 @@
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { rgbaToHsva } from '$lib/utils';
-
 	export let activeObject: fabric.Object | null;
 	export let rgba: RgbaColor = { r: 255, g: 255, b: 255, a: 1 };
 	export let hex: string = '#ffffff';
