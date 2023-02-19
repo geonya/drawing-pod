@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ColorPicker from '$lib/components/ColorPicket/ColorPicker.svelte';
+	import ColorPicker from '$lib/components/ColorPicker/ColorPicker.svelte';
 	import { CANVAS_DATA } from '$lib/constants';
 	import { MouseState } from '$lib/types';
 	import { convertStringToRgba, stringifyRGB } from '$lib/utils';
@@ -114,6 +114,7 @@
 
 	const handleObjectSelect = () => {
 		activeObject = canvas.getActiveObject();
+		console.log(activeObject);
 		if (activeObject) {
 			getObjectColor(activeObject);
 		}

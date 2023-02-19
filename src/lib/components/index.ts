@@ -1,3 +1,3 @@
-import ColorPicker from './ColorPicket/ColorPicker.svelte';
+import ColorPicker from './ColorPicker/ColorPicker.svelte';
 
 export { ColorPicker };
