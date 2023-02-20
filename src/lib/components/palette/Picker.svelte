@@ -2,8 +2,8 @@
 	import { hsvaToRgba } from '$lib/utils';
 	import type { HsvaColor } from 'colord';
 	import { onMount } from 'svelte';
-	import type { Writable } from 'svelte/store';
 	import { hsva } from './colorStore';
+	import { DOT_RADIUS } from './constants';
 
 	interface RatioPositionXY {
 		xRatio: number;
@@ -12,7 +12,7 @@
 	let pickerBg: HTMLElement;
 	let pickerBgRect: DOMRect;
 	let isMouseDown = false;
-	const dotRadius = 6;
+	const dotRadius = DOT_RADIUS;
 	let dotRadiusRatio: RatioPositionXY = { xRatio: 0, yRatio: 0 };
 	let pickerPosition: RatioPositionXY = { xRatio: 0, yRatio: 0 };
 
@@ -49,7 +49,6 @@
 		pickerPosition = { xRatio: (offsetX / width) * 100, yRatio: (offsetY / height) * 100 };
 	};
 
-	// TODO: 만약 꼭지점 끝가지 간다면 s 랑 v 값을 극단까지 지정할 수 있는가?
 	const hsvaToPickerPosition = (hsva: HsvaColor): RatioPositionXY => {
 		if (!hsva) return { xRatio: 0, yRatio: 0 };
 		const position = { ...pickerPosition };
