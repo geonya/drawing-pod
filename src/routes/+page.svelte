@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ColorPicker from '$lib/components/ColorPicker/ColorPicker.svelte';
 	import { CANVAS_DATA } from '$lib/constants';
+
 	import { MouseState } from '$lib/types';
 	import { convertStringToRgba, stringifyRGB } from '$lib/utils';
 	import { colord, type RgbaColor } from 'colord';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { hsvaToRgba } from '$lib/utils';
+	import { hsvaToHex, hsvaToRgba, stringifyRGB } from '$lib/utils';
 	import type { HsvaColor } from 'colord';
 	import { onMount } from 'svelte';
 	import { hsva } from './colorStore';
@@ -9,6 +9,8 @@
 		xRatio: number;
 		yRatio: number;
 	}
+
+	export let bgColor: string;
 	let pickerBg: HTMLElement;
 	let pickerBgRect: DOMRect;
 	let isMouseDown = false;
@@ -16,7 +18,6 @@
 	let dotRadiusRatio: RatioPositionXY = { xRatio: 0, yRatio: 0 };
 	let pickerPosition: RatioPositionXY = { xRatio: 0, yRatio: 0 };
 
-	$: pickerBgColor = hsvaToRgba($hsva);
 	$: {
 		const sv = positionToHsva(pickerPosition);
 		hsva.update((hsva) => ({ ...hsva, ...sv }));
@@ -53,7 +54,7 @@
 		if (!hsva) return { xRatio: 0, yRatio: 0 };
 		const position = { ...pickerPosition };
 		const { s, v } = hsva as { s: number; v: number };
-		position.xRatio = (s / 360) * 100;
+		position.xRatio = (s / 100) * 100;
 		position.yRatio = (v / 100) * 100;
 		if (s === 0) {
 			position.xRatio = dotRadiusRatio.xRatio;
@@ -61,7 +62,7 @@
 		if (v === 0) {
 			position.yRatio = dotRadiusRatio.yRatio;
 		}
-		if (s >= 360) {
+		if (s >= 100) {
 			position.xRatio = 100 - dotRadiusRatio.xRatio;
 		}
 		if (v >= 100) {
@@ -74,13 +75,13 @@
 	const positionToHsva = (_position: RatioPositionXY) => {
 		const position = { ..._position };
 		const { xRatio, yRatio } = position;
-		let s = (xRatio / 100) * 360;
+		let s = (xRatio / 100) * 100;
 		let v = (yRatio / 100) * 100;
 		if (xRatio <= dotRadiusRatio.xRatio) {
 			s = 0;
 		}
 		if (xRatio >= 100 - dotRadiusRatio.xRatio) {
-			s = 360;
+			s = 100;
 		}
 		if (yRatio <= dotRadiusRatio.yRatio) {
 			v = 0;
@@ -103,11 +104,11 @@
 </script>
 
 <svelte:window on:mouseup={handleMouseUp} />
-<div class="p-5" id="pickerBgWrapper" on:mousemove={handleMouseMove}>
+<div class="select-none p-5" id="pickerBgWrapper" on:mousemove={handleMouseMove}>
 	<div
 		class="relative h-32 w-32"
 		id="pickerBg"
-		style="--bg-color:{pickerBgColor};"
+		style="--bg-color:{bgColor};"
 		on:mousedown|self={handleMouseDown}
 		bind:this={pickerBg}
 	>
@@ -124,7 +125,6 @@
 <style>
 	#pickerBg {
 		background: linear-gradient(#ffffff00, #000000ff),
-			linear-gradient(0.25turn, #ffffffff, #00000000), rgba(0, 0, 0, 1);
+			linear-gradient(0.25turn, #ffffffff, #00000000), var(--bg-color);
 	}
-	/* your styles go here */
 </style>

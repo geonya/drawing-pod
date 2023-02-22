@@ -1,5 +1,7 @@
 import { colord, type HsvaColor, type RgbaColor } from 'colord';
 
+export const hsvaToHex = (hsva: HsvaColor): string => colord(hsva).toHex();
+
 export const stringifyRGB = (rgba: RgbaColor): string => `rgba(${Object.values(rgba).join()})`;
 export const convertStringToRgba = (color: string | null) => {
 	if (!color) return;
