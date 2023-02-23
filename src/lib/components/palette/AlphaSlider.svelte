@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
-	import { hsva } from './colorStore';
+	import { hsvaToHex } from '$lib/utils';
 	import type { HsvaColor } from 'colord';
-
 	export let _hsva: HsvaColor;
 
+	let hex = '#FFFFFF';
 	let sliderWrapper: HTMLElement;
 	let slider: HTMLElement;
 	let isMouseDown = false;
@@ -14,14 +14,9 @@
 	let dotRadiusRatio: number;
 	let sliderPositionRatio: number;
 
-	const updateHsva = (position: number) => {
-		const h = setHValue(position);
-		hsva.update((prev) => ({ ...prev, h }));
-	};
-	const updatePickerBg = (position: number) => {
-		const h = setHValue(position);
-		_hsva = { h, s: 100, v: 100, a: 1 };
-	};
+	$: hex = hsvaToHex($hsva);
+	$: alpha = setAlphaValue(sliderPositionRatio);
+	$: hsva.update((o) => ({ ...o, a: alpha }));
 
 	const handleMouseDown = () => {
 		isMouseDown = true;
@@ -37,51 +32,50 @@
 		sliderPositionRatio = ((clientY - top) / height) * 100;
 		if (sliderPositionRatio <= dotRadiusRatio) sliderPositionRatio = dotRadiusRatio;
 		if (sliderPositionRatio >= 100 - dotRadiusRatio) sliderPositionRatio = 100 - dotRadiusRatio;
-		updateHsva(sliderPositionRatio);
-		updatePickerBg(sliderPositionRatio);
+		return sliderPositionRatio;
 	};
-	const hsvaToSliderPosition = (h: number) => {
-		let verticalRatio = (h / 360) * 100;
-		if (h === 0) {
+	const hsvaToSliderPosition = (a: number) => {
+		let verticalRatio = a * 100;
+		if (a === 0) {
 			verticalRatio = dotRadiusRatio;
 		}
-		if (h === 360) {
+		if (a === 1) {
 			verticalRatio = 100 - dotRadiusRatio;
 		}
 		return verticalRatio;
 	};
-	const setHValue = (position: number) => {
-		let h = (position / 100) * 360;
-		if (position === dotRadiusRatio) h = 0;
-		if (position === 100 - dotRadiusRatio) h = 360;
-		return h;
+	const setAlphaValue = (position: number) => {
+		if (position === dotRadiusRatio) return 0;
+		if (position === 100 - dotRadiusRatio) return 1;
+		return position / 100;
 	};
 
 	onMount(() => {
 		sliderRect = slider.getBoundingClientRect();
-		if (!sliderRect.height) return;
-		dotRadiusRatio = (dotRadius / sliderRect.height) * 100;
-		sliderPositionRatio = hsvaToSliderPosition(_hsva.h);
+		if (sliderRect.height) {
+			dotRadiusRatio = (dotRadius / sliderRect.height) * 100;
+			sliderPositionRatio = hsvaToSliderPosition(_hsva.a);
+		}
 	});
 </script>
 
 <!-- color slider -->
 <svelte:window on:mouseup={handleMouseUp} />
 <div
-	class="sliderWrapper h-full w-full select-none p-[2px]"
+	class="sliderWrapper h-full w-full select-none p-1"
 	bind:this={sliderWrapper}
 	on:mousemove={handleMouseMove}
 >
 	<div
 		bind:this={slider}
 		on:mousedown={handleMouseDown}
-		class="slider relative h-full w-3 rounded-md"
-		style=""
+		class="alpha relative h-full w-3 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
+		style="--alpha-color: {hex}; --pathern-size:5px"
 	>
 		{#if sliderPositionRatio && dotRadiusRatio}
 			<div
 				on:mousedown={handleMouseDown}
-				class="sliderDot z-1 absolute left-0 right-0 m-auto cursor-grab
+				class="alphaDot z-1 absolute left-0 right-0 m-auto cursor-grab
 							rounded-full bg-base-500"
 				style="width:{dotRadius * 2}px; height:{dotRadius *
 					2}px; translate(0, 0); top:{sliderPositionRatio - dotRadiusRatio}%;"
@@ -91,9 +85,13 @@
 </div>
 
 <style>
-	.slider {
-		--gradient: #ff0000, #ffff00 17.2%, #ffff00 18.2%, #00ff00 33.3%, #00ffff 49.5%, #00ffff 51.5%,
-			#0000ff 67.7%, #ff00ff 83.3%, #ff0000;
-		background: linear-gradient(var(--gradient));
+	.alpha:before {
+		background: linear-gradient(#00000000, var(--alpha-color));
+	}
+	.alpha {
+		background-image: linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%),
+			linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%);
+		background-size: var(--pattern-size-2x, 12px) var(--pattern-size-2x, 12px);
+		background-position: 0 0, var(--pattern-size, 6px) var(--pattern-size, 6px);
 	}
 </style>

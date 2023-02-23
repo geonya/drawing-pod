@@ -1,42 +1,82 @@
 <script lang="ts">
-	import ColorPicker from '$lib/components/ColorPicker/ColorPicker.svelte';
 	import { CANVAS_DATA } from '$lib/constants';
+	import { Palette } from '$lib/components/palette';
+	import { ColorType, MouseState } from '$lib/types';
 
-	import { MouseState } from '$lib/types';
-	import { convertStringToRgba, stringifyRGB } from '$lib/utils';
-	import { colord, type RgbaColor } from 'colord';
 	import { fabric } from 'fabric';
 	import { onMount } from 'svelte';
-	import { fade, fly } from 'svelte/transition';
+	import { fly, fade } from 'svelte/transition';
+	import { activeShape } from '$lib/store';
+
+	fabric.Canvas.prototype.toObject.IObjectOptions = (function (toObject) {
+		return function (this: any) {
+			return fabric.util.object.extend(toObject.call(this), {
+				id: this.id,
+			});
+		};
+	})(fabric.Canvas.prototype.toObject);
+
+	var SelectObject = function (ObjectName) {
+		canvas.getObjects().forEach(function (o) {
+			if (o.id === ObjectName) {
+				canvas.setActiveObject(o);
+			}
+		});
+	};
+	const canvas = new fabric.Canvas('c');
+	const rect = new fabric.Rect();
+
+	//add new custom parameters
+	fabric.Object.prototype.toObject = (function (toObject) {
+		return function (this: any) {
+			return fabric.util.object.extend(toObject.call(this), {
+				id: this.id,
+				tool: this.tool,
+				depth: this.depth,
+				kind: this.kind,
+			});
+		};
+	})(fabric.Object.prototype.toObject);
+
+	//set your new custom parameters
+	rect.set('tool', 'chainsaw');
+	rect.set('depth', '999');
+	rect.set('kind', 'designerRect');
+
+	canvas.includeDefaultValues = true;
+	canvas.add(rect);
+
+	canvas.toJSON();
+	console.log(canvas.toJSON());
 
 	let canvas: fabric.Canvas;
 	let navOpen = false;
 	let canvasWrapper: HTMLElement;
-	let activeObject: fabric.Object | null = null;
 	let mouseState: MouseState = MouseState.DEFAULT;
 	let fillColorBoxOpen = false,
 		strokeColorBoxOpen = false;
+	let fillColor = 'rgba(0,0,0,0)',
+		strokeColor = 'rgba(0,0,0,0)';
 
-	let fillColorHex: string;
-	let fillColorRgba: RgbaColor;
-	let strokeColorHex: string;
-	let strokeColorRgba: RgbaColor;
+	// event react
+
+	$: toggleDrawingAndDraggingMode(mouseState);
 
 	const handleBringForward = () => {
 		setMouseStateDefault();
-		if (!activeObject) {
-			activeObject = null;
+		if (!$activeObject) {
+			$activeObject = null;
 			return;
 		}
-		canvas.bringForward(activeObject);
+		canvas.bringForward($activeObject);
 	};
 	const handleSendBackward = () => {
 		setMouseStateDefault();
-		if (!activeObject) {
-			activeObject = null;
+		if (!$activeObject) {
+			$activeObject = null;
 			return;
 		}
-		canvas.sendBackwards(activeObject);
+		canvas.sendBackwards($activeObject);
 	};
 	const handleAddText = () => {
 		setMouseStateDefault();
@@ -49,11 +89,12 @@
 	const handleAddRect = () => {
 		setMouseStateDefault();
 		const rect = new fabric.Rect({
+			id: 'rect',
 			width: 200,
 			height: 200,
-			stroke: 'black',
+			stroke: 'rgba(0,0,0,1)',
 			strokeWidth: 2,
-			fill: 'transparent',
+			fill: 'rgba(255,255,255,1)',
 		});
 		canvas.add(rect);
 		canvas.centerObject(rect);
@@ -61,8 +102,8 @@
 	const handleAddCircle = () => {
 		setMouseStateDefault();
 		const circle = new fabric.Circle({
-			fill: 'transparent',
-			stroke: 'black',
+			fill: 'rgba(255,255,255,1)',
+			stroke: 'rgba(0,0,0,1)',
 			strokeWidth: 2,
 			radius: 100,
 		});
@@ -75,7 +116,7 @@
 		if (mouseState === MouseState.DRAWING) {
 			console.log('drawing mode on');
 			canvas.isDrawingMode = true;
-			canvas.freeDrawingBrush.color = 'black';
+			canvas.freeDrawingBrush.color = 'rgba(0,0,0,1)';
 			canvas.freeDrawingBrush.width = 5;
 		} else {
 			console.log('drawing mode off');
@@ -85,40 +126,27 @@
 
 	const handleDelete = () => {
 		setMouseStateDefault();
-		if (activeObject) {
-			canvas.remove(activeObject);
-			activeObject = null;
+		if (true) {
+			canvas.remove();
 		}
 	};
-	const getObjectColor = (object: fabric.Object) => {
-		const _fillColorRgba = convertStringToRgba(object.fill as string);
-		const _strokeColorRgba = convertStringToRgba(object.stroke as string);
-		if (typeof _fillColorRgba?.a === 'number') {
-			fillColorRgba = _fillColorRgba;
-			fillColorHex = colord(_fillColorRgba).toHex();
-		}
-		if (typeof _strokeColorRgba?.a === 'number') {
-			strokeColorRgba = _strokeColorRgba;
-			strokeColorHex = colord(_strokeColorRgba).toHex();
-		}
-	};
-	const setObjectColor = (fillColorRgba: RgbaColor, strokeColorRgba: RgbaColor) => {
-		if (!activeObject) return;
-		if (fillColorRgba) {
-			activeObject.set('fill', stringifyRGB(fillColorRgba));
-		}
-		if (strokeColorRgba) {
-			activeObject.set('stroke', stringifyRGB(strokeColorRgba));
-		}
+
+	const updateObjectColor = (e: CustomEvent) => {
 		canvas.renderAll();
 	};
 
-	const handleObjectSelect = () => {
-		activeObject = canvas.getActiveObject();
-		console.log(activeObject);
-		if (activeObject) {
-			getObjectColor(activeObject);
-		}
+	const handleObjectSelectCreated = () => {
+		const activeObject = canvas.getActiveObject();
+		activeShape.addShape(activeObject);
+	};
+
+	const handleObejectSelectionUpdate = () => {
+		const activeObject = canvas.getActiveObject();
+		activeShape.updateShape(activeObject);
+	};
+
+	const handleObjectCleared = () => {
+		activeShape.deleteShape();
 	};
 
 	const handleDragging = (mouseState: MouseState) => {
@@ -234,19 +262,13 @@
 		handleDragging(mouseState);
 	};
 
-	const handleNavOpen = (activeObject: fabric.Object | null) => {
-		if (!activeObject) {
+	const handleNavOpen = ($activeObject: fabric.Object | null) => {
+		if (!$activeObject) {
 			navOpen = false;
 			fillColorBoxOpen = false;
 			strokeColorBoxOpen = false;
 			return;
 		}
-		const realActiveObject = canvas.getActiveObject();
-		if (!realActiveObject) {
-			navOpen = false;
-			return;
-		}
-		navOpen = true;
 	};
 
 	const handleColorBoxOpen = (type: 'fill' | 'stroke') => {
@@ -296,11 +318,6 @@
 		}, time);
 	};
 
-	// event react
-	$: canvas && handleNavOpen(activeObject);
-	$: toggleDrawingAndDraggingMode(mouseState);
-	$: setObjectColor(fillColorRgba, strokeColorRgba);
-
 	onMount(() => {
 		const storageString = localStorage.getItem(CANVAS_DATA);
 		canvas = new fabric.Canvas('canvas', {
@@ -317,9 +334,9 @@
 				console.log('Saved Data Loaded');
 			});
 		}
-		canvas.on('selection:created', () => handleObjectSelect());
-		canvas.on('selection:updated', () => handleObjectSelect());
-		canvas.on('selection:cleared', () => handleObjectSelect());
+		canvas.on('selection:created', () => handleObjectSelectCreated());
+		canvas.on('selection:updated', () => handleObejectSelectionUpdate());
+		canvas.on('selection:cleared', () => handleObjectCleared());
 		canvas.on('object:moving', preventExitCanvas);
 
 		let interval = handleAutoSave(10000);
@@ -569,43 +586,57 @@
 	</div>
 </header>
 
-{#if navOpen && activeObject}
+{#if navOpen}
 	<nav
 		transition:fly={{ x: -200, duration: 500 }}
-		class="fixed top-48 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
+		class="fixed top-24 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
 	>
-		<div class="scroll-none scroll scrollbar-hide h-full w-full overflow-y-auto">
-			<div class="컨트롤 박스 grid-auto-row grid gap-2 p-3">
+		<div class="scroll-none scroll scrollbar-hide relative h-full w-full overflow-y-auto">
+			<div class="컨트롤 박스 p-3">
 				{#if fillColorBoxOpen}
-					<ColorPicker bind:hex={fillColorHex} bind:rgba={fillColorRgba} bind:activeObject />
+					<div transition:fade={{ duration: 300 }}>
+						<Palette on:requestColorRender={updateObjectColor} colorType={ColorType.FILL} />
+						<div
+							on:click={() => (fillColorBoxOpen = false)}
+							on:keypress={() => (fillColorBoxOpen = false)}
+							class="absolute top-0 left-0 h-full w-full"
+						/>
+					</div>
 				{/if}
 				{#if strokeColorBoxOpen}
-					<ColorPicker bind:hex={strokeColorHex} bind:rgba={strokeColorRgba} bind:activeObject />
-				{/if}
-				<div class="선">
-					<label for="stroke">
-						<span class="">선</span>
-					</label>
-					<div class="grid grid-flow-col items-center gap-2">
-						<button
-							class="컬러박스 h-7 w-7 rounded-md"
-							style="background-color:{strokeColorHex || 'black'};"
-							on:click={() => handleColorBoxOpen('stroke')}
+					<div transition:fade={{ duration: 300 }}>
+						<Palette on:requestColorRender={updateObjectColor} colorType={ColorType.STROKE} />
+						<div
+							on:click={() => (strokeColorBoxOpen = false)}
+							on:keypress={() => (strokeColorBoxOpen = false)}
+							class="absolute top-0 left-0 h-full w-full"
 						/>
-						<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>
-				</div>
+				{/if}
 				<div class="채우기">
 					<label for="fill">
 						<span class="">채우기</span>
 					</label>
 					<div class="grid grid-flow-col items-center gap-2">
 						<button
-							class="컬러박스 h-7 w-7 rounded-md "
+							class="샘플컬러 h-7 w-7 rounded-md "
 							on:click={() => handleColorBoxOpen('fill')}
-							style="background-color:{fillColorHex || 'black'};"
+							style="background-color:{fillColor};"
 						/>
 						<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
+					</div>
+				</div>
+				<div class="선">
+					<label for="stroke">
+						<span class="">선</span>
+					</label>
+					<div class="grid grid-flow-col items-center gap-2">
+						<button
+							class="샘플컬러 h-7 w-7 rounded-md"
+							style="background-color:{strokeColor};"
+							on:click={() => handleColorBoxOpen('stroke')}
+						/>
+						<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>
 				</div>
 			</div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { hsvaToHex, hsvaToRgba, stringifyRGB } from '$lib/utils';
+	import { hsvaToHex } from '$lib/utils';
 	import type { HsvaColor } from 'colord';
 	import { onMount } from 'svelte';
 	import { hsva } from './colorStore';
@@ -9,19 +9,37 @@
 		xRatio: number;
 		yRatio: number;
 	}
-
-	export let bgColor: string;
 	let pickerBg: HTMLElement;
 	let pickerBgRect: DOMRect;
 	let isMouseDown = false;
 	const dotRadius = DOT_RADIUS;
-	let dotRadiusRatio: RatioPositionXY = { xRatio: 0, yRatio: 0 };
-	let pickerPosition: RatioPositionXY = { xRatio: 0, yRatio: 0 };
+	let dotRadiusRatio: RatioPositionXY;
+	let pickerPosition: RatioPositionXY;
 
-	$: {
-		const sv = positionToHsva(pickerPosition);
-		hsva.update((hsva) => ({ ...hsva, ...sv }));
-	}
+	const positionToSv = (position: RatioPositionXY) => {
+		const _position = { ...position };
+		const { xRatio, yRatio } = _position;
+		let s = (xRatio / 100) * 100;
+		let v = ((100 - yRatio) / 100) * 100;
+		if (xRatio <= dotRadiusRatio.xRatio) {
+			s = 0;
+		}
+		if (xRatio >= 100 - dotRadiusRatio.xRatio) {
+			s = 100;
+		}
+		if (yRatio <= dotRadiusRatio.yRatio) {
+			v = 100;
+		}
+		if (yRatio >= 100 - dotRadiusRatio.yRatio) {
+			v = 0;
+		}
+		return { s, v };
+	};
+
+	const updateHsva = (position: RatioPositionXY) => {
+		const { s, v } = positionToSv(position);
+		hsva.update((o) => ({ ...o, s, v }));
+	};
 
 	const handleMouseDown = () => {
 		isMouseDown = true;
@@ -31,7 +49,6 @@
 	};
 	const handleMouseMove = (e: MouseEvent) => {
 		if (isMouseDown === false) return;
-		if (!pickerBgRect) return;
 		const { clientX, clientY } = e;
 		const { left, top, width, height } = pickerBgRect;
 		let [offsetX, offsetY] = [clientX - left, clientY - top];
@@ -48,77 +65,61 @@
 			offsetY = height - dotRadius;
 		}
 		pickerPosition = { xRatio: (offsetX / width) * 100, yRatio: (offsetY / height) * 100 };
+		updateHsva(pickerPosition);
 	};
 
 	const hsvaToPickerPosition = (hsva: HsvaColor): RatioPositionXY => {
-		if (!hsva) return { xRatio: 0, yRatio: 0 };
-		const position = { ...pickerPosition };
 		const { s, v } = hsva as { s: number; v: number };
-		position.xRatio = (s / 100) * 100;
-		position.yRatio = (v / 100) * 100;
+		let xRatio = (s / 100) * 100;
+		let yRatio = ((100 - v) / 100) * 100;
 		if (s === 0) {
-			position.xRatio = dotRadiusRatio.xRatio;
+			xRatio = dotRadiusRatio.xRatio;
 		}
 		if (v === 0) {
-			position.yRatio = dotRadiusRatio.yRatio;
+			yRatio = 100 - dotRadiusRatio.yRatio;
 		}
 		if (s >= 100) {
-			position.xRatio = 100 - dotRadiusRatio.xRatio;
+			xRatio = 100 - dotRadiusRatio.xRatio;
 		}
 		if (v >= 100) {
-			position.yRatio = 100 - dotRadiusRatio.yRatio;
+			yRatio = dotRadiusRatio.yRatio;
 		}
 
-		return position;
+		return { xRatio, yRatio };
 	};
 
-	const positionToHsva = (_position: RatioPositionXY) => {
-		const position = { ..._position };
-		const { xRatio, yRatio } = position;
-		let s = (xRatio / 100) * 100;
-		let v = (yRatio / 100) * 100;
-		if (xRatio <= dotRadiusRatio.xRatio) {
-			s = 0;
-		}
-		if (xRatio >= 100 - dotRadiusRatio.xRatio) {
-			s = 100;
-		}
-		if (yRatio <= dotRadiusRatio.yRatio) {
-			v = 0;
-		}
-		if (yRatio >= 100 - dotRadiusRatio.yRatio) {
-			v = 100;
-		}
-		return { s, v };
-	};
 	onMount(() => {
 		pickerBgRect = pickerBg.getBoundingClientRect();
-		if (!pickerBgRect) return;
-		dotRadiusRatio = {
-			xRatio: (dotRadius / pickerBgRect.width) * 100,
-			yRatio: (dotRadius / pickerBgRect.height) * 100,
-		};
-		pickerPosition = { xRatio: dotRadiusRatio.xRatio, yRatio: dotRadiusRatio.yRatio };
-		pickerPosition = hsvaToPickerPosition($hsva);
+		if (pickerBgRect) {
+			dotRadiusRatio = {
+				xRatio: (dotRadius / pickerBgRect.width) * 100,
+				yRatio: (dotRadius / pickerBgRect.height) * 100,
+			};
+			if (dotRadiusRatio) {
+				pickerPosition = hsvaToPickerPosition(_hsva);
+			}
+		}
 	});
 </script>
 
 <svelte:window on:mouseup={handleMouseUp} />
-<div class="select-none p-5" id="pickerBgWrapper" on:mousemove={handleMouseMove}>
+<div class="select-none rounded-sm p-3" id="pickerBgWrapper" on:mousemove={handleMouseMove}>
 	<div
-		class="relative h-32 w-32"
+		class="relative h-40 w-40 rounded-md"
 		id="pickerBg"
-		style="--bg-color:{bgColor};"
+		style="--bg-color:{hsvaToHex(_hsva)};"
 		on:mousedown|self={handleMouseDown}
 		bind:this={pickerBg}
 	>
-		<div
-			on:mousedown|self={handleMouseDown}
-			id="pickerDot"
-			class="absolute rounded-full bg-red-400"
-			style="width:{dotRadius * 2}px; height:{dotRadius * 2}px; top:{pickerPosition.yRatio -
-				dotRadiusRatio.yRatio}%; left:{pickerPosition.xRatio - dotRadiusRatio.xRatio}%;"
-		/>
+		{#if pickerPosition && dotRadiusRatio}
+			<div
+				on:mousedown|self={handleMouseDown}
+				id="pickerDot"
+				class="absolute rounded-full bg-red-400"
+				style="width:{dotRadius * 2}px; height:{dotRadius * 2}px; top:{pickerPosition.yRatio -
+					dotRadiusRatio.yRatio}%; left:{pickerPosition.xRatio - dotRadiusRatio.xRatio}%;"
+			/>
+		{/if}
 	</div>
 </div>
 
