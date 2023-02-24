@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
-	import { hsvaToHex, hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils';
+	import { hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils';
 
 	export let color: string;
 	export let bgColor: string;
@@ -18,7 +18,8 @@
 		const hsva = stringRgbaToHsva(color);
 		const newHsva = { ...hsva, h };
 		color = hsvaToStringRgba(newHsva);
-		bgColor = hsvaToStringRgba(newHsva);
+		const bgHsva = { h, s: 100, v: 100, a: 1 };
+		bgColor = hsvaToStringRgba(bgHsva);
 	};
 
 	const handleMouseDown = () => {

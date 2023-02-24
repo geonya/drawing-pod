@@ -1,23 +1,20 @@
 <script lang="ts">
-	import { CANVAS_DATA} from '$lib/constants';
-	import { Palette } from '$lib/components';
+	import { CANVAS_DATA } from '$lib/constants';
+	import { ColorRender, Palette, Sidebar } from '$lib/components';
 	import { PaintType, MouseState } from '$lib/types';
 
 	import { fabric } from 'fabric';
 	import { onMount, SvelteComponent } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
+	import Icon from '$lib/components/Icon.svelte';
 
 	let canvas: fabric.Canvas;
 	let canvasWrapper: HTMLElement;
 	let mouseState: MouseState = MouseState.DEFAULT;
-
 	let fill: string | null = null;
 	let stroke: string | null = null;
 	let paletteOpen: PaintType | null = null;
-
 	let navOpenKey: object[] = [];
-
-	let palette: SvelteComponent;
 
 	// const handleBringForward = () => {
 	// 	setMouseStateDefault();
@@ -45,11 +42,11 @@
 	// };
 	const handleAddRect = () => {
 		const rect = new fabric.Rect({
-			fill: 'rgba(255,255,255,1)',
+			fill: 'rgba(200,200,200,1)',
 			stroke: 'rgba(0,0,0,1)',
 			strokeWidth: 2,
 			width: 200,
-			height: 100,
+			height: 200,
 		});
 		canvas.add(rect);
 		canvas.centerObject(rect);
@@ -59,7 +56,7 @@
 		const circle = new fabric.Circle({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
-			// strokeWidth: 2,
+			strokeWidth: 2,
 			radius: 100,
 		});
 		canvas.add(circle);
@@ -84,47 +81,6 @@
 		const activeObject = canvas.getActiveObject();
 		if (activeObject) {
 			canvas.remove(activeObject);
-		}
-	};
-
-	const handleSelectCreated = () => {
-		const activeObject = canvas.getActiveObject();
-		if (activeObject) {
-			const { fill: _fill, stroke: _stroke } = activeObject;
-			fill = _fill as string;
-			stroke = _stroke as string;
-			navOpenKey = [{}];
-		}
-	};
-
-	const handleObejectSelectionUpdate = () => {
-		const activeObject = canvas.getActiveObject();
-		if (activeObject) {
-			const { fill: _fill, stroke: _stroke } = activeObject;
-			fill = _fill as string;
-			stroke = _stroke as string;
-			navOpenKey = [{}];
-		}
-	};
-	const handleObjectCleared = () => {
-		canvas.discardActiveObject();
-		fill = null;
-		stroke = null;
-		paletteOpen = null;
-		navOpenKey = [];
-	};
-
-	const handleUpdateColorRender = (e: CustomEvent) => {
-		const activeObject = canvas.getActiveObject();
-		if (activeObject) {
-			const { color, type } = e.detail;
-			if (type === PaintType.FILL) {
-				activeObject.set(PaintType.FILL, color);
-			}
-			if (type === PaintType.STROKE) {
-				activeObject.set(PaintType.STROKE, color);
-			}
-			canvas.requestRenderAll();
 		}
 	};
 
@@ -293,9 +249,7 @@
 				console.log('Saved Data Loaded');
 			});
 		}
-		canvas.on('selection:created', () => handleSelectCreated());
-		canvas.on('selection:updated', () => handleObejectSelectionUpdate());
-		canvas.on('selection:cleared', () => handleObjectCleared());
+
 		canvas.on('object:moving', preventExitCanvas);
 
 		let interval = handleAutoSave(10000);
@@ -524,20 +478,7 @@
 				<button
 					class="flex flex-shrink items-center space-x-2 rounded-md border px-3 py-1.5 hover:bg-base-100"
 				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						class="h-6 w-6"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M7.875 14.25l1.214 1.942a2.25 2.25 0 001.908 1.058h2.006c.776 0 1.497-.4 1.908-1.058l1.214-1.942M2.41 9h4.636a2.25 2.25 0 011.872 1.002l.164.246a2.25 2.25 0 001.872 1.002h2.092a2.25 2.25 0 001.872-1.002l.164-.246A2.25 2.25 0 0116.954 9h4.636M2.41 9a2.25 2.25 0 00-.16.832V12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 12V9.832c0-.287-.055-.57-.16-.832M2.41 9a2.25 2.25 0 01.382-.632l3.285-3.832a2.25 2.25 0 011.708-.786h8.43c.657 0 1.281.287 1.709.786l3.284 3.832c.163.19.291.404.382.632M4.5 20.25h15A2.25 2.25 0 0021.75 18v-2.625c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125V18a2.25 2.25 0 002.25 2.25z"
-						/>
-					</svg>
+					<Icon name="storage" />
 					<span>창꼬</span>
 				</button>
 			</div>
@@ -545,131 +486,12 @@
 	</div>
 </header>
 
-{#each navOpenKey as key (key)}
-	<nav
-		transition:fly={{ x: -200, duration: 500 }}
-		class="fixed top-24 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
-	>
-		<div class="scroll-none scroll scrollbar-hide relative h-full w-full overflow-y-auto">
-			<div class="컨트롤 박스 p-3">
-				{#if fill && paletteOpen === PaintType.FILL}
-					<div transition:fade={{ duration: 200 }}>
-						<Palette
-							on:requestColorRender={handleUpdateColorRender}
-							color={fill}
-							type={PaintType.FILL}
-							bind:this={palette}
-						/>:
-						<div
-							on:click={() => (paletteOpen = null)}
-							on:keypress={() => (paletteOpen = null)}
-							class="absolute top-0 left-0 h-full w-full"
-						/>
-					</div>
-				{/if}
-				{#if stroke && paletteOpen === PaintType.STROKE}
-					<div transition:fade={{ duration: 200 }}>
-						<Palette
-							on:requestColorRender={handleUpdateColorRender}
-							color={stroke}
-							type={PaintType.STROKE}
-						/>
-						<div76
-							on:click={() => (paletteOpen = null)}
-							on:keypress={() => (paletteOpen = null)}
-							class="absolute top-0 left-0 h-full w-full"
-						/>
-					</div>
-				{/if}
-				{#if stroke && fill}
-					<div class="채우기">
-						<label for={PaintType.FILL}>
-							<span class="">채우기</span>
-						</label>
-						<div class="grid grid-flow-col items-center gap-2">
-							<button
-								class="샘플컬러 h-7 w-7 rounded-md "
-								style="background-color:{fill};"
-								on:click={() => (paletteOpen = PaintType.FILL)}
-							/>:
-							<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
-						</div>
-					</div>
+<ColorRender {canvas} bind:fill bind:stroke>
+	{#each navOpenKey as key (key)}
+		<Sidebar bind:fill bind:stroke />
+	{/each}
+</ColorRender>
 
-					<div class="선">
-						<label for="stroke">
-							<span class="">선</span>
-						</label>
-						<div class="grid-flow--col grid items-center gap-2">
-							<button
-								class="샘플컬러 h-7 w-7 rounded-md"
-								style="background-color:{stroke};"
-								on:click={() => (paletteOpen = PaintType.STROKE)}
-							/>
-							<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
-						</div>
-					</div>
-				{/if}
-			</div>
-			<div class="flex h-full justify-around">
-				<button class="앞으로" on:click={() => 'handleBringForward'}>
-					<svg
-						class="h-6 w-6"
-						aria-hidden="true"
-						focusable="false"
-						role="img"
-						viewBox="0 0 20 20"
-						fill="none"
-						stroke="currentColor"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						><g
-							clip-path="url(#a)"
-							stroke="currentColor"
-							stroke-width="1.25"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							><path
-								fill-rule="evenodd"
-								clip-rule="evenodd"
-								d="M6.944 12.5H12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
-								fill="currentColor"
-							/><path
-								d="M13.889 4.167H8.333c-.767 0-1.389.621-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.768-.622-1.39-1.39-1.39Z"
-							/></g
-						><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
-					>
-				</button>
-				<button class="뒤로" on:click={() => 'handleBringForward'}>
-					<svg
-						aria-hidden="true"
-						focusable="false"
-						role="img"
-						viewBox="0 0 20 20"
-						class="h-6 w-6"
-						fill="none"
-						stroke="currentColor"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						><g
-							clip-path="url(#a)"
-							stroke="currentColor"
-							stroke-width="1.25"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							><path
-								d="M13.889 4.167H8.333c-.767 0-1.389.622-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.767-.622-1.39-1.39-1.39Z"
-								fill="currentColor"
-							/><path
-								d="M12.5 12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
-							/></g
-						><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
-					>
-				</button>
-			</div>
-		</div>
-	</nav>
-{/each}
 <main class="scrollbar-hide min-h-[100vh]" bind:this={canvasWrapper}>
 	<canvas id="canvas" class="" />
 </main>
