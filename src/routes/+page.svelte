@@ -1,39 +1,23 @@
 <script lang="ts">
-	import { CANVAS_DATA, INITIAL_HSVA, INITIAL_RGBA } from '$lib/constants';
+	import { CANVAS_DATA} from '$lib/constants';
 	import { Palette } from '$lib/components';
-	import { PaintType, MouseState, type ColorType, type Shape } from '$lib/types';
+	import { PaintType, MouseState } from '$lib/types';
 
 	import { fabric } from 'fabric';
 	import { onMount, SvelteComponent } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
-	import { initialFillColor, initialStrokeColor, mutableColor, shape } from '$lib/store';
-	import { get } from 'svelte/store';
-	import { convertStringToRgba, hsvaToHex, hsvaToStringRgba, rgbaToHsva } from '$lib/utils';
 
 	let canvas: fabric.Canvas;
 	let canvasWrapper: HTMLElement;
 	let mouseState: MouseState = MouseState.DEFAULT;
-	let fillPaletteOpenKey: object[] = [],
-		strokePaletteOpenKey: object[] = [];
+
+	let fill: string | null = null;
+	let stroke: string | null = null;
+	let paletteOpen: PaintType | null = null;
 
 	let navOpenKey: object[] = [];
 
 	let palette: SvelteComponent;
-
-	const handleUpdateColorRender = (e: CustomEvent) => {
-		const activeObject = canvas.getActiveObject();
-		if (activeObject) {
-			const { color, type } = e.detail;
-			const rgba = hsvaToStringRgba(color);
-			if (type === PaintType.FILL) {
-				activeObject.set(PaintType.FILL, rgba);
-			}
-			if (type === PaintType.STROKE) {
-				activeObject.set(PaintType.FILL, rgba);
-			}
-			canvas.requestRenderAll();
-		}
-	};
 
 	// const handleBringForward = () => {
 	// 	setMouseStateDefault();
@@ -97,24 +81,18 @@
 	};
 
 	const handleDelete = () => {
-		const object = get(shape)?.object;
-		if (object) {
-			canvas.remove(object);
-			shape.unActiveShape();
+		const activeObject = canvas.getActiveObject();
+		if (activeObject) {
+			canvas.remove(activeObject);
 		}
 	};
 
 	const handleSelectCreated = () => {
 		const activeObject = canvas.getActiveObject();
 		if (activeObject) {
-			const fillColor = activeObject.get('fill');
-			const strokeColor = activeObject.get('stroke');
-			const fillColorRgba = convertStringToRgba(fillColor as string);
-			const strokeColorRgba = convertStringToRgba(strokeColor as string);
-			const fillColorHsva = rgbaToHsva(fillColorRgba);
-			const storkeColorHsva = rgbaToHsva(strokeColorRgba);
-			initialFillColor.set(fillColorHsva);
-			initialStrokeColor.set(storkeColorHsva);
+			const { fill: _fill, stroke: _stroke } = activeObject;
+			fill = _fill as string;
+			stroke = _stroke as string;
 			navOpenKey = [{}];
 		}
 	};
@@ -122,24 +100,32 @@
 	const handleObejectSelectionUpdate = () => {
 		const activeObject = canvas.getActiveObject();
 		if (activeObject) {
-			const fillColor = activeObject.get('fill');
-			const strokeColor = activeObject.get('stroke');
-			const fillColorRgba = convertStringToRgba(fillColor as string);
-			const strokeColorRgba = convertStringToRgba(strokeColor as string);
-			const fillColorHsva = rgbaToHsva(fillColorRgba);
-			const storkeColorHsva = rgbaToHsva(strokeColorRgba);
-			initialFillColor.set(fillColorHsva);
-			initialStrokeColor.set(storkeColorHsva);
+			const { fill: _fill, stroke: _stroke } = activeObject;
+			fill = _fill as string;
+			stroke = _stroke as string;
 			navOpenKey = [{}];
 		}
 	};
 	const handleObjectCleared = () => {
 		canvas.discardActiveObject();
-		initialFillColor.set(INITIAL_HSVA);
-		initialStrokeColor.set(INITIAL_HSVA);
+		fill = null;
+		stroke = null;
+		paletteOpen = null;
 		navOpenKey = [];
-		fillPaletteOpenKey = [];
-		strokePaletteOpenKey = [];
+	};
+
+	const handleUpdateColorRender = (e: CustomEvent) => {
+		const activeObject = canvas.getActiveObject();
+		if (activeObject) {
+			const { color, type } = e.detail;
+			if (type === PaintType.FILL) {
+				activeObject.set(PaintType.FILL, color);
+			}
+			if (type === PaintType.STROKE) {
+				activeObject.set(PaintType.STROKE, color);
+			}
+			canvas.requestRenderAll();
+		}
 	};
 
 	const handleDragging = (mouseState: MouseState) => {
@@ -302,7 +288,6 @@
 			height: canvasWrapper.getBoundingClientRect().height,
 			width: canvasWrapper.getBoundingClientRect().width,
 		});
-
 		if (storageString) {
 			canvas.loadFromJSON(JSON.parse(storageString), () => {
 				console.log('Saved Data Loaded');
@@ -567,74 +552,65 @@
 	>
 		<div class="scroll-none scroll scrollbar-hide relative h-full w-full overflow-y-auto">
 			<div class="컨트롤 박스 p-3">
-				{#each strokePaletteOpenKey as key (key)}
+				{#if fill && paletteOpen === PaintType.FILL}
 					<div transition:fade={{ duration: 200 }}>
 						<Palette
 							on:requestColorRender={handleUpdateColorRender}
-							type={PaintType.STROKE}
-							bind:this={palette}
-						/>
-						<div
-							on:click={() => {
-								strokePaletteOpenKey = [];
-								palette.$destroy();
-							}}
-							on:keypress={() => (strokePaletteOpenKey = [])}
-							class="absolute top-0 left-0 h-full w-full"
-						/>
-					</div>
-				{/each}
-				{#each fillPaletteOpenKey as key (key)}
-					<div transition:fade={{ duration: 200 }}>
-						<Palette
-							on:requestColorRender={handleUpdateColorRender}
+							color={fill}
 							type={PaintType.FILL}
 							bind:this={palette}
 						/>:
 						<div
-							on:click={() => {
-								fillPaletteOpenKey = [];
-								palette.$destroy();
-							}}
-							on:keypress={() => (fillPaletteOpenKey = [])}
+							on:click={() => (paletteOpen = null)}
+							on:keypress={() => (paletteOpen = null)}
 							class="absolute top-0 left-0 h-full w-full"
 						/>
 					</div>
-				{/each}
-				<div class="채우기">
-					<label for="fill">
-						<span class="">채우기</span>
-					</label>
-					<div class="grid grid-flow-col items-center gap-2">
-						<button
-							class="샘플컬러 h-7 w-7 rounded-md "
-							style="background-color:{hsvaToHex($initialFillColor) || '#FFFFFF'};"
-							on:click={() => {
-								strokePaletteOpenKey = [];
-								fillPaletteOpenKey = [{}];
-							}}
-						/>:
-						<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
-					</div>
-				</div>
-				<div class="선">
-					<label for="stroke">
-						<span class="">선</span>
-					</label>
-					<div class="grid-flow--col grid items-center gap-2">
-						<button
-							class="샘플컬러 h-7 w-7 rounded-md"
-							style="background-color:{hsvaToHex($initialStrokeColor) || '#FFFFFF'};"
-							on:click={() => {
-								fillPaletteOpenKey = [];
-								strokePaletteOpenKey = [{}];
-							}}
+				{/if}
+				{#if stroke && paletteOpen === PaintType.STROKE}
+					<div transition:fade={{ duration: 200 }}>
+						<Palette
+							on:requestColorRender={handleUpdateColorRender}
+							color={stroke}
+							type={PaintType.STROKE}
 						/>
-						<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
+						<div76
+							on:click={() => (paletteOpen = null)}
+							on:keypress={() => (paletteOpen = null)}
+							class="absolute top-0 left-0 h-full w-full"
+						/>
 					</div>
-				</div>
-			</div>
+				{/if}
+				{#if stroke && fill}
+					<div class="채우기">
+						<label for={PaintType.FILL}>
+							<span class="">채우기</span>
+						</label>
+						<div class="grid grid-flow-col items-center gap-2">
+							<button
+								class="샘플컬러 h-7 w-7 rounded-md "
+								style="background-color:{fill};"
+								on:click={() => (paletteOpen = PaintType.FILL)}
+							/>:
+							<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
+						</div>
+					</div>
 
+					<div class="선">
+						<label for="stroke">
+							<span class="">선</span>
+						</label>
+						<div class="grid-flow--col grid items-center gap-2">
+							<button
+								class="샘플컬러 h-7 w-7 rounded-md"
+								style="background-color:{stroke};"
+								on:click={() => (paletteOpen = PaintType.STROKE)}
+							/>
+							<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
+						</div>
+					</div>
+				{/if}
+			</div>
 			<div class="flex h-full justify-around">
 				<button class="앞으로" on:click={() => 'handleBringForward'}>
 					<svg

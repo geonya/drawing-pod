@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
-	import type { HsvaColor } from 'colord';
-	import { mutableColor, paletteBgColor } from '$lib/store';
-	import { hsvaToHex } from '$lib/utils';
+	import { hsvaToHex, hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils';
 
-	export let initColor: HsvaColor;
+	export let color: string;
+	export let bgColor: string;
 
 	let sliderWrapper: HTMLElement;
 	let slider: HTMLElement;
@@ -16,11 +15,10 @@
 	let sliderPositionRatio: number;
 
 	const updateColor = (h: number) => {
-		mutableColor.update((prev) => ({ ...prev, h }));
-	};
-	const updateBgColor = (h: number) => {
-		const hsva = { h, s: 100, v: 100, a: 1 } as HsvaColor;
-		$paletteBgColor = hsvaToHex(hsva);
+		const hsva = stringRgbaToHsva(color);
+		const newHsva = { ...hsva, h };
+		color = hsvaToStringRgba(newHsva);
+		bgColor = hsvaToStringRgba(newHsva);
 	};
 
 	const handleMouseDown = () => {
@@ -39,7 +37,7 @@
 		if (sliderPositionRatio >= 100 - dotRadiusRatio) sliderPositionRatio = 100 - dotRadiusRatio;
 		const h = setHValue(sliderPositionRatio);
 		updateColor(h);
-		updateBgColor(h);
+		// updateBgColor(h);
 	};
 	const hsvaToSliderPosition = (h: number) => {
 		let vRatio = (h / 360) * 100;
@@ -64,7 +62,8 @@
 		if (!sliderRect.height) return;
 		dotRadiusRatio = (dotRadius / sliderRect.height) * 100;
 		if (dotRadiusRatio) {
-			sliderPositionRatio = hsvaToSliderPosition(initColor.h);
+			const hsva = stringRgbaToHsva(color);
+			sliderPositionRatio = hsvaToSliderPosition(hsva.h);
 		}
 	});
 </script>

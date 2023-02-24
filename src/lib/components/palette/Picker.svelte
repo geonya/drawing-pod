@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { mutableColor } from '$lib/store';
+	import { convertStringToRgba, hsvaToStringRgba, rgbaToHsva, stringRgbaToHsva } from '$lib/utils';
 	import type { HsvaColor } from 'colord';
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
-
-	export let initColor: HsvaColor;
+	export let color: string;
 	export let bgColor: string;
 
 	interface RatioPositionXY {
@@ -40,9 +39,10 @@
 
 	const updateHsva = (position: RatioPositionXY) => {
 		const sv = positionToSv(position);
-		mutableColor.update((prev) => ({ ...prev, ...sv }));
+		const hsva = stringRgbaToHsva(color);
+		const newHsva = { ...hsva, ...sv };
+		color = hsvaToStringRgba(newHsva);
 	};
-
 	const handleMouseDown = () => {
 		isMouseDown = true;
 	};
@@ -102,7 +102,9 @@
 				yRatio: (dotRadius / pickerBgRect.height) * 100,
 			};
 			if (dotRadiusRatio) {
-				pickerPosition = hsvaToPickerPosition(initColor);
+				const rgba = convertStringToRgba(color);
+				const hsva = rgbaToHsva(rgba);
+				pickerPosition = hsvaToPickerPosition(hsva);
 			}
 		}
 	});

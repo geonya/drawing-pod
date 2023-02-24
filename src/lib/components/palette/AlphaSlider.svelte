@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
-	import type { HsvaColor } from 'colord';
-	import { mutableColor } from '$lib/store';
+	import { hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils';
 
-	export let initColor: HsvaColor;
+	export let color: string;
 	export let bgColor: string;
 
 	let sliderWrapper: HTMLElement;
@@ -16,7 +15,9 @@
 	let sliderPositionRatio: number;
 
 	const updateColor = (a: number) => {
-		mutableColor.update((prev) => ({ ...prev, a }));
+		const hsva = stringRgbaToHsva(color);
+		const newHsva = { ...hsva, a };
+		color = hsvaToStringRgba(newHsva);
 	};
 
 	const handleMouseDown = () => {
@@ -57,13 +58,13 @@
 		if (sliderRect.height) {
 			dotRadiusRatio = (dotRadius / sliderRect.height) * 100;
 			if (dotRadiusRatio) {
-				sliderPositionRatio = hsvaToSliderPosition(initColor.a);
+				const hsva = stringRgbaToHsva(color);
+				sliderPositionRatio = hsvaToSliderPosition(hsva.a);
 			}
 		}
 	});
 </script>
 
-<!-- color slider -->
 <svelte:window on:mouseup={handleMouseUp} />
 <div
 	class="sliderWrapper h-full w-full select-none p-1"
@@ -74,7 +75,7 @@
 		bind:this={slider}
 		on:mousedown={handleMouseDown}
 		class="alpha relative h-full w-3 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
-		style="--alpha-color: {bgColor}; --pathern-size:5px"
+		style="--alpha-color: {bgColor || color}; --pathern-size:5px"
 	>
 		{#if sliderPositionRatio && dotRadiusRatio}
 			<div
