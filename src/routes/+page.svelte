@@ -1,114 +1,71 @@
 <script lang="ts">
 	import { CANVAS_DATA } from '$lib/constants';
-	import { Palette } from '$lib/components/palette';
-	import { ColorType, MouseState } from '$lib/types';
+	import { Palette } from '$lib/components';
+	import { PaintType, MouseState, type ColorType, type Shape } from '$lib/types';
 
 	import { fabric } from 'fabric';
 	import { onMount } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
-	import { activeShape } from '$lib/store';
-
-	fabric.Canvas.prototype.toObject.IObjectOptions = (function (toObject) {
-		return function (this: any) {
-			return fabric.util.object.extend(toObject.call(this), {
-				id: this.id,
-			});
-		};
-	})(fabric.Canvas.prototype.toObject);
-
-	var SelectObject = function (ObjectName) {
-		canvas.getObjects().forEach(function (o) {
-			if (o.id === ObjectName) {
-				canvas.setActiveObject(o);
-			}
-		});
-	};
-	const canvas = new fabric.Canvas('c');
-	const rect = new fabric.Rect();
-
-	//add new custom parameters
-	fabric.Object.prototype.toObject = (function (toObject) {
-		return function (this: any) {
-			return fabric.util.object.extend(toObject.call(this), {
-				id: this.id,
-				tool: this.tool,
-				depth: this.depth,
-				kind: this.kind,
-			});
-		};
-	})(fabric.Object.prototype.toObject);
-
-	//set your new custom parameters
-	rect.set('tool', 'chainsaw');
-	rect.set('depth', '999');
-	rect.set('kind', 'designerRect');
-
-	canvas.includeDefaultValues = true;
-	canvas.add(rect);
-
-	canvas.toJSON();
-	console.log(canvas.toJSON());
+	import { shape, color } from '$lib/store';
 
 	let canvas: fabric.Canvas;
-	let navOpen = false;
+	let isNavOpen = false;
 	let canvasWrapper: HTMLElement;
 	let mouseState: MouseState = MouseState.DEFAULT;
 	let fillColorBoxOpen = false,
 		strokeColorBoxOpen = false;
-	let fillColor = 'rgba(0,0,0,0)',
-		strokeColor = 'rgba(0,0,0,0)';
-
-	// event react
-
+	let fillColor: ColorType, strokeColor: ColorType;
+	let initFillColor: ColorType, initStrokeColor: ColorType;
 	$: toggleDrawingAndDraggingMode(mouseState);
 
-	const handleBringForward = () => {
-		setMouseStateDefault();
-		if (!$activeObject) {
-			$activeObject = null;
-			return;
-		}
-		canvas.bringForward($activeObject);
-	};
-	const handleSendBackward = () => {
-		setMouseStateDefault();
-		if (!$activeObject) {
-			$activeObject = null;
-			return;
-		}
-		canvas.sendBackwards($activeObject);
-	};
-	const handleAddText = () => {
-		setMouseStateDefault();
-		const textBox = new fabric.Textbox('Hello', {
-			editable: true,
-		});
-		canvas.add(textBox);
-		canvas.centerObject(textBox);
-	};
+	// const handleBringForward = () => {
+	// 	setMouseStateDefault();
+	// 	if (!$activeObject) {
+	// 		$activeObject = null;
+	// 		return;
+	// 	}
+	// 	canvas.bringForward($activeObject);
+	// };
+	// const handleSendBackward = () => {
+	// 	setMouseStateDefault();
+	// 	if (!$activeObject) {
+	// 		$activeObject = null;
+	// 		return;
+	// 	}
+	// 	canvas.sendBackwards($activeObject);
+	// };
+	// const handleAddText = () => {
+	// 	setMouseStateDefault();
+	// 	const textBox = new fabric.Textbox('Hello', {
+	// 		editable: true,
+	// 	});
+	// 	canvas.add(textBox);
+	// 	canvas.centerObject(textBox);
+	// };
 	const handleAddRect = () => {
 		setMouseStateDefault();
 		const rect = new fabric.Rect({
-			id: 'rect',
-			width: 200,
-			height: 200,
+			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
 			strokeWidth: 2,
-			fill: 'rgba(255,255,255,1)',
+			width: 200,
+			height: 100,
 		});
 		canvas.add(rect);
 		canvas.centerObject(rect);
+		canvas.setActiveObject(rect);
 	};
 	const handleAddCircle = () => {
 		setMouseStateDefault();
 		const circle = new fabric.Circle({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
-			strokeWidth: 2,
+			// strokeWidth: 2,
 			radius: 100,
 		});
 		canvas.add(circle);
 		canvas.centerObject(circle);
+		canvas.setActiveObject(circle);
 	};
 
 	const handleDrawing = (mouseState: MouseState) => {
@@ -126,27 +83,42 @@
 
 	const handleDelete = () => {
 		setMouseStateDefault();
-		if (true) {
-			canvas.remove();
+		const object = $shape?.object;
+		if (object) {
+			canvas.remove(object);
+			shape.unActiveShape();
 		}
 	};
-
-	const updateObjectColor = (e: CustomEvent) => {
+	const handleCanvasObjectColorUpdate = (e: CustomEvent) => {
+		const { color, type } = e.detail;
+		if (type === PaintType.FILL) {
+			fillColor = color;
+		}
+		if (type === PaintType.STROKE) {
+			strokeColor = color;
+		}
 		canvas.renderAll();
 	};
 
 	const handleObjectSelectCreated = () => {
+		console.log('select createaed');
 		const activeObject = canvas.getActiveObject();
-		activeShape.addShape(activeObject);
+		const newShape = shape.activeShape(activeObject);
+		if (newShape) {
+			fillColor = initFillColor = newShape.fill;
+			strokeColor = initStrokeColor = newShape.stroke;
+		}
 	};
 
 	const handleObejectSelectionUpdate = () => {
+		shape.unActiveShape();
 		const activeObject = canvas.getActiveObject();
-		activeShape.updateShape(activeObject);
+		shape.activeShape(activeObject);
 	};
-
 	const handleObjectCleared = () => {
-		activeShape.deleteShape();
+		console.log('select cleared');
+		canvas.discardActiveObject();
+		shape.unActiveShape();
 	};
 
 	const handleDragging = (mouseState: MouseState) => {
@@ -260,15 +232,6 @@
 	const toggleDrawingAndDraggingMode = (mouseState: MouseState) => {
 		handleDrawing(mouseState);
 		handleDragging(mouseState);
-	};
-
-	const handleNavOpen = ($activeObject: fabric.Object | null) => {
-		if (!$activeObject) {
-			navOpen = false;
-			fillColorBoxOpen = false;
-			strokeColorBoxOpen = false;
-			return;
-		}
 	};
 
 	const handleColorBoxOpen = (type: 'fill' | 'stroke') => {
@@ -586,16 +549,20 @@
 	</div>
 </header>
 
-{#if navOpen}
+{#if true}
 	<nav
 		transition:fly={{ x: -200, duration: 500 }}
 		class="fixed top-24 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
 	>
 		<div class="scroll-none scroll scrollbar-hide relative h-full w-full overflow-y-auto">
 			<div class="컨트롤 박스 p-3">
-				{#if fillColorBoxOpen}
+				{#if true}
 					<div transition:fade={{ duration: 300 }}>
-						<Palette on:requestColorRender={updateObjectColor} colorType={ColorType.FILL} />
+						<Palette
+							on:colorUpdate={handleCanvasObjectColorUpdate}
+							type={PaintType.FILL}
+							init={initFillColor}
+						/>
 						<div
 							on:click={() => (fillColorBoxOpen = false)}
 							on:keypress={() => (fillColorBoxOpen = false)}
@@ -603,9 +570,13 @@
 						/>
 					</div>
 				{/if}
-				{#if strokeColorBoxOpen}
+				{#if false}
 					<div transition:fade={{ duration: 300 }}>
-						<Palette on:requestColorRender={updateObjectColor} colorType={ColorType.STROKE} />
+						<Palette
+							on:colorUpdate={handleCanvasObjectColorUpdate}
+							type={PaintType.STROKE}
+							init={initStrokeColor}
+						/>
 						<div
 							on:click={() => (strokeColorBoxOpen = false)}
 							on:keypress={() => (strokeColorBoxOpen = false)}
@@ -621,7 +592,7 @@
 						<button
 							class="샘플컬러 h-7 w-7 rounded-md "
 							on:click={() => handleColorBoxOpen('fill')}
-							style="background-color:{fillColor};"
+							style="background-color:{fillColor?.hex || 'rgba(0,0,0,0)'};"
 						/>
 						<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>
@@ -633,7 +604,7 @@
 					<div class="grid grid-flow-col items-center gap-2">
 						<button
 							class="샘플컬러 h-7 w-7 rounded-md"
-							style="background-color:{strokeColor};"
+							style="background-color:{strokeColor?.hex || 'rgba(0,0,0,0)'};"
 							on:click={() => handleColorBoxOpen('stroke')}
 						/>
 						<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
@@ -641,7 +612,7 @@
 				</div>
 			</div>
 			<div class="flex h-full justify-around">
-				<button class="앞으로" on:click={handleBringForward}>
+				<button class="앞으로" on:click={() => 'handleBringForward'}>
 					<svg
 						class="h-6 w-6"
 						aria-hidden="true"
@@ -669,7 +640,7 @@
 						><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs></svg
 					>
 				</button>
-				<button class="뒤로" on:click={handleBringForward}>
+				<button class="뒤로" on:click={() => 'handleBringForward'}>
 					<svg
 						aria-hidden="true"
 						focusable="false"

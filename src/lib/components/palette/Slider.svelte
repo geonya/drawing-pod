@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
-	import { hsva } from './colorStore';
 	import type { HsvaColor } from 'colord';
+	import type { ColorType } from '$lib/types';
+	import { color } from '$lib/store';
+	import { hsvaToHex } from '$lib/utils';
 
+	export let init: ColorType;
+	export let bgColor: string;
 	export let _hsva: HsvaColor;
 
 	let sliderWrapper: HTMLElement;
@@ -14,13 +18,12 @@
 	let dotRadiusRatio: number;
 	let sliderPositionRatio: number;
 
-	const updateHsva = (position: number) => {
-		const h = setHValue(position);
-		hsva.update((prev) => ({ ...prev, h }));
+	const updateColor = (h: number) => {
+		_hsva = { ...init.hsva, ..._hsva, h };
 	};
-	const updatePickerBg = (position: number) => {
-		const h = setHValue(position);
-		_hsva = { h, s: 100, v: 100, a: 1 };
+	const updatePickerBg = (h: number) => {
+		const hsva = { h, s: 100, v: 100, a: 1 } as HsvaColor;
+		bgColor = hsvaToHex(hsva);
 	};
 
 	const handleMouseDown = () => {
@@ -37,8 +40,9 @@
 		sliderPositionRatio = ((clientY - top) / height) * 100;
 		if (sliderPositionRatio <= dotRadiusRatio) sliderPositionRatio = dotRadiusRatio;
 		if (sliderPositionRatio >= 100 - dotRadiusRatio) sliderPositionRatio = 100 - dotRadiusRatio;
-		updateHsva(sliderPositionRatio);
-		updatePickerBg(sliderPositionRatio);
+		const h = setHValue(sliderPositionRatio);
+		updateColor(h);
+		updatePickerBg(h);
 	};
 	const hsvaToSliderPosition = (h: number) => {
 		let verticalRatio = (h / 360) * 100;
@@ -61,7 +65,7 @@
 		sliderRect = slider.getBoundingClientRect();
 		if (!sliderRect.height) return;
 		dotRadiusRatio = (dotRadius / sliderRect.height) * 100;
-		sliderPositionRatio = hsvaToSliderPosition(_hsva.h);
+		sliderPositionRatio = hsvaToSliderPosition(init.hsva.h);
 	});
 </script>
 

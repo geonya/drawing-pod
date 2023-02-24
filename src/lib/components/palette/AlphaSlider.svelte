@@ -13,11 +13,6 @@
 	const dotRadius = DOT_RADIUS;
 	let dotRadiusRatio: number;
 	let sliderPositionRatio: number;
-
-	$: hex = hsvaToHex($hsva);
-	$: alpha = setAlphaValue(sliderPositionRatio);
-	$: hsva.update((o) => ({ ...o, a: alpha }));
-
 	const handleMouseDown = () => {
 		isMouseDown = true;
 	};
