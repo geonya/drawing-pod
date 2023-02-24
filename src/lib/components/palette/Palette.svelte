@@ -2,7 +2,7 @@
 	import Picker from './Picker.svelte';
 	import Slider from './Slider.svelte';
 	import AlphaSlider from './AlphaSlider.svelte';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { beforeUpdate, createEventDispatcher, onMount } from 'svelte';
 	import { rgbaChecker, hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils';
 	import { paletteColor } from '$lib/store';
 	import type { PaintType } from '$lib/types';
@@ -25,8 +25,8 @@
 	}
 	onMount(() => {
 		if (color) {
-			const hsva = stringRgbaToHsva(color);
-			const bgHsva = { h: hsva.h, s: 100, v: 100, a: 1 };
+			const { h } = stringRgbaToHsva(color);
+			const bgHsva = { h, s: 100, v: 100, a: 1 };
 			bgColor = hsvaToStringRgba(bgHsva);
 		}
 	});
