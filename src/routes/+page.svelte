@@ -1,29 +1,39 @@
 <script lang="ts">
-	import { CANVAS_DATA, INITIAL_RGBA } from '$lib/constants';
+	import { CANVAS_DATA, INITIAL_HSVA, INITIAL_RGBA } from '$lib/constants';
 	import { Palette } from '$lib/components';
 	import { PaintType, MouseState, type ColorType, type Shape } from '$lib/types';
 
 	import { fabric } from 'fabric';
-	import { onMount } from 'svelte';
+	import { onMount, SvelteComponent } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
-	import { shape } from '$lib/store';
+	import { initialFillColor, initialStrokeColor, mutableColor, shape } from '$lib/store';
 	import { get } from 'svelte/store';
+	import { convertStringToRgba, hsvaToHex, hsvaToStringRgba, rgbaToHsva } from '$lib/utils';
 
 	let canvas: fabric.Canvas;
-	let isNavOpen = false;
 	let canvasWrapper: HTMLElement;
 	let mouseState: MouseState = MouseState.DEFAULT;
-	let isFillPaletteOpen = false,
-		isStrokePaletteOpen = false;
-	let fillColor: ColorType | null = null;
-	let strokeColor: ColorType | null = null;
-	$: {
-		if ($shape && $shape.id) {
-			fillColor = $shape.fill;
-			strokeColor = $shape.stroke;
+	let fillPaletteOpenKey: object[] = [],
+		strokePaletteOpenKey: object[] = [];
+
+	let navOpenKey: object[] = [];
+
+	let palette: SvelteComponent;
+
+	const handleUpdateColorRender = (e: CustomEvent) => {
+		const activeObject = canvas.getActiveObject();
+		if (activeObject) {
+			const { color, type } = e.detail;
+			const rgba = hsvaToStringRgba(color);
+			if (type === PaintType.FILL) {
+				activeObject.set(PaintType.FILL, rgba);
+			}
+			if (type === PaintType.STROKE) {
+				activeObject.set(PaintType.FILL, rgba);
+			}
+			canvas.requestRenderAll();
 		}
-	}
-	$: toggleDrawingAndDraggingMode(mouseState);
+	};
 
 	// const handleBringForward = () => {
 	// 	setMouseStateDefault();
@@ -50,7 +60,6 @@
 	// 	canvas.centerObject(textBox);
 	// };
 	const handleAddRect = () => {
-		setMouseStateDefault();
 		const rect = new fabric.Rect({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
@@ -63,7 +72,6 @@
 		canvas.setActiveObject(rect);
 	};
 	const handleAddCircle = () => {
-		setMouseStateDefault();
 		const circle = new fabric.Circle({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
@@ -89,40 +97,49 @@
 	};
 
 	const handleDelete = () => {
-		setMouseStateDefault();
 		const object = get(shape)?.object;
 		if (object) {
 			canvas.remove(object);
 			shape.unActiveShape();
 		}
 	};
-	const handleCanvasObjectColorUpdate = (e: CustomEvent) => {
-		const { color, type } = e.detail;
-		if (type === PaintType.FILL) {
-			fillColor = color;
-		} else {
-			strokeColor = color;
-		}
-		canvas.renderAll();
-	};
 
-	const handleObjectSelectCreated = () => {
+	const handleSelectCreated = () => {
 		const activeObject = canvas.getActiveObject();
-		const newShape = shape.activeShape(activeObject);
-
-		isNavOpen = true;
+		if (activeObject) {
+			const fillColor = activeObject.get('fill');
+			const strokeColor = activeObject.get('stroke');
+			const fillColorRgba = convertStringToRgba(fillColor as string);
+			const strokeColorRgba = convertStringToRgba(strokeColor as string);
+			const fillColorHsva = rgbaToHsva(fillColorRgba);
+			const storkeColorHsva = rgbaToHsva(strokeColorRgba);
+			initialFillColor.set(fillColorHsva);
+			initialStrokeColor.set(storkeColorHsva);
+			navOpenKey = [{}];
+		}
 	};
 
 	const handleObejectSelectionUpdate = () => {
 		const activeObject = canvas.getActiveObject();
-		const newShape = shape.activeShape(activeObject);
+		if (activeObject) {
+			const fillColor = activeObject.get('fill');
+			const strokeColor = activeObject.get('stroke');
+			const fillColorRgba = convertStringToRgba(fillColor as string);
+			const strokeColorRgba = convertStringToRgba(strokeColor as string);
+			const fillColorHsva = rgbaToHsva(fillColorRgba);
+			const storkeColorHsva = rgbaToHsva(strokeColorRgba);
+			initialFillColor.set(fillColorHsva);
+			initialStrokeColor.set(storkeColorHsva);
+			navOpenKey = [{}];
+		}
 	};
 	const handleObjectCleared = () => {
 		canvas.discardActiveObject();
-		shape.unActiveShape();
-		isNavOpen = false;
-		isFillPaletteOpen = false;
-		isStrokePaletteOpen = false;
+		initialFillColor.set(INITIAL_HSVA);
+		initialStrokeColor.set(INITIAL_HSVA);
+		navOpenKey = [];
+		fillPaletteOpenKey = [];
+		strokePaletteOpenKey = [];
 	};
 
 	const handleDragging = (mouseState: MouseState) => {
@@ -238,16 +255,6 @@
 		handleDragging(mouseState);
 	};
 
-	const handleColorBoxOpen = (type: PaintType.FILL | PaintType.STROKE) => {
-		if (type === PaintType.FILL) {
-			isStrokePaletteOpen = false;
-			isFillPaletteOpen = !isFillPaletteOpen;
-		} else if (type === PaintType.STROKE) {
-			isFillPaletteOpen = false;
-			isStrokePaletteOpen = !isStrokePaletteOpen;
-		}
-	};
-
 	const handleImageUpload = (e: Event) => {
 		setMouseStateDefault();
 		let file = (e.target as HTMLInputElement).files?.[0];
@@ -301,7 +308,7 @@
 				console.log('Saved Data Loaded');
 			});
 		}
-		canvas.on('selection:created', () => handleObjectSelectCreated());
+		canvas.on('selection:created', () => handleSelectCreated());
 		canvas.on('selection:updated', () => handleObejectSelectionUpdate());
 		canvas.on('selection:cleared', () => handleObjectCleared());
 		canvas.on('object:moving', preventExitCanvas);
@@ -553,41 +560,47 @@
 	</div>
 </header>
 
-{#if isNavOpen}
+{#each navOpenKey as key (key)}
 	<nav
 		transition:fly={{ x: -200, duration: 500 }}
 		class="fixed top-24 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
 	>
 		<div class="scroll-none scroll scrollbar-hide relative h-full w-full overflow-y-auto">
 			<div class="컨트롤 박스 p-3">
-				{#if isFillPaletteOpen}
-					<div transition:fade={{ duration: 300 }}>
+				{#each strokePaletteOpenKey as key (key)}
+					<div transition:fade={{ duration: 200 }}>
 						<Palette
-							on:colorUpdate={handleCanvasObjectColorUpdate}
+							on:requestColorRender={handleUpdateColorRender}
+							type={PaintType.STROKE}
+							bind:this={palette}
+						/>
+						<div
+							on:click={() => {
+								strokePaletteOpenKey = [];
+								palette.$destroy();
+							}}
+							on:keypress={() => (strokePaletteOpenKey = [])}
+							class="absolute top-0 left-0 h-full w-full"
+						/>
+					</div>
+				{/each}
+				{#each fillPaletteOpenKey as key (key)}
+					<div transition:fade={{ duration: 200 }}>
+						<Palette
+							on:requestColorRender={handleUpdateColorRender}
 							type={PaintType.FILL}
-							prevColor={fillColor}
+							bind:this={palette}
 						/>:
 						<div
-							on:click={() => (isFillPaletteOpen = false)}
-							on:keypress={() => (isFillPaletteOpen = false)}
+							on:click={() => {
+								fillPaletteOpenKey = [];
+								palette.$destroy();
+							}}
+							on:keypress={() => (fillPaletteOpenKey = [])}
 							class="absolute top-0 left-0 h-full w-full"
 						/>
 					</div>
-				{/if}
-				{#if isStrokePaletteOpen}
-					<div transition:fade={{ duration: 300 }}>
-						<Palette
-							on:colorUpdate={handleCanvasObjectColorUpdate}
-							type={PaintType.STROKE}
-							prevColor={strokeColor}
-						/>
-						<div
-							on:click={() => (isStrokePaletteOpen = false)}
-							on:keypress={() => (isStrokePaletteOpen = false)}
-							class="absolute top-0 left-0 h-full w-full"
-						/>
-					</div>
-				{/if}
+				{/each}
 				<div class="채우기">
 					<label for="fill">
 						<span class="">채우기</span>
@@ -595,8 +608,11 @@
 					<div class="grid grid-flow-col items-center gap-2">
 						<button
 							class="샘플컬러 h-7 w-7 rounded-md "
-							on:click={() => handleColorBoxOpen(PaintType.FILL)}
-							style="background-color:{fillColor?.hex || INITIAL_RGBA};"
+							style="background-color:{hsvaToHex($initialFillColor) || '#FFFFFF'};"
+							on:click={() => {
+								strokePaletteOpenKey = [];
+								fillPaletteOpenKey = [{}];
+							}}
 						/>:
 						<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>
@@ -605,16 +621,20 @@
 					<label for="stroke">
 						<span class="">선</span>
 					</label>
-					<div class="grid grid-flow-col items-center gap-2">
+					<div class="grid-flow--col grid items-center gap-2">
 						<button
 							class="샘플컬러 h-7 w-7 rounded-md"
-							style="background-color:{strokeColor?.hex || INITIAL_RGBA};"
-							on:click={() => handleColorBoxOpen(PaintType.STROKE)}
+							style="background-color:{hsvaToHex($initialStrokeColor) || '#FFFFFF'};"
+							on:click={() => {
+								fillPaletteOpenKey = [];
+								strokePaletteOpenKey = [{}];
+							}}
 						/>
 						<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>
 				</div>
 			</div>
+
 			<div class="flex h-full justify-around">
 				<button class="앞으로" on:click={() => 'handleBringForward'}>
 					<svg
@@ -673,7 +693,7 @@
 			</div>
 		</div>
 	</nav>
-{/if}
+{/each}
 <main class="scrollbar-hide min-h-[100vh]" bind:this={canvasWrapper}>
 	<canvas id="canvas" class="" />
 </main>

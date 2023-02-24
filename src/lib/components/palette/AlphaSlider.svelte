@@ -2,17 +2,10 @@
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
 	import type { HsvaColor } from 'colord';
-	import { hsvaToHex } from '$lib/utils';
+	import { mutableColor } from '$lib/store';
 
-	export let _hsva: HsvaColor;
-	export let initHsva: HsvaColor;
-	let bgColor = hsvaToHex(initHsva) || '#FFFFFF';
-
-	$: {
-		if (initHsva && sliderRect && dotRadiusRatio) {
-			sliderPositionRatio = hsvaToSliderPosition(initHsva.a);
-		}
-	}
+	export let initColor: HsvaColor;
+	export let bgColor: string;
 
 	let sliderWrapper: HTMLElement;
 	let slider: HTMLElement;
@@ -23,7 +16,7 @@
 	let sliderPositionRatio: number;
 
 	const updateColor = (a: number) => {
-		_hsva = { ...initHsva, ..._hsva, a };
+		mutableColor.update((prev) => ({ ...prev, a }));
 	};
 
 	const handleMouseDown = () => {
@@ -64,7 +57,7 @@
 		if (sliderRect.height) {
 			dotRadiusRatio = (dotRadius / sliderRect.height) * 100;
 			if (dotRadiusRatio) {
-				sliderPositionRatio = hsvaToSliderPosition(initHsva.a);
+				sliderPositionRatio = hsvaToSliderPosition(initColor.a);
 			}
 		}
 	});

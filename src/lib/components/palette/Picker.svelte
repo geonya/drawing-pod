@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { hsvaToHex, hsvaToStringRgba } from '$lib/utils';
+	import { mutableColor } from '$lib/store';
 	import type { HsvaColor } from 'colord';
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
 
-	export let initHsva: HsvaColor;
-	export let _hsva: HsvaColor;
+	export let initColor: HsvaColor;
+	export let bgColor: string;
+
 	interface RatioPositionXY {
 		xRatio: number;
 		yRatio: number;
@@ -16,16 +17,6 @@
 	const dotRadius = DOT_RADIUS;
 	let dotRadiusRatio: RatioPositionXY;
 	let pickerPosition: RatioPositionXY;
-
-	$: {
-		if (initHsva) {
-			bgColor = hsvaToStringRgba(initHsva);
-			if (pickerBg && pickerBgRect && dotRadiusRatio) {
-				pickerPosition = hsvaToPickerPosition(initHsva);
-			}
-		}
-	}
-	let bgColor: string = hsvaToHex(initHsva) || '#FFFFFF';
 
 	const positionToSv = (position: RatioPositionXY) => {
 		const _position = { ...position };
@@ -49,7 +40,7 @@
 
 	const updateHsva = (position: RatioPositionXY) => {
 		const sv = positionToSv(position);
-		_hsva = { ...initHsva, ..._hsva, ...sv };
+		mutableColor.update((prev) => ({ ...prev, ...sv }));
 	};
 
 	const handleMouseDown = () => {
@@ -111,7 +102,7 @@
 				yRatio: (dotRadius / pickerBgRect.height) * 100,
 			};
 			if (dotRadiusRatio) {
-				pickerPosition = hsvaToPickerPosition(initHsva);
+				pickerPosition = hsvaToPickerPosition(initColor);
 			}
 		}
 	});
