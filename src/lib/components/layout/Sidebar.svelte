@@ -67,11 +67,9 @@
 		</div>
 		<div class="flex h-full justify-around">
 			<button class="앞으로" on:click={() => 'handleBringForward'}>
-				<Icon name={'movingFoward'} />
+				<Icon name="forward" />
 			</button>
-			<button class="뒤로" on:click={() => 'handleBringForward'}>
-				<Icon name={'movingFoward'} /></button
-			>
+			<button class="뒤로" on:click={() => 'handleBringForward'}> <Icon name="backward" /></button>
 		</div>
 	</div>
 </nav>
