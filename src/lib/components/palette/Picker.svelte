@@ -1,13 +1,11 @@
 <script lang="ts">
-	import type { ColorType } from '$lib/types';
+	import { hsvaToHex, hsvaToStringRgba } from '$lib/utils';
 	import type { HsvaColor } from 'colord';
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
 
-	export let init: ColorType;
-	export let bgColor: string;
+	export let initHsva: HsvaColor;
 	export let _hsva: HsvaColor;
-
 	interface RatioPositionXY {
 		xRatio: number;
 		yRatio: number;
@@ -18,6 +16,16 @@
 	const dotRadius = DOT_RADIUS;
 	let dotRadiusRatio: RatioPositionXY;
 	let pickerPosition: RatioPositionXY;
+
+	$: {
+		if (initHsva) {
+			bgColor = hsvaToStringRgba(initHsva);
+			if (pickerBg && pickerBgRect && dotRadiusRatio) {
+				pickerPosition = hsvaToPickerPosition(initHsva);
+			}
+		}
+	}
+	let bgColor: string = hsvaToHex(initHsva) || '#FFFFFF';
 
 	const positionToSv = (position: RatioPositionXY) => {
 		const _position = { ...position };
@@ -41,7 +49,7 @@
 
 	const updateHsva = (position: RatioPositionXY) => {
 		const sv = positionToSv(position);
-		_hsva = { ...init.hsva, ..._hsva, ...sv };
+		_hsva = { ...initHsva, ..._hsva, ...sv };
 	};
 
 	const handleMouseDown = () => {
@@ -92,19 +100,18 @@
 		if (v >= 100) {
 			yRatio = dotRadiusRatio.yRatio;
 		}
-		console.log('xRatio', xRatio);
 		return { xRatio, yRatio };
 	};
 
 	onMount(() => {
 		pickerBgRect = pickerBg.getBoundingClientRect();
-		if (pickerBgRect) {
+		if (pickerBgRect && pickerBgRect.width && pickerBgRect.height) {
 			dotRadiusRatio = {
 				xRatio: (dotRadius / pickerBgRect.width) * 100,
 				yRatio: (dotRadius / pickerBgRect.height) * 100,
 			};
 			if (dotRadiusRatio) {
-				pickerPosition = hsvaToPickerPosition(init.hsva);
+				pickerPosition = hsvaToPickerPosition(initHsva);
 			}
 		}
 	});

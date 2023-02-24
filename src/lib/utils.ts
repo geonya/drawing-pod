@@ -1,4 +1,5 @@
 import { colord, type HsvaColor, type RgbaColor } from 'colord';
+import { INITIAL_RGBA } from './constants';
 export const objectChecker = (obj: fabric.Object | undefined | null): boolean => {
 	if (!obj) return false;
 	const { fill, stroke, height, width } = obj;
@@ -22,6 +23,8 @@ export const convertStringToRgba = (color: string) => {
 	return rgba;
 };
 
+export const hsvaToStringRgba = (hsva: HsvaColor): string => stringifyRgba(hsvaToRgba(hsva));
+
 export const hsvaToHex = (hsva: HsvaColor) => colord(hsva).toHex();
 export const hsvaToRgba = (hsva: HsvaColor): RgbaColor => {
 	const rgb = colord(hsva).toRgb();
@@ -32,10 +35,10 @@ export const rgbaToHsva = (rgba: RgbaColor): HsvaColor => {
 };
 
 export const shapeColorConvertToRgbaString = (color: any): string => {
-	if (typeof color === 'object') return 'rgba(255, 255, 255, 1)';
-	if (color === 'rgba(NaN)') return 'rgba(255, 255, 255, 1)';
+	if (typeof color === 'object') return INITIAL_RGBA;
+	if (color === 'rgba(NaN)') return INITIAL_RGBA;
 	if (typeof color === 'string') return color;
-	return 'rgba(255, 255, 255, 1)';
+	return INITIAL_RGBA;
 };
 export const extractHsvaInShape = (color: string) => {
 	const sRgba = shapeColorConvertToRgbaString(color);
@@ -43,4 +46,11 @@ export const extractHsvaInShape = (color: string) => {
 	const hsva = rgbaToHsva(rgba);
 	console.log(hsva);
 	return hsva;
+};
+
+export const colorChecker = (color: any) => {
+	if (typeof color === 'object') return INITIAL_RGBA;
+	if (typeof color === 'undefined') return INITIAL_RGBA;
+	if (typeof color === 'string') return color;
+	return INITIAL_RGBA;
 };

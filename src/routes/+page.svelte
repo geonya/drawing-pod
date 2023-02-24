@@ -1,21 +1,28 @@
 <script lang="ts">
-	import { CANVAS_DATA } from '$lib/constants';
+	import { CANVAS_DATA, INITIAL_RGBA } from '$lib/constants';
 	import { Palette } from '$lib/components';
 	import { PaintType, MouseState, type ColorType, type Shape } from '$lib/types';
 
 	import { fabric } from 'fabric';
 	import { onMount } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
-	import { shape, color } from '$lib/store';
+	import { shape } from '$lib/store';
+	import { get } from 'svelte/store';
 
 	let canvas: fabric.Canvas;
 	let isNavOpen = false;
 	let canvasWrapper: HTMLElement;
 	let mouseState: MouseState = MouseState.DEFAULT;
-	let fillColorBoxOpen = false,
-		strokeColorBoxOpen = false;
-	let fillColor: ColorType, strokeColor: ColorType;
-	let initFillColor: ColorType, initStrokeColor: ColorType;
+	let isFillPaletteOpen = false,
+		isStrokePaletteOpen = false;
+	let fillColor: ColorType | null = null;
+	let strokeColor: ColorType | null = null;
+	$: {
+		if ($shape && $shape.id) {
+			fillColor = $shape.fill;
+			strokeColor = $shape.stroke;
+		}
+	}
 	$: toggleDrawingAndDraggingMode(mouseState);
 
 	// const handleBringForward = () => {
@@ -83,7 +90,7 @@
 
 	const handleDelete = () => {
 		setMouseStateDefault();
-		const object = $shape?.object;
+		const object = get(shape)?.object;
 		if (object) {
 			canvas.remove(object);
 			shape.unActiveShape();
@@ -93,32 +100,29 @@
 		const { color, type } = e.detail;
 		if (type === PaintType.FILL) {
 			fillColor = color;
-		}
-		if (type === PaintType.STROKE) {
+		} else {
 			strokeColor = color;
 		}
 		canvas.renderAll();
 	};
 
 	const handleObjectSelectCreated = () => {
-		console.log('select createaed');
 		const activeObject = canvas.getActiveObject();
 		const newShape = shape.activeShape(activeObject);
-		if (newShape) {
-			fillColor = initFillColor = newShape.fill;
-			strokeColor = initStrokeColor = newShape.stroke;
-		}
+
+		isNavOpen = true;
 	};
 
 	const handleObejectSelectionUpdate = () => {
-		shape.unActiveShape();
 		const activeObject = canvas.getActiveObject();
-		shape.activeShape(activeObject);
+		const newShape = shape.activeShape(activeObject);
 	};
 	const handleObjectCleared = () => {
-		console.log('select cleared');
 		canvas.discardActiveObject();
 		shape.unActiveShape();
+		isNavOpen = false;
+		isFillPaletteOpen = false;
+		isStrokePaletteOpen = false;
 	};
 
 	const handleDragging = (mouseState: MouseState) => {
@@ -234,13 +238,13 @@
 		handleDragging(mouseState);
 	};
 
-	const handleColorBoxOpen = (type: 'fill' | 'stroke') => {
-		if (type === 'fill') {
-			fillColorBoxOpen = !fillColorBoxOpen;
-			strokeColorBoxOpen = false;
-		} else if (type === 'stroke') {
-			strokeColorBoxOpen = !strokeColorBoxOpen;
-			fillColorBoxOpen = false;
+	const handleColorBoxOpen = (type: PaintType.FILL | PaintType.STROKE) => {
+		if (type === PaintType.FILL) {
+			isStrokePaletteOpen = false;
+			isFillPaletteOpen = !isFillPaletteOpen;
+		} else if (type === PaintType.STROKE) {
+			isFillPaletteOpen = false;
+			isStrokePaletteOpen = !isStrokePaletteOpen;
 		}
 	};
 
@@ -549,37 +553,37 @@
 	</div>
 </header>
 
-{#if true}
+{#if isNavOpen}
 	<nav
 		transition:fly={{ x: -200, duration: 500 }}
 		class="fixed top-24 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
 	>
 		<div class="scroll-none scroll scrollbar-hide relative h-full w-full overflow-y-auto">
 			<div class="컨트롤 박스 p-3">
-				{#if true}
+				{#if isFillPaletteOpen}
 					<div transition:fade={{ duration: 300 }}>
 						<Palette
 							on:colorUpdate={handleCanvasObjectColorUpdate}
 							type={PaintType.FILL}
-							init={initFillColor}
-						/>
+							prevColor={fillColor}
+						/>:
 						<div
-							on:click={() => (fillColorBoxOpen = false)}
-							on:keypress={() => (fillColorBoxOpen = false)}
+							on:click={() => (isFillPaletteOpen = false)}
+							on:keypress={() => (isFillPaletteOpen = false)}
 							class="absolute top-0 left-0 h-full w-full"
 						/>
 					</div>
 				{/if}
-				{#if false}
+				{#if isStrokePaletteOpen}
 					<div transition:fade={{ duration: 300 }}>
 						<Palette
 							on:colorUpdate={handleCanvasObjectColorUpdate}
 							type={PaintType.STROKE}
-							init={initStrokeColor}
+							prevColor={strokeColor}
 						/>
 						<div
-							on:click={() => (strokeColorBoxOpen = false)}
-							on:keypress={() => (strokeColorBoxOpen = false)}
+							on:click={() => (isStrokePaletteOpen = false)}
+							on:keypress={() => (isStrokePaletteOpen = false)}
 							class="absolute top-0 left-0 h-full w-full"
 						/>
 					</div>
@@ -591,9 +595,9 @@
 					<div class="grid grid-flow-col items-center gap-2">
 						<button
 							class="샘플컬러 h-7 w-7 rounded-md "
-							on:click={() => handleColorBoxOpen('fill')}
-							style="background-color:{fillColor?.hex || 'rgba(0,0,0,0)'};"
-						/>
+							on:click={() => handleColorBoxOpen(PaintType.FILL)}
+							style="background-color:{fillColor?.hex || INITIAL_RGBA};"
+						/>:
 						<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>
 				</div>
@@ -604,8 +608,8 @@
 					<div class="grid grid-flow-col items-center gap-2">
 						<button
 							class="샘플컬러 h-7 w-7 rounded-md"
-							style="background-color:{strokeColor?.hex || 'rgba(0,0,0,0)'};"
-							on:click={() => handleColorBoxOpen('stroke')}
+							style="background-color:{strokeColor?.hex || INITIAL_RGBA};"
+							on:click={() => handleColorBoxOpen(PaintType.STROKE)}
 						/>
 						<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 					</div>

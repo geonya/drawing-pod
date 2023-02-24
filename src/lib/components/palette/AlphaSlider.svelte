@@ -1,11 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
-	import { hsvaToHex } from '$lib/utils';
 	import type { HsvaColor } from 'colord';
-	export let _hsva: HsvaColor;
+	import { hsvaToHex } from '$lib/utils';
 
-	let hex = '#FFFFFF';
+	export let _hsva: HsvaColor;
+	export let initHsva: HsvaColor;
+	let bgColor = hsvaToHex(initHsva) || '#FFFFFF';
+
+	$: {
+		if (initHsva && sliderRect && dotRadiusRatio) {
+			sliderPositionRatio = hsvaToSliderPosition(initHsva.a);
+		}
+	}
+
 	let sliderWrapper: HTMLElement;
 	let slider: HTMLElement;
 	let isMouseDown = false;
@@ -13,6 +21,11 @@
 	const dotRadius = DOT_RADIUS;
 	let dotRadiusRatio: number;
 	let sliderPositionRatio: number;
+
+	const updateColor = (a: number) => {
+		_hsva = { ...initHsva, ..._hsva, a };
+	};
+
 	const handleMouseDown = () => {
 		isMouseDown = true;
 	};
@@ -27,19 +40,20 @@
 		sliderPositionRatio = ((clientY - top) / height) * 100;
 		if (sliderPositionRatio <= dotRadiusRatio) sliderPositionRatio = dotRadiusRatio;
 		if (sliderPositionRatio >= 100 - dotRadiusRatio) sliderPositionRatio = 100 - dotRadiusRatio;
-		return sliderPositionRatio;
+		const a = setAValue(sliderPositionRatio);
+		updateColor(a);
 	};
 	const hsvaToSliderPosition = (a: number) => {
-		let verticalRatio = a * 100;
+		let vRatio = a * 100;
 		if (a === 0) {
-			verticalRatio = dotRadiusRatio;
+			vRatio = dotRadiusRatio;
 		}
 		if (a === 1) {
-			verticalRatio = 100 - dotRadiusRatio;
+			vRatio = 100 - dotRadiusRatio;
 		}
-		return verticalRatio;
+		return vRatio;
 	};
-	const setAlphaValue = (position: number) => {
+	const setAValue = (position: number) => {
 		if (position === dotRadiusRatio) return 0;
 		if (position === 100 - dotRadiusRatio) return 1;
 		return position / 100;
@@ -49,7 +63,9 @@
 		sliderRect = slider.getBoundingClientRect();
 		if (sliderRect.height) {
 			dotRadiusRatio = (dotRadius / sliderRect.height) * 100;
-			sliderPositionRatio = hsvaToSliderPosition(_hsva.a);
+			if (dotRadiusRatio) {
+				sliderPositionRatio = hsvaToSliderPosition(initHsva.a);
+			}
 		}
 	});
 </script>
@@ -65,7 +81,7 @@
 		bind:this={slider}
 		on:mousedown={handleMouseDown}
 		class="alpha relative h-full w-3 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
-		style="--alpha-color: {hex}; --pathern-size:5px"
+		style="--alpha-color: {bgColor}; --pathern-size:5px"
 	>
 		{#if sliderPositionRatio && dotRadiusRatio}
 			<div
