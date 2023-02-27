@@ -1,11 +1,14 @@
 <script lang="ts">
 	import type { MouseState } from '$lib/types';
+	import { Controller } from '../canvas/Controller';
+	import type { Renderer } from '../canvas/Renderer';
 	import Icon from '../Icon.svelte';
 
-	export let mouseState: MouseState;
+	export let renderer: Renderer;
+	let mouseState: MouseState;
 </script>
 
-<header class="fixed top-0 left-0 right-0 z-10 h-24 w-full">
+<div class="fixed top-0 left-0 right-0 z-10 h-24 w-full">
 	<div class="grid h-full w-full grid-cols-10">
 		<!-- // left side -->
 		<div class="col-span-2 place-self-center justify-self-start pl-9">
@@ -96,4 +99,4 @@
 			</div>
 		</div>
 	</div>
-</header>
+</div>
