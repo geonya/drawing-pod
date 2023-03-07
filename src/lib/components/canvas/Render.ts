@@ -152,6 +152,7 @@ export class Render {
 
   onCreateObjectSelect() {
     const activeObject = this.canvas.getActiveObject();
+    console.log(activeObject)
     if (activeObject) {
       const { fill: _fill, stroke: _stroke } = activeObject;
       this.fill = _fill as string;

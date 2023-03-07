@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Canvas } from '$lib';
-	import Layer from '$lib/components/content/Layer.svelte';
+	import { Layer } from '$lib';
 </script>
 
 <main class="h-screen w-full bg-blue-500">

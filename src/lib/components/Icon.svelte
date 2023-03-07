@@ -152,15 +152,17 @@
 </script>
 
 {#if icon}
-	<svg
-		class={'h-6 w-6 ' + $$props.class}
-		aria-hidden="true"
-		focusable="false"
-		role="img"
-		viewBox="0 0 20 20"
-		fill="none"
-		stroke="currentColor"
-		stroke-linecap="round"
-		stroke-linejoin="round">{@html icon.svg}</svg
-	>
+	<div>
+		<svg
+			class={'h-5 w-5 ' + $$props.class}
+			aria-hidden="true"
+			focusable="false"
+			role="img"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-linecap="round"
+			stroke-linejoin="round">{@html icon.svg}</svg
+		>
+	</div>
 {/if}

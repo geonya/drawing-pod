@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fabricCanvas } from '$lib/store';
+	import { canvas } from '$lib/store';
 	import { MotionState } from '$lib/types';
 	import { onMount } from 'svelte';
 	import type { Render } from './Render';
@@ -20,7 +20,9 @@
 		}
 	}
 	onMount(() => {
-		$fabricCanvas?.on('selection:cleared', () => render.onChangeMotionState(MotionState.DEFAULT));
+		if ($canvas) {
+			$canvas.on('selection:cleared', () => render.onChangeMotionState(MotionState.DEFAULT));
+		}
 	});
 </script>
 

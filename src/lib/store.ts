@@ -26,4 +26,4 @@ const setPaletteColor = () => {
 }
 
 export const paletteColor = setPaletteColor()
-export const fabricCanvas = setCanvas()
+export const canvas = setCanvas()
