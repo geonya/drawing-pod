@@ -1,6 +1,6 @@
 import type { HsvaColor, RgbaColor } from 'colord';
 
-export enum MouseState {
+export enum MotionState {
 	DEFAULT = 'default',
 	DRAWING = 'drawing',
 	DRAGGING = 'dragging',

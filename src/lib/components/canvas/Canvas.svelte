@@ -1,45 +1,40 @@
-<script context="module" lang="ts">
-	import { fabric } from 'fabric';
-	import { Controller } from './Controller';
-	import { Renderer } from './Renderer';
-	let canvas: fabric.Canvas;
-	let controller: Controller;
-	let renderer: Renderer;
-</script>
-
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import Sidebar from '../layout/Sidebar.svelte';
-	import Topbar from '../layout/Topbar.svelte';
-	import Setup from './Setup.svelte';
-
+	import { fabric } from 'fabric';
+	import { fabricCanvas } from '$lib/store';
+	import { onDestroy, onMount } from 'svelte';
+	let canvasWrapper: HTMLElement;
+	function onResize() {
+		$fabricCanvas?.setDimensions({
+			width: window.innerWidth,
+			height: window.innerHeight,
+		});
+		$fabricCanvas?.calcOffset();
+	}
+	$: console.log($fabricCanvas);
 	onMount(() => {
-		canvas = new fabric.Canvas('canvas', {
-			// snapAngle: 0,
+		$fabricCanvas = new fabric.Canvas('canvas', {
+			width: canvasWrapper.getBoundingClientRect().width,
+			height: canvasWrapper.getBoundingClientRect().height,
+			snapAngle: 0,
 			fireRightClick: true,
 			preserveObjectStacking: true,
 			backgroundColor: 'rgba(255,255,255,1)',
 		});
-		controller = new Controller(canvas);
-		renderer = new Renderer(canvas);
+	});
+	onDestroy(() => {
+		$fabricCanvas?.off('resizing', onResize);
 	});
 </script>
 
-<canvas id="canvas" class="scrollbar-hide block min-h-[100vh] w-full">
-	<Setup {canvas}>
-		<Sidebar {renderer} />
-		<Topbar {renderer} />
-	</Setup>
-</canvas>
+<svelte:window on:resize={onResize} />
+<div class="fixed inset-0 h-full w-full" bind:this={canvasWrapper}>
+	<canvas id="canvas" />
+</div>
+{#if $fabricCanvas}
+	<slot />
+{:else}
+	initializing...
+{/if}
 
 <style>
-	#canvas {
-		position: fixed;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 100%;
-		height: 100vh;
-		overflow: hidden;
-	}
 </style>

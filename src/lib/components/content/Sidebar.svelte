@@ -2,23 +2,21 @@
 	import { PaintType } from '$lib/types';
 	import { fade, fly } from 'svelte/transition';
 	import { ColorRender } from '../..';
-	import type { Controller } from '../canvas/Controller';
-	import type { Renderer } from '../canvas/Renderer';
+	import type { Render } from '../canvas/Render';
 	import Icon from '../Icon.svelte';
 	import Palette from '../palette/Palette.svelte';
-
-	export let renderer: Renderer;
+	export let render: Render;
 	let fill: string | null = null;
 	let stroke: string | null = null;
 	let paletteOpen: PaintType | null = null;
 </script>
 
-<nav
-	transition:fly={{ x: -200, duration: 500 }}
-	class="fixed top-24 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
->
-	<div class="scroll-none scroll scrollbar-hide relative h-full w-full overflow-y-auto">
-		<ColorRender bind:fill bind:stroke {canvas}>
+<ColorRender bind:fill bind:stroke {render}>
+	<nav
+		transition:fly={{ x: -200, duration: 500 }}
+		class="fixed top-24 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
+	>
+		<div class="scroll-none scroll scrollbar-hide relative h-full w-full overflow-y-auto">
 			<div class="컨트롤 박스 p-3">
 				{#if fill && paletteOpen === PaintType.FILL}
 					<div transition:fade={{ duration: 200 }}>
@@ -70,12 +68,14 @@
 					</div>
 				{/if}
 			</div>
-		</ColorRender>
-		<div class="flex h-full justify-around">
-			<button class="앞으로" on:click={() => 'handleBringForward'}>
-				<Icon name="forward" />
-			</button>
-			<button class="뒤로" on:click={() => 'handleBringForward'}> <Icon name="backward" /></button>
+			<div class="flex h-full justify-around">
+				<button class="앞으로" on:click={() => 'handleBringForward'}>
+					<Icon name="forward" />
+				</button>
+				<button class="뒤로" on:click={() => 'handleBringForward'}>
+					<Icon name="backward" /></button
+				>
+			</div>
 		</div>
-	</div>
-</nav>
+	</nav>
+</ColorRender>

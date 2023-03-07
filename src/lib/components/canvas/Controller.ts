@@ -6,16 +6,6 @@ export class Controller {
     private readonly canvas: fabric.Canvas,
   ) { }
 
-  setup(canvas: fabric.Canvas) {
-
-  }
-
-  windowResize() {
-    if (!this.canvas) return;
-    console.log('window resizing...');
-    this.canvas.calcOffset();
-  };
-
   onSave() {
     const storageString = localStorage.getItem(CANVAS_DATA);
 
@@ -23,6 +13,13 @@ export class Controller {
       this.canvas.loadFromJSON(JSON.parse(storageString), () => {
         console.log('Saved Data Loaded');
       });
+    }
+  };
+
+  onDelete() {
+    const activeObject = this.canvas.getActiveObject();
+    if (activeObject) {
+      this.canvas.remove(activeObject);
     }
   };
 
@@ -51,7 +48,7 @@ export class Controller {
     URL.revokeObjectURL(url);
   };
 
-  handleImageUpload(e: Event) {
+  onAddImage(e: Event) {
     let file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
     const reader = new FileReader();
@@ -75,6 +72,4 @@ export class Controller {
 
   };
 
-  setMouseStateDefault() {
-  };
 }

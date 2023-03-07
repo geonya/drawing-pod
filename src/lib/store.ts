@@ -1,6 +1,17 @@
 import { writable } from "svelte/store"
 import type { PaintType } from "./types";
 
+const setCanvas = () => {
+  const { subscribe, update, set } = writable<fabric.Canvas | null>(null)
+
+  return {
+    subscribe,
+    set,
+    update,
+  }
+
+}
+
 export interface paletteColor {
   color: string;
   type: PaintType
@@ -15,3 +26,4 @@ const setPaletteColor = () => {
 }
 
 export const paletteColor = setPaletteColor()
+export const fabricCanvas = setCanvas()

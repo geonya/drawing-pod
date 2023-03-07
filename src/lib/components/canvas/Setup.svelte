@@ -1,24 +1,11 @@
 <script lang="ts">
+	import { fabricCanvas } from '$lib/store';
 	import { onDestroy, onMount } from 'svelte';
+	$: canvas = $fabricCanvas!;
 
-	export let canvas: fabric.Canvas;
+	const onResize = () => {};
 
-	const onResize = () => {
-		if (typeof window === 'undefined') return;
-		canvas.setDimensions({
-			width: window.innerWidth,
-			height: window.innerHeight,
-		});
-	};
-
-	onMount(() => {
-		canvas.on('resizing', onResize);
-	});
-	onDestroy(() => {
-		canvas.off('resizing', onResize);
-	});
+	onMount(() => {});
 </script>
 
-<svelte:window on:resize={onResize} />
 <div data-id="setup" style="display: none;" />
-<slot />
