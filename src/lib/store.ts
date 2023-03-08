@@ -32,6 +32,16 @@ const setPaletteColor = () => {
   }
 }
 
+const setActiveObject = () => {
+  const { subscribe, set, update } = writable<fabric.Object | null>(null)
+  return {
+    subscribe,
+    set,
+    update,
+  }
+}
+
 export const paletteColor = setPaletteColor()
 export const canvas = setCanvas()
 export const motionState = setMotionState()
+export const activeObject = setActiveObject()

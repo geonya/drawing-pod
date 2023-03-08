@@ -2,6 +2,12 @@ import { colord, type HsvaColor, type RgbaColor } from 'colord';
 import { INITIAL_RGBA } from './constants';
 
 export const stringifyRgba = (rgba: RgbaColor): string => `rgba(${Object.values(rgba).join()})`;
+
+export const stringifyRgbaWithAlpha1 = (sRgba: string): string => {
+  const rgba = convertStringToRgba(sRgba);
+  const { r, g, b } = rgba;
+  return `rgba(${r}, ${g}, ${b}, 1)`;
+}
 export const convertStringToRgba = (color: string) => {
   const rgbaNumbers = color
     .replace('rgba(', '')
@@ -32,6 +38,11 @@ export const stringRgbaToHsva = (color: string): HsvaColor => {
   const rgba = convertStringToRgba(color);
   const hsva = rgbaToHsva(rgba);
   return hsva;
+}
+export const stringRgbaToHex = (color: string): string => {
+  const rgba = convertStringToRgba(color);
+  const hex = colord(rgba).toHex();
+  return hex;
 }
 export const rgbaChecker = (color: string) => {
   if (!color.includes('rgba')) return INITIAL_RGBA;

@@ -4,17 +4,16 @@
 	import { onMount } from 'svelte';
 	import type { Render } from './Render';
 	export let render: Render;
-	$: $motionState = MotionState.DEFAULT;
 	$: {
 		if ($motionState === MotionState.DEFAULT) {
 			render.onDrawingEnd();
 			render.onDraggingEnd();
 		}
 		if ($motionState === MotionState.DRAWING) {
-			render.onDrawingStart($motionState);
+			render.onDrawingStart();
 		}
 		if ($motionState === MotionState.DRAGGING) {
-			render.onDraggingStart($motionState);
+			render.onDraggingStart();
 		}
 	}
 	const onClickESC = (e: KeyboardEvent) => {

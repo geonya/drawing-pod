@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DOT_RADIUS } from './constants';
-	import { hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils';
+	import { hsvaToStringRgba, stringifyRgbaWithAlpha1, stringRgbaToHsva } from '$lib/utils';
 
 	export let color: string;
-	export let bgColor: string;
+	$: rgbColor = stringifyRgbaWithAlpha1(color);
 
-	let sliderWrapper: HTMLElement;
 	let slider: HTMLElement;
 	let isMouseDown = false;
 	let sliderRect: DOMRect;
@@ -66,16 +65,12 @@
 </script>
 
 <svelte:window on:mouseup={handleMouseUp} />
-<div
-	class="sliderWrapper h-full w-full select-none p-1"
-	bind:this={sliderWrapper}
-	on:mousemove={handleMouseMove}
->
+<div class="sliderWrapper h-full w-full select-none p-1" on:mousemove={handleMouseMove}>
 	<div
 		bind:this={slider}
 		on:mousedown={handleMouseDown}
 		class="alpha relative h-full w-3 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
-		style="--alpha-color: {bgColor || color}; --pathern-size:5px"
+		style="--alpha-color: {rgbColor}; --pathern-size:5px"
 	>
 		{#if sliderPositionRatio && dotRadiusRatio}
 			<div

@@ -1,6 +1,7 @@
 import type { IPaletteColor } from '$lib/store';
-import { MotionState, PaintType } from '$lib/types';
+import { PaintType } from '$lib/types';
 import { fabric } from 'fabric'
+import type { Writable } from 'svelte/store';
 
 export class Render {
   fill: string | null = null;
@@ -160,6 +161,10 @@ export class Render {
     this.onClearColor()
   };
 
+  onActiveObjectStoreUpdate(object: Writable<fabric.Object | null>) {
+    object.set(this.canvas.getActiveObject())
+  }
+
   onClearColor() {
     this.fill = null
     this.stroke = null
@@ -188,5 +193,14 @@ export class Render {
       }
       this.canvas.requestRenderAll();
     }
+
+
+  }
+  typeofActiveObject() {
+    const activeObject = this.canvas.getActiveObject();
+    if (activeObject) {
+      return activeObject.type
+    }
+    return null
   }
 }

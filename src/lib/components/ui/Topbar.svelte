@@ -4,10 +4,10 @@
 	import type { Render } from '../canvas/Render';
 	import { MotionState } from '$lib/types';
 	import type { Controller } from '../canvas/Controller';
-	import { onMount } from 'svelte';
-	import { canvas, motionState } from '$lib/store';
+	import { motionState } from '$lib/store';
 	export let controller: Controller;
 	export let render: Render;
+	export let saveProgress: number = 0;
 	const onRectAdd = () => {
 		render.onAddRect();
 	};
@@ -76,8 +76,21 @@
 				<button class="쓰레기통" on:click={() => onDelete()}>
 					<Icon name="trash" />
 				</button>
-				<button class="저장" on:click={() => onSave()}>
-					<Icon name="save" />
+				<button id="저장" class="relative" on:click={() => onSave()}>
+					{#if saveProgress >= 1.0}<div
+							class="absolute -right-16 top-0 grid h-5 w-16 place-content-center rounded-full border border-green-500 px-1 text-green-500 shadow-sm"
+						>
+							<span class="text-xs">자동 저장 완료!</span>
+						</div>{/if}
+					<div
+						class="absolute -top-3.5 -right-3 z-10 h-2.5 w-11 overflow-hidden rounded-full border text-xs"
+					>
+						<div class="h-full bg-green-500" style="width: {saveProgress * 100}%" />
+					</div>
+					<Icon
+						name="save"
+						class="stroke-green-500 transition-all duration-500 ease-in-out hover:scale-110"
+					/>
 				</button>
 			</div>
 

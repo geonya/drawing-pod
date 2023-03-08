@@ -31,10 +31,7 @@
 	});
 </script>
 
-<div
-	id="baseModal"
-	class="absolute top-0 left-0 z-30 grid h-52 w-full grid-cols-7 space-x-3 rounded-md bg-base-200 bg-opacity-95 p-1 shadow-xl"
->
+<div id="baseModal" class="z-20 grid h-48 w-full grid-cols-7 space-x-3 rounded-md p-1 ">
 	{#if color}
 		<div id="pickerWrapper" class="col-span-5 grid h-full w-full place-content-center">
 			<Picker bind:color {bgColor} />
@@ -43,8 +40,8 @@
 			<div id="colorSliderWrapper" class="h-full w-full">
 				<Slider bind:color bind:bgColor />
 			</div>
-			<div class="h-full w-full">
-				<AlphaSlider bind:color bind:bgColor />
+			<div id="alphaSliderWrapper" class="h-full w-full">
+				<AlphaSlider bind:color />
 			</div>
 		</div>
 	{/if}
