@@ -6,7 +6,6 @@
 	export let color: string;
 	export let bgColor: string;
 
-	let sliderWrapper: HTMLElement;
 	let slider: HTMLElement;
 	let isMouseDown = false;
 	let sliderRect: DOMRect;
@@ -71,11 +70,7 @@
 
 <!-- color slider -->
 <svelte:window on:mouseup={handleMouseUp} />
-<div
-	class="sliderWrapper h-full w-full select-none p-[2px]"
-	bind:this={sliderWrapper}
-	on:mousemove={handleMouseMove}
->
+<div class="sliderWrapper h-full w-full select-none p-[2px]" on:mousemove={handleMouseMove}>
 	<div
 		bind:this={slider}
 		on:mousedown={handleMouseDown}

@@ -1,9 +1,8 @@
-import type { paletteColor } from '$lib/store';
+import type { IPaletteColor } from '$lib/store';
 import { MotionState, PaintType } from '$lib/types';
 import { fabric } from 'fabric'
 
 export class Render {
-  motionState: MotionState = MotionState.DEFAULT;
   fill: string | null = null;
   stroke: string | null = null;
   activeObject: fabric.Object | null = null;
@@ -12,7 +11,6 @@ export class Render {
   ) {
     this.activeObject = this.canvas.getActiveObject();
   }
-
   onAddRect() {
     const rect = new fabric.Rect({
       fill: 'rgba(200,200,200,1)',
@@ -51,7 +49,6 @@ export class Render {
     this.canvas.sendBackwards(this.activeObject);
   };
   onAddText() {
-
     const textBox = new fabric.Textbox('Hello', {
       editable: true,
     });
@@ -59,14 +56,9 @@ export class Render {
     this.canvas.centerObject(textBox);
   };
 
-  onChangeMotionState(state: MotionState) {
-    this.motionState = state;
-    // TODO : change cursor
-    // this.canvas.defaultCursor = state;
-  }
-
-  onDragStart() {
-
+  onDraggingStart() {
+    console.log('drat start')
+    this.onDrawingEnd()
     let lastClientX = 0;
     let lastClientY = 0;
     let state: string = 'ready';
@@ -97,8 +89,7 @@ export class Render {
       }
     });
   }
-  onDragEnd() {
-    console.log('drag mode off');
+  onDraggingEnd() {
     this.canvas.forEachObject((o: fabric.Object) => {
       o.evented = true;
       o.selectable = true;
@@ -108,17 +99,16 @@ export class Render {
     this.canvas.off('mouse:down');
     this.canvas.off('mouse:move');
     this.canvas.selection = true;
-
   };
 
-  onDrawStart() {
-    console.log('drawing mode on');
+  onDrawingStart() {
+    this.onDraggingEnd()
     this.canvas.isDrawingMode = true;
     this.canvas.freeDrawingBrush.color = 'rgba(0,0,0,1)';
     this.canvas.freeDrawingBrush.width = 5;
   }
 
-  onDrawEnd() {
+  onDrawingEnd() {
     console.log('drawing mode off');
     this.canvas.isDrawingMode = false;
   }
@@ -150,41 +140,53 @@ export class Render {
     }
   };
 
-  onCreateObjectSelect() {
+  onObjectSelect() {
     const activeObject = this.canvas.getActiveObject();
-    console.log(activeObject)
     if (activeObject) {
-      const { fill: _fill, stroke: _stroke } = activeObject;
-      this.fill = _fill as string;
-      this.stroke = _stroke as string;
+      this.fill = activeObject.fill as string;
+      this.stroke = activeObject.stroke as string;
     }
   };
 
-  onChangeObjectSelect() {
+  onObjectSelectUpdate() {
     const activeObject = this.canvas.getActiveObject();
     if (activeObject) {
-      const { fill: _fill, stroke: _stroke } = activeObject;
-      this.fill = _fill as string;
-      this.stroke = _stroke as string;
+      this.fill = activeObject.fill as string;
+      this.stroke = activeObject.stroke as string;
     }
   };
-  onClearObjectSelect() {
+  onObjectSelectClear() {
     this.canvas.discardActiveObject();
-    this.fill = null;
-    this.stroke = null;
+    this.onClearColor()
   };
 
-  onUpdateColor(colorObj: paletteColor) {
+  onClearColor() {
+    this.fill = null
+    this.stroke = null
+  }
+
+  onUpdateColor(paletteColor: IPaletteColor) {
+    const { color, type } = paletteColor;
+    if (type === PaintType.FILL && this.fill) {
+      this.fill = color
+    }
+    if (type === PaintType.STROKE && this.stroke) {
+      this.stroke = color
+    }
+  };
+  onUpdateObjectColor(paletteColor: IPaletteColor) {
+    const { type, color } = paletteColor;
     const activeObject = this.canvas.getActiveObject();
     if (activeObject) {
-      const { color, type } = colorObj;
       if (type === PaintType.FILL) {
-        activeObject.set(PaintType.FILL, color);
+        activeObject.set('fill', color)
+        this.fill = color
       }
       if (type === PaintType.STROKE) {
-        activeObject.set(PaintType.STROKE, color);
+        activeObject.set('stroke', color)
+        this.stroke = color
       }
       this.canvas.requestRenderAll();
     }
-  };
+  }
 }

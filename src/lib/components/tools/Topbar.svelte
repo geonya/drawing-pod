@@ -4,6 +4,8 @@
 	import type { Render } from '../canvas/Render';
 	import { MotionState } from '$lib/types';
 	import type { Controller } from '../canvas/Controller';
+	import { onMount } from 'svelte';
+	import { canvas, motionState } from '$lib/store';
 	export let controller: Controller;
 	export let render: Render;
 	const onRectAdd = () => {
@@ -13,13 +15,13 @@
 		render.onAddCircle();
 	};
 	const onHandDragging = () => {
-		render.onChangeMotionState(MotionState.DRAGGING);
+		$motionState = MotionState.DRAGGING;
 	};
-	const onMouseSelect = () => {
-		render.onChangeMotionState(MotionState.DEFAULT);
+	const onCursorMove = () => {
+		$motionState = MotionState.DEFAULT;
 	};
 	const onDrawing = () => {
-		render.onChangeMotionState(MotionState.DRAWING);
+		$motionState = MotionState.DRAWING;
 	};
 	const onDelete = () => {
 		controller.onDelete();
@@ -43,7 +45,7 @@
 				<button class="자물쇠">
 					<Icon name="lock" />
 				</button>
-				<button class="마우스" on:click={() => onMouseSelect()}>
+				<button class="마우스" on:click={() => onCursorMove()}>
 					<Icon name="mouse" />
 				</button>
 				<button class="손" on:click={() => onHandDragging()}>

@@ -8,28 +8,23 @@ export class Controller {
 
   onSave() {
     const storageString = localStorage.getItem(CANVAS_DATA);
-
     if (storageString) {
       this.canvas.loadFromJSON(JSON.parse(storageString), () => {
         console.log('Saved Data Loaded');
       });
     }
   };
-
   onDelete() {
     const activeObject = this.canvas.getActiveObject();
     if (activeObject) {
       this.canvas.remove(activeObject);
     }
   };
-
   onAutoSave(time: number) {
     return setInterval(() => {
       this.onSave();
     }, time);
   };
-
-
   onDownloadSVG() {
     const group = new fabric.Group(this.canvas.getObjects());
     const newCanvas = new fabric.Canvas('newCanvas', {
@@ -47,7 +42,6 @@ export class Controller {
     a.click();
     URL.revokeObjectURL(url);
   };
-
   onAddImage(e: Event) {
     let file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;

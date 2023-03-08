@@ -6,9 +6,9 @@
 	import Icon from '../Icon.svelte';
 	import Palette from '../palette/Palette.svelte';
 	export let render: Render;
-	let fill: string | null = null;
-	let stroke: string | null = null;
-	let paletteOpen: PaintType | null = null;
+	let fill: string | null = render.fill;
+	let stroke: string | null = render.stroke;
+	let whichPalette: PaintType | null = null;
 </script>
 
 <ColorRender bind:fill bind:stroke {render}>
@@ -18,22 +18,20 @@
 	>
 		<div class="scroll-none scroll scrollbar-hide relative h-full w-full overflow-y-auto">
 			<div class="컨트롤 박스 p-3">
-				{#if fill && paletteOpen === PaintType.FILL}
+				{#if fill && whichPalette === PaintType.FILL}
 					<div transition:fade={{ duration: 200 }}>
 						<Palette color={fill} type={PaintType.FILL} />:
-						<div
-							on:click={() => (paletteOpen = null)}
-							on:keypress={() => (paletteOpen = null)}
+						<button
+							on:click={() => (whichPalette = null)}
 							class="absolute top-0 left-0 h-full w-full"
 						/>
 					</div>
 				{/if}
-				{#if stroke && paletteOpen === PaintType.STROKE}
+				{#if stroke && whichPalette === PaintType.STROKE}
 					<div transition:fade={{ duration: 200 }}>
 						<Palette color={stroke} type={PaintType.STROKE} />
-						<div76
-							on:click={() => (paletteOpen = null)}
-							on:keypress={() => (paletteOpen = null)}
+						<button
+							on:click={() => (whichPalette = null)}
 							class="absolute top-0 left-0 h-full w-full"
 						/>
 					</div>
@@ -47,7 +45,7 @@
 							<button
 								class="샘플컬러 h-7 w-7 rounded-md "
 								style="background-color:{fill};"
-								on:click={() => (paletteOpen = PaintType.FILL)}
+								on:click={() => (whichPalette = PaintType.FILL)}
 							/>:
 							<input id="fill" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 						</div>
@@ -61,7 +59,7 @@
 							<button
 								class="샘플컬러 h-7 w-7 rounded-md"
 								style="background-color:{stroke};"
-								on:click={() => (paletteOpen = PaintType.STROKE)}
+								on:click={() => (whichPalette = PaintType.STROKE)}
 							/>
 							<input id="stroke" type="text" class="input max-h-7 w-full rounded-md border px-2" />
 						</div>

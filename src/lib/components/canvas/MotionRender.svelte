@@ -1,29 +1,34 @@
 <script lang="ts">
-	import { canvas } from '$lib/store';
+	import { canvas, motionState } from '$lib/store';
 	import { MotionState } from '$lib/types';
 	import { onMount } from 'svelte';
 	import type { Render } from './Render';
 	export let render: Render;
-	$: motionState = render.motionState;
+	$: $motionState = MotionState.DEFAULT;
 	$: {
-		if (motionState === MotionState.DEFAULT) {
-			render.onDragEnd();
-			render.onDrawEnd();
+		if ($motionState === MotionState.DEFAULT) {
+			render.onDrawingEnd();
+			render.onDraggingEnd();
 		}
-		if (motionState === MotionState.DRAGGING) {
-			render.onDrawEnd();
-			render.onDragStart();
+		if ($motionState === MotionState.DRAWING) {
+			render.onDrawingStart($motionState);
 		}
-		if (motionState === MotionState.DRAWING) {
-			render.onDragEnd();
-			render.onDrawStart();
+		if ($motionState === MotionState.DRAGGING) {
+			render.onDraggingStart($motionState);
 		}
 	}
-	onMount(() => {
-		if ($canvas) {
-			$canvas.on('selection:cleared', () => render.onChangeMotionState(MotionState.DEFAULT));
+	const onClickESC = (e: KeyboardEvent) => {
+		console.log(e.key);
+		if (e.key === 'Escape') {
+			$motionState = MotionState.DEFAULT;
+			render.onObjectSelectClear();
 		}
+	};
+
+	onMount(() => {
+		$canvas!.on('selection:cleared', () => ($motionState = MotionState.DEFAULT));
 	});
 </script>
 
+<svelte:window on:keydown={onClickESC} />
 <slot />
