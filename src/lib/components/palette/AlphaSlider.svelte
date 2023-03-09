@@ -1,67 +1,67 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { DOT_RADIUS } from './constants';
-	import { hsvaToStringRgba, stringifyRgbaWithAlpha1, stringRgbaToHsva } from '$lib/utils';
+	import { onMount } from 'svelte'
+	import { DOT_RADIUS } from './constants'
+	import { hsvaToStringRgba, stringifyRgbaWithAlpha1, stringRgbaToHsva } from '$lib/utils'
 
-	export let color: string;
-	$: rgbColor = stringifyRgbaWithAlpha1(color);
+	export let color: string
+	$: rgbColor = stringifyRgbaWithAlpha1(color)
 
-	let slider: HTMLElement;
-	let isMouseDown = false;
-	let sliderRect: DOMRect;
-	const dotRadius = DOT_RADIUS;
-	let dotRadiusRatio: number;
-	let sliderPositionRatio: number;
+	let slider: HTMLElement
+	let isMouseDown = false
+	let sliderRect: DOMRect
+	const dotRadius = DOT_RADIUS
+	let dotRadiusRatio: number
+	let sliderPositionRatio: number
 
 	const updateColor = (a: number) => {
-		const hsva = stringRgbaToHsva(color);
-		const newHsva = { ...hsva, a };
-		color = hsvaToStringRgba(newHsva);
-	};
+		const hsva = stringRgbaToHsva(color)
+		const newHsva = { ...hsva, a }
+		color = hsvaToStringRgba(newHsva)
+	}
 
 	const handleMouseDown = () => {
-		isMouseDown = true;
-	};
+		isMouseDown = true
+	}
 	const handleMouseUp = () => {
-		isMouseDown = false;
-	};
+		isMouseDown = false
+	}
 	const handleMouseMove = (e: MouseEvent) => {
-		if (isMouseDown === false) return;
-		if (!sliderRect) return;
-		const { clientY } = e;
-		const { top, height } = sliderRect;
-		sliderPositionRatio = ((clientY - top) / height) * 100;
-		if (sliderPositionRatio <= dotRadiusRatio) sliderPositionRatio = dotRadiusRatio;
-		if (sliderPositionRatio >= 100 - dotRadiusRatio) sliderPositionRatio = 100 - dotRadiusRatio;
-		const a = setAValue(sliderPositionRatio);
-		updateColor(a);
-	};
+		if (isMouseDown === false) return
+		if (!sliderRect) return
+		const { clientY } = e
+		const { top, height } = sliderRect
+		sliderPositionRatio = ((clientY - top) / height) * 100
+		if (sliderPositionRatio <= dotRadiusRatio) sliderPositionRatio = dotRadiusRatio
+		if (sliderPositionRatio >= 100 - dotRadiusRatio) sliderPositionRatio = 100 - dotRadiusRatio
+		const a = setAValue(sliderPositionRatio)
+		updateColor(a)
+	}
 	const hsvaToSliderPosition = (a: number) => {
-		let vRatio = a * 100;
+		let vRatio = a * 100
 		if (a === 0) {
-			vRatio = dotRadiusRatio;
+			vRatio = dotRadiusRatio
 		}
 		if (a === 1) {
-			vRatio = 100 - dotRadiusRatio;
+			vRatio = 100 - dotRadiusRatio
 		}
-		return vRatio;
-	};
+		return vRatio
+	}
 	const setAValue = (position: number) => {
-		if (position === dotRadiusRatio) return 0;
-		if (position === 100 - dotRadiusRatio) return 1;
-		return position / 100;
-	};
+		if (position === dotRadiusRatio) return 0
+		if (position === 100 - dotRadiusRatio) return 1
+		return position / 100
+	}
 
 	onMount(() => {
-		sliderRect = slider.getBoundingClientRect();
+		sliderRect = slider.getBoundingClientRect()
 		if (sliderRect.height) {
-			dotRadiusRatio = (dotRadius / sliderRect.height) * 100;
+			dotRadiusRatio = (dotRadius / sliderRect.height) * 100
 			if (dotRadiusRatio) {
-				const hsva = stringRgbaToHsva(color);
-				sliderPositionRatio = hsvaToSliderPosition(hsva.a);
+				const hsva = stringRgbaToHsva(color)
+				sliderPositionRatio = hsvaToSliderPosition(hsva.a)
 			}
 		}
-	});
+	})
 </script>
 
 <svelte:window on:mouseup={handleMouseUp} />

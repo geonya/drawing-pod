@@ -1,4 +1,4 @@
-const colors = require('tailwindcss/colors');
+const colors = require('tailwindcss/colors')
 
 const config = {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
@@ -15,6 +15,6 @@ const config = {
 	},
 
 	plugins: [],
-};
+}
 
-module.exports = config;
+module.exports = config

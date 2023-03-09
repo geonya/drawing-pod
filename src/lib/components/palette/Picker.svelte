@@ -1,113 +1,113 @@
 <script lang="ts">
-	import { convertStringToRgba, hsvaToStringRgba, rgbaToHsva, stringRgbaToHsva } from '$lib/utils';
-	import type { HsvaColor } from 'colord';
-	import { onMount } from 'svelte';
-	import { DOT_RADIUS } from './constants';
-	export let color: string;
-	export let bgColor: string;
+	import { convertStringToRgba, hsvaToStringRgba, rgbaToHsva, stringRgbaToHsva } from '$lib/utils'
+	import type { HsvaColor } from 'colord'
+	import { onMount } from 'svelte'
+	import { DOT_RADIUS } from './constants'
+	export let color: string
+	export let bgColor: string
 
 	interface RatioPositionXY {
-		xRatio: number;
-		yRatio: number;
+		xRatio: number
+		yRatio: number
 	}
-	let pickerBg: HTMLElement;
-	let pickerBgRect: DOMRect;
-	let isMouseDown = false;
-	const dotRadius = DOT_RADIUS;
-	let dotRadiusRatio: RatioPositionXY;
-	let pickerPosition: RatioPositionXY;
+	let pickerBg: HTMLElement
+	let pickerBgRect: DOMRect
+	let isMouseDown = false
+	const dotRadius = DOT_RADIUS
+	let dotRadiusRatio: RatioPositionXY
+	let pickerPosition: RatioPositionXY
 
 	const positionToSv = (position: RatioPositionXY) => {
-		const _position = { ...position };
-		const { xRatio, yRatio } = _position;
-		let s = (xRatio / 100) * 100;
-		let v = ((100 - yRatio) / 100) * 100;
+		const _position = { ...position }
+		const { xRatio, yRatio } = _position
+		let s = (xRatio / 100) * 100
+		let v = ((100 - yRatio) / 100) * 100
 		if (xRatio <= dotRadiusRatio.xRatio) {
-			s = 0;
+			s = 0
 		}
 		if (xRatio >= 100 - dotRadiusRatio.xRatio) {
-			s = 100;
+			s = 100
 		}
 		if (yRatio <= dotRadiusRatio.yRatio) {
-			v = 100;
+			v = 100
 		}
 		if (yRatio >= 100 - dotRadiusRatio.yRatio) {
-			v = 0;
+			v = 0
 		}
-		return { s, v };
-	};
+		return { s, v }
+	}
 
 	const updateHsva = (position: RatioPositionXY) => {
-		const sv = positionToSv(position);
-		const hsva = stringRgbaToHsva(color);
-		const newHsva = { ...hsva, ...sv };
-		color = hsvaToStringRgba(newHsva);
-	};
+		const sv = positionToSv(position)
+		const hsva = stringRgbaToHsva(color)
+		const newHsva = { ...hsva, ...sv }
+		color = hsvaToStringRgba(newHsva)
+	}
 	const handleMouseDown = () => {
-		isMouseDown = true;
-	};
+		isMouseDown = true
+	}
 	const handleMouseUp = () => {
-		isMouseDown = false;
-	};
+		isMouseDown = false
+	}
 	const handleMouseMove = (e: MouseEvent) => {
-		if (isMouseDown === false) return;
-		const { clientX, clientY } = e;
-		let { left, top, width, height } = pickerBgRect;
+		if (isMouseDown === false) return
+		const { clientX, clientY } = e
+		let { left, top, width, height } = pickerBgRect
 		if (left <= 0 || top <= 0 || width <= 0 || height <= 0) {
-			pickerBgRect = pickerBg.getBoundingClientRect();
-			({ left, top, width, height } = pickerBgRect);
+			pickerBgRect = pickerBg.getBoundingClientRect()
+			;({ left, top, width, height } = pickerBgRect)
 		}
-		let [offsetX, offsetY] = [clientX - left, clientY - top];
+		let [offsetX, offsetY] = [clientX - left, clientY - top]
 		if (offsetX <= dotRadius) {
-			offsetX = dotRadius;
+			offsetX = dotRadius
 		}
 		if (offsetX >= width - dotRadius) {
-			offsetX = width - dotRadius;
+			offsetX = width - dotRadius
 		}
 		if (offsetY <= dotRadius) {
-			offsetY = dotRadius;
+			offsetY = dotRadius
 		}
 		if (offsetY >= height - dotRadius) {
-			offsetY = height - dotRadius;
+			offsetY = height - dotRadius
 		}
-		pickerPosition = { xRatio: (offsetX / width) * 100, yRatio: (offsetY / height) * 100 };
-		updateHsva(pickerPosition);
-	};
+		pickerPosition = { xRatio: (offsetX / width) * 100, yRatio: (offsetY / height) * 100 }
+		updateHsva(pickerPosition)
+	}
 
 	const hsvaToPickerPosition = (hsva: HsvaColor): RatioPositionXY => {
-		const { s, v } = hsva as { s: number; v: number };
-		let xRatio = s;
-		let yRatio = ((100 - v) / 100) * 100;
+		const { s, v } = hsva as { s: number; v: number }
+		let xRatio = s
+		let yRatio = ((100 - v) / 100) * 100
 
 		if (s === 0) {
-			xRatio = dotRadiusRatio.xRatio;
+			xRatio = dotRadiusRatio.xRatio
 		}
 		if (v === 0) {
-			yRatio = 100 - dotRadiusRatio.yRatio;
+			yRatio = 100 - dotRadiusRatio.yRatio
 		}
 		if (s >= 100) {
-			xRatio = 100 - dotRadiusRatio.xRatio;
+			xRatio = 100 - dotRadiusRatio.xRatio
 		}
 		if (v >= 100) {
-			yRatio = dotRadiusRatio.yRatio;
+			yRatio = dotRadiusRatio.yRatio
 		}
-		return { xRatio, yRatio };
-	};
+		return { xRatio, yRatio }
+	}
 
 	onMount(() => {
-		pickerBgRect = pickerBg.getBoundingClientRect();
+		pickerBgRect = pickerBg.getBoundingClientRect()
 		if (pickerBgRect && pickerBgRect.width && pickerBgRect.height) {
 			dotRadiusRatio = {
 				xRatio: (dotRadius / pickerBgRect.width) * 100,
 				yRatio: (dotRadius / pickerBgRect.height) * 100,
-			};
+			}
 			if (dotRadiusRatio) {
-				const rgba = convertStringToRgba(color);
-				const hsva = rgbaToHsva(rgba);
-				pickerPosition = hsvaToPickerPosition(hsva);
+				const rgba = convertStringToRgba(color)
+				const hsva = rgbaToHsva(rgba)
+				pickerPosition = hsvaToPickerPosition(hsva)
 			}
 		}
-	});
+	})
 </script>
 
 <svelte:window on:mouseup={handleMouseUp} />

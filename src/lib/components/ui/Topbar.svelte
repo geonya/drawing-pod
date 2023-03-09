@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Icon from '../Icon.svelte';
-	import { MotionRender } from '$lib';
-	import TopPanel from '../panel/TopPanel.svelte';
+	import Icon from '../Icon.svelte'
+	import { MotionRender } from '$lib'
+	import TopPanel from '../panel/TopPanel.svelte'
 </script>
 
 <MotionRender>

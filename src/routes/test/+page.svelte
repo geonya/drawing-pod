@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Canvas } from '$lib';
+	import { Canvas } from '$lib'
 </script>
 
 <Canvas />
