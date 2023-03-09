@@ -107,7 +107,6 @@ export class Render {
 	}
 
 	onDrawingEnd() {
-		console.log('drawing mode off')
 		this.canvas.isDrawingMode = false
 	}
 

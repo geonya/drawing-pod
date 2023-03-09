@@ -2,11 +2,11 @@
 	import { PaintType, type IPaletteColor } from '$lib/types'
 	import { onMount } from 'svelte'
 	import { sideBarOpen, sideBarKey, paletteColor, canvas } from '$lib/store'
-	import { fabric } from 'fabric'
 	import type { Render } from './Render'
 	export let render: Render
 
 	let strokeWidth: number | null
+
 	$: {
 		if (strokeWidth && $paletteColor) {
 			onUpdateStrokeWidth(strokeWidth, $paletteColor)
@@ -19,6 +19,7 @@
 			render.onUpdateObjectColor($paletteColor)
 		}
 	}
+
 	const uiColorChange = (paletteColor: IPaletteColor) => {
 		if (paletteColor) {
 			if (paletteColor.type === PaintType.FILL) {
@@ -58,16 +59,9 @@
 		onSidebarClose()
 		clearPaletteColor()
 	}
+
 	onMount(() => {
 		if (!$canvas) return
-		const rect = new fabric.Rect({
-			left: 100,
-			top: 100,
-			fill: 'red',
-			width: 20,
-			height: 20,
-		})
-		$canvas.add(rect)
 		$canvas.on('selection:created', onObjectSelect)
 		$canvas.on('selection:updated', onObjectSelectUpdate)
 		$canvas.on('selection:cleared', onObjectSelectClear)

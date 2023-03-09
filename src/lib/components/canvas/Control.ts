@@ -1,7 +1,7 @@
 import { CANVAS_DATA } from '$lib/constants'
 import { fabric } from 'fabric'
 
-export class Controller {
+export class Control {
 	constructor(private readonly canvas: fabric.Canvas) { }
 
 	onSave() {
@@ -60,5 +60,4 @@ export class Controller {
 		reader.readAsDataURL(file)
 	}
 
-	onSaveWithButton() { }
 }

@@ -1,6 +1,4 @@
 import type { HsvaColor, RgbaColor } from 'colord'
-import type { Controller } from './components/canvas/Controller'
-import type { Render } from './components/canvas/Render'
 // TODO - type : color
 export interface IPaletteColor {
 	color: string
@@ -17,7 +15,6 @@ export enum PaintType {
 	FILL = 'fill',
 	STROKE = 'stroke',
 }
-
 
 export enum ObjectType {
 	RECT = 'rect',
@@ -36,22 +33,4 @@ export interface IShape {
 	stroke: string | null
 	type: ObjectType | null
 	strokeWidth: number | null
-}
-
-export interface IMotionContext {
-	onAddImage: (e: Event) => void
-	onAddRect: () => void
-	onAddCircle: () => void
-	onHandDraggingStart: () => void
-	onHandDraggingEnd: () => void
-	onCursorMove: () => void
-	onDrawing: () => void
-	onDelete: () => void
-	onSave: () => void
-	onKeyDown: (e: KeyboardEvent) => void
-	onKeyUp: (e: KeyboardEvent) => void
-}
-export interface ICanvasContext {
-	getController: () => Controller
-	getRender: () => Render
 }

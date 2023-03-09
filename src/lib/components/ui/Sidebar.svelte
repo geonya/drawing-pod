@@ -1,13 +1,18 @@
 <script lang="ts">
+	import { shape } from '$lib/store'
 	import { ObjectType, PaintType } from '$lib/types'
 	import { stringRgbaToHex } from '$lib/utils'
 	import { fly } from 'svelte/transition'
 	import Icon from '../Icon.svelte'
 	import Palette from '../palette/Palette.svelte'
-	export let fill: string | null
-	export let stroke: string | null
-	export let type: ObjectType | null
-	export let strokeWidth: number | null
+	let fill: string | null
+	let stroke: string | null
+	let type: ObjectType | null
+	let strokeWidth: number | null
+	$: fill = $shape?.fill ?? null
+	$: stroke = $shape?.stroke ?? null
+	$: type = $shape?.type ?? null
+	$: strokeWidth = $shape?.strokeWidth ?? null
 	$: fillHex = fill ? stringRgbaToHex(fill) : ''
 	$: strokeHex = stroke ? stringRgbaToHex(stroke) : ''
 	$: whichPalette = fill ? PaintType.FILL : PaintType.STROKE

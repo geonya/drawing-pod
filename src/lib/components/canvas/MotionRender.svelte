@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { MOTION_CONTEXT_KEY } from '$lib/constants'
-	import { MotionState, type IMotionContext } from '$lib/types'
-	import type { Controller } from './Controller'
+	import { MotionState } from '$lib/types'
+	import type { Control } from './Control'
 	import type { Render } from './Render'
-	import { onMount, setContext } from 'svelte'
-	export let controller: Controller
+	import { onMount } from 'svelte'
+	import { motionContext } from '$lib/store'
+	export let control: Control
 	export let render: Render
+
 	let motionState: MotionState = MotionState.DEFAULT
 	$: onChangeMotionState(motionState)
 	const onChangeMotionState = (motionState: MotionState) => {
@@ -44,15 +45,15 @@
 	}
 	const onDelete = () => {
 		motionState = MotionState.DEFAULT
-		controller.onDelete()
+		control.onDelete()
 	}
 	const onSave = () => {
 		motionState = MotionState.DEFAULT
-		controller.onSave()
+		control.onSave()
 	}
 	const onAddImage = (e: Event) => {
 		motionState = MotionState.DEFAULT
-		controller.onAddImage(e)
+		control.onAddImage(e)
 	}
 	const onKeyDown = (e: KeyboardEvent) => {
 		if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -71,7 +72,9 @@
 			onHandDraggingEnd()
 		}
 	}
-	setContext<IMotionContext>(MOTION_CONTEXT_KEY, {
+	const onDownload = () => {}
+
+	motionContext.set({
 		onAddRect,
 		onAddCircle,
 		onHandDraggingStart,
@@ -83,6 +86,7 @@
 		onAddImage,
 		onKeyDown,
 		onKeyUp,
+		onDownload,
 	})
 	onMount(() => {
 		motionState = MotionState.DEFAULT
