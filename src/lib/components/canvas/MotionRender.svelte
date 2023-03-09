@@ -1,19 +1,13 @@
 <script lang="ts">
 	import { MOTION_CONTEXT_KEY } from '$lib/constants'
-	import { activeObject, canvas, paletteColor, sideBarKey, sideBarOpen } from '$lib/store'
 	import { MotionState, type IMotionContext } from '$lib/types'
 	import type { Controller } from './Controller'
 	import type { Render } from './Render'
-	import { CANVAS_CONTEXT_KEY } from '$lib/constants'
-	import type { ICanvasContext } from '$lib/types'
-	import { getContext, onMount, setContext } from 'svelte'
-
-	let controller: Controller
-	let render: Render
+	import { onMount, setContext } from 'svelte'
+	export let controller: Controller
+	export let render: Render
 	let motionState: MotionState = MotionState.DEFAULT
-	const { getController, getRender } = getContext<ICanvasContext>(CANVAS_CONTEXT_KEY)
 	$: onChangeMotionState(motionState)
-
 	const onChangeMotionState = (motionState: MotionState) => {
 		if (!render) return
 		if (motionState === MotionState.DEFAULT) {
@@ -21,9 +15,11 @@
 			render.onDraggingEnd()
 		}
 		if (motionState === MotionState.DRAWING) {
+			render.onDraggingEnd()
 			render.onDrawingStart()
 		}
 		if (motionState === MotionState.DRAGGING) {
+			render.onDraggingEnd()
 			render.onDraggingStart()
 		}
 	}
@@ -59,7 +55,6 @@
 		motionState = MotionState.DEFAULT
 		controller.onAddImage(e)
 	}
-
 	const onKeyDown = (e: KeyboardEvent) => {
 		if (e.key === 'Delete' || e.key === 'Backspace') {
 			onDelete()
@@ -77,36 +72,6 @@
 			onHandDraggingEnd()
 		}
 	}
-
-	const onObjectSelect = () => {
-		render.onObjectSelect()
-		render.onActiveObjectStoreUpdate(activeObject)
-		onSideBarOpen()
-	}
-	const onObjectSelectUpdate = () => {
-		render.onObjectSelectUpdate()
-		render.onActiveObjectStoreUpdate(activeObject)
-		changeSideBar()
-		clearPaletteColor()
-	}
-	const onObjectSelectClear = () => {
-		render.onObjectSelectClear()
-		render.onActiveObjectStoreUpdate(activeObject)
-		onSidebarClose()
-		clearPaletteColor()
-	}
-	const clearPaletteColor = () => {
-		$paletteColor = null
-	}
-	const onSideBarOpen = () => {
-		$sideBarOpen = true
-	}
-	const onSidebarClose = () => {
-		$sideBarOpen = false
-	}
-	const changeSideBar = () => {
-		$sideBarKey = Symbol()
-	}
 	setContext<IMotionContext>(MOTION_CONTEXT_KEY, {
 		onAddRect,
 		onAddCircle,
@@ -121,14 +86,7 @@
 		onKeyUp,
 	})
 	onMount(() => {
-		controller = getController()
-		render = getRender()
 		motionState = MotionState.DEFAULT
-		if ($canvas) {
-			$canvas.on('selection:created', onObjectSelect)
-			$canvas.on('selection:updated', onObjectSelectUpdate)
-			$canvas.on('selection:cleared', onObjectSelectClear)
-		}
 	})
 </script>
 

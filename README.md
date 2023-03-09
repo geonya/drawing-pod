@@ -11,8 +11,8 @@
 - [x] AutoSave in time
 - [x] Image Upload
 - [x] Refactor MotionRender
-- [ ] Path Select Controller
-- [ ] Line Stroke
+- [x] Path Select Controller
+- [x] Line Stroke
 - [ ] svg Download
 - [ ] sticky line
 - [ ] connect db

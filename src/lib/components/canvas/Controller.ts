@@ -2,7 +2,7 @@ import { CANVAS_DATA } from '$lib/constants'
 import { fabric } from 'fabric'
 
 export class Controller {
-	constructor(private readonly canvas: fabric.Canvas) {}
+	constructor(private readonly canvas: fabric.Canvas) { }
 
 	onSave() {
 		const storageString = localStorage.getItem(CANVAS_DATA)
@@ -23,7 +23,7 @@ export class Controller {
 			this.onSave()
 		}, time)
 	}
-	onDownloadSVG() {
+	onDownloadAsSVG() {
 		const group = new fabric.Group(this.canvas.getObjects())
 		const newCanvas = new fabric.Canvas('newCanvas', {
 			width: group.width,
@@ -60,5 +60,5 @@ export class Controller {
 		reader.readAsDataURL(file)
 	}
 
-	onSaveWithButton() {}
+	onSaveWithButton() { }
 }

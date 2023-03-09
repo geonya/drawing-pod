@@ -13,6 +13,7 @@ export enum PaintType {
 	STROKE = 'stroke',
 }
 
+
 export enum ObjectType {
 	RECT = 'rect',
 	CIRCLE = 'circle',
@@ -25,11 +26,12 @@ export interface ColorType {
 	rgba: RgbaColor
 	hex: string
 }
-export interface Shape {
+export interface IShape {
 	id: string
-	object: fabric.Object
-	fill: ColorType
-	stroke: ColorType
+	fill: string | null
+	stroke: string | null
+	type: ObjectType | null
+	strokeWidth: number | null
 }
 
 export interface IMotionContext {

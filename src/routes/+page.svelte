@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { Canvas } from '$lib'
-	import { Layer } from '$lib'
 </script>
 
-<main class="h-screen w-full bg-blue-500">
-	<Canvas>
-		<Layer />
-	</Canvas>
+<main class="h-screen w-full">
+	<Canvas />
 </main>
 
 <footer class="fixed bottom-0 right-0 left-0 grid h-12 w-full place-content-center backdrop-blur">

@@ -14,6 +14,7 @@
 		| 'lock'
 		| 'hand'
 		| 'menu'
+		| 'download'
 
 	interface IIcon {
 		name: string
@@ -96,7 +97,8 @@
 		},
 		{
 			name: 'save',
-			svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+			svg: `
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 					`,
 		},
 		{
@@ -142,6 +144,12 @@
 							d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6"
 						/>`,
 		},
+		{
+			name: 'download',
+			svg: `
+  					<path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"></path>
+					`,
+		},
 	]
 	let icon = icons.find((e: IIcon) => e.name === name)
 </script>
@@ -149,7 +157,7 @@
 {#if icon}
 	<div>
 		<svg
-			class={'h-5 w-5 ' + $$props.class}
+			class={'inline-block h-5 w-5 ' + $$props.class}
 			aria-hidden="true"
 			focusable="false"
 			role="img"
@@ -159,5 +167,6 @@
 			stroke-linecap="round"
 			stroke-linejoin="round">{@html icon.svg}</svg
 		>
+		<slot />
 	</div>
 {/if}

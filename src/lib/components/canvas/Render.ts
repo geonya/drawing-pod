@@ -2,7 +2,6 @@ import { INITIAL_RGBA } from '$lib/constants'
 import type { IPaletteColor } from '$lib/store'
 import { ObjectType, PaintType } from '$lib/types'
 import { fabric } from 'fabric'
-import type { Writable } from 'svelte/store'
 
 export class Render {
 	fill: string | null = null
@@ -10,7 +9,7 @@ export class Render {
 	activeObject: fabric.Object | null = null
 	type: ObjectType | null = null
 	strokeWidth: number | null = null
-	constructor(private canvas: fabric.Canvas) {}
+	constructor(private canvas: fabric.Canvas) { }
 	onAddRect() {
 		const rect = new fabric.Rect({
 			fill: 'rgba(200,200,200,1)',
@@ -169,9 +168,6 @@ export class Render {
 		this.onClearObject()
 	}
 
-	onActiveObjectStoreUpdate(object: Writable<fabric.Object | null>) {
-		object.set(this.canvas.getActiveObject())
-	}
 
 	onClearObject() {
 		this.fill = null
@@ -222,4 +218,5 @@ export class Render {
 		}
 		return null
 	}
+
 }
