@@ -157,7 +157,7 @@ export class Render {
     }
   };
   onObjectSelectClear() {
-    this.canvas.discardActiveObject();
+    this.canvas.discardActiveObject().renderAll()
     this.onClearColor()
   };
 

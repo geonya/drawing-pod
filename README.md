@@ -8,7 +8,12 @@
   - [x] HSVA Slider
   - [x] Color State Management
 - [x] Refactoring... with class component
-- [x] AutoSave
+- [x] AutoSave in time
+- [x] Image Upload
+- [ ] Refactor MotionRender
+- [ ] Path Select Controller
 - [ ] Line Stroke
-- [ ] Image Upload
 - [ ] svg Download
+- [ ] sticky line
+- [ ] connect db
+- [ ] SVG library 

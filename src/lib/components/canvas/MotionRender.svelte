@@ -1,33 +1,93 @@
 <script lang="ts">
-	import { canvas, motionState } from '$lib/store';
-	import { MotionState } from '$lib/types';
-	import { onMount } from 'svelte';
+	import { MOTION_CONTEXT_KEY } from '$lib/constants';
+	import { motionState } from '$lib/store';
+	import { MotionState, type IMotionContext } from '$lib/types';
+	import type { Controller } from './Controller';
 	import type { Render } from './Render';
-	export let render: Render;
+	import { CANVAS_CONTEXT_KEY } from '$lib/constants';
+	import type { ICanvasContext } from '$lib/types';
+	import { getContext, onMount, setContext } from 'svelte';
+
+	let controller: Controller;
+	let render: Render;
+	const { getController, getRender } = getContext<ICanvasContext>(CANVAS_CONTEXT_KEY);
 	$: {
-		if ($motionState === MotionState.DEFAULT) {
-			render.onDrawingEnd();
-			render.onDraggingEnd();
-		}
-		if ($motionState === MotionState.DRAWING) {
-			render.onDrawingStart();
-		}
-		if ($motionState === MotionState.DRAGGING) {
-			render.onDraggingStart();
+		if (render && controller) {
+			if ($motionState === MotionState.DEFAULT) {
+				render.onDrawingEnd();
+				render.onDraggingEnd();
+			}
+			if ($motionState === MotionState.DRAWING) {
+				render.onDrawingStart();
+			}
+			if ($motionState === MotionState.DRAGGING) {
+				render.onDraggingStart();
+			}
 		}
 	}
-	const onClickESC = (e: KeyboardEvent) => {
-		console.log(e.key);
+	const onAddRect = () => {
+		render.onAddRect();
+	};
+	const onAddCircle = () => {
+		render.onAddCircle();
+	};
+	const onHandDraggingStart = () => {
+		$motionState = MotionState.DRAGGING;
+	};
+	const onHandDraggingEnd = () => {
+		$motionState = MotionState.DEFAULT;
+	};
+	const onCursorMove = () => {
+		$motionState = MotionState.DEFAULT;
+	};
+	const onDrawing = () => {
+		$motionState = MotionState.DRAWING;
+	};
+	const onDelete = () => {
+		controller.onDelete();
+	};
+	const onSave = () => {
+		controller.onSave();
+	};
+	const onAddImage = (e: Event) => {
+		controller.onAddImage(e);
+	};
+
+	const onKeyDown = (e: KeyboardEvent) => {
+		if (e.key === 'Delete' || e.key === 'Backspace') {
+			onDelete();
+		}
+		if (e.key === ' ') {
+			onHandDraggingStart();
+		}
 		if (e.key === 'Escape') {
 			$motionState = MotionState.DEFAULT;
 			render.onObjectSelectClear();
 		}
 	};
+	const onKeyUp = (e: KeyboardEvent) => {
+		if (e.key === ' ') {
+			onHandDraggingEnd();
+		}
+	};
 
+	setContext<IMotionContext>(MOTION_CONTEXT_KEY, {
+		onAddRect,
+		onAddCircle,
+		onHandDraggingStart,
+		onHandDraggingEnd,
+		onCursorMove,
+		onDrawing,
+		onDelete,
+		onSave,
+		onAddImage,
+		onKeyDown,
+		onKeyUp,
+	});
 	onMount(() => {
-		$canvas!.on('selection:cleared', () => ($motionState = MotionState.DEFAULT));
+		controller = getController();
+		render = getRender();
 	});
 </script>
 
-<svelte:window on:keydown={onClickESC} />
 <slot />

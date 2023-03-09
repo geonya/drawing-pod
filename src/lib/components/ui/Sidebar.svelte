@@ -3,18 +3,16 @@
 	import { stringRgbaToHex } from '$lib/utils';
 	import { fly } from 'svelte/transition';
 	import { ColorRender } from '../..';
-	import type { Render } from '../canvas/Render';
 	import Icon from '../Icon.svelte';
 	import Palette from '../palette/Palette.svelte';
-	export let render: Render;
-	let fill: string | null = render.fill;
-	let stroke: string | null = render.stroke;
+	let fill: string | null;
+	let stroke: string | null;
 	let whichPalette: PaintType | null = PaintType.FILL;
 	$: fillHex = fill ? stringRgbaToHex(fill) : '';
 	$: strokeHex = stroke ? stringRgbaToHex(stroke) : '';
 </script>
 
-<ColorRender bind:fill bind:stroke {render}>
+<ColorRender bind:fill bind:stroke>
 	<nav
 		transition:fly={{ x: -200, duration: 500 }}
 		class="fixed top-24 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border shadow-md backdrop-blur md:block"
