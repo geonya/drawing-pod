@@ -1,7 +1,3 @@
-<script context="module" lang="ts">
-	export let sidebarKey = Symbol()
-</script>
-
 <script lang="ts">
 	import { ObjectType, PaintType } from '$lib/types'
 	import { stringRgbaToHex } from '$lib/utils'

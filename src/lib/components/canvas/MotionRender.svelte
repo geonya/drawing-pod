@@ -9,7 +9,6 @@
 	let motionState: MotionState = MotionState.DEFAULT
 	$: onChangeMotionState(motionState)
 	const onChangeMotionState = (motionState: MotionState) => {
-		if (!render) return
 		if (motionState === MotionState.DEFAULT) {
 			render.onDrawingEnd()
 			render.onDraggingEnd()

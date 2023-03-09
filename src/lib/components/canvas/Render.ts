@@ -1,6 +1,6 @@
 import { INITIAL_RGBA } from '$lib/constants'
-import type { IPaletteColor } from '$lib/store'
-import { ObjectType, PaintType } from '$lib/types'
+import { shape } from '$lib/store'
+import { ObjectType, PaintType, type IPaletteColor } from '$lib/types'
 import { fabric } from 'fabric'
 
 export class Render {
@@ -148,6 +148,12 @@ export class Render {
 			if (this.type === ObjectType.IMAGE) {
 				this.stroke = INITIAL_RGBA
 			}
+			shape.set({
+				fill: this.fill,
+				stroke: this.stroke,
+				type: this.type,
+				strokeWidth: this.strokeWidth
+			})
 		}
 	}
 
@@ -161,6 +167,12 @@ export class Render {
 			if (this.type === ObjectType.IMAGE) {
 				this.stroke = INITIAL_RGBA
 			}
+			shape.set({
+				fill: this.fill,
+				stroke: this.stroke,
+				type: this.type,
+				strokeWidth: this.strokeWidth
+			})
 		}
 	}
 	onObjectSelectClear() {
@@ -173,6 +185,7 @@ export class Render {
 		this.fill = null
 		this.stroke = null
 		this.strokeWidth = null
+		shape.set(null)
 	}
 
 	onUpdateColor(paletteColor: IPaletteColor) {

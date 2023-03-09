@@ -1,18 +1,16 @@
 import { writable } from 'svelte/store'
-import type { MotionState, PaintType } from './types'
+import type { IMotionContext, IPaletteColor, MotionState, PaintType } from './types'
 
-// TODO - type : color
-export interface IPaletteColor {
-	color: string
-	type: PaintType
+const setCanvas = () => {
+	const { subscribe, set, update } = writable<fabric.Canvas | null>(null)
+	return {
+		subscribe,
+		update,
+		set,
+	}
 }
-export interface IObject {
-	id: string;
-	type: string;
-	stroke: string;
-	strokeWidth: number;
-	fill: string;
-}
+export const canvas = setCanvas()
+
 const setSideBarOpen = () => {
 	const { subscribe, set } = writable<boolean>(false)
 	return {
@@ -37,8 +35,8 @@ const setPaletteColor = () => {
 		set,
 	}
 }
-const setActiveObject = () => {
-	const { subscribe, set, update } = writable<IObject | null>(null)
+const setMotionContext = () => {
+	const { subscribe, set, update } = writable<IMotionContext | null>(null)
 	return {
 		subscribe,
 		update,
@@ -49,4 +47,17 @@ const setActiveObject = () => {
 export const paletteColor = setPaletteColor()
 export const sideBarOpen = setSideBarOpen()
 export const sideBarKey = setSideBarKey()
-export const activeObject = setActiveObject()
+export const motionContext = setMotionContext()
+
+import type { IShape } from "$lib/types"
+
+const setShape = () => {
+	const { subscribe, set, update } = writable<IShape | null>(null)
+	return {
+		subscribe,
+		update,
+		set,
+	}
+}
+
+export const shape = setShape()

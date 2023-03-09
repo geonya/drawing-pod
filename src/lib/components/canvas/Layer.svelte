@@ -9,16 +9,13 @@
 	import ShapeRender from './ShapeRender.svelte'
 	import { Render } from './Render'
 	import { Controller } from './Controller'
-	export let canvas: fabric.Canvas
+	import { canvas, shape, sideBarKey, sideBarOpen } from '$lib/store'
+	import MotionRender from './MotionRender.svelte'
+	import Topbar from '../ui/Topbar.svelte'
+	import Sidebar from '../ui/Sidebar.svelte'
 	let render: Render
 	let controller: Controller
 	let saveProgress: number = 0
-
-	let shape: IShape | null = null
-	let hi: string = ''
-
-	$: console.log(shape)
-	$: console.log(hi)
 
 	const onLoadStorageData = (canvas: fabric.Canvas) => {
 		const storageJsonData = localStorage.getItem(CANVAS_DATA)
@@ -68,9 +65,9 @@
 		}
 	}
 	onMount(() => {
-		if (canvas) {
-			render = new Render(canvas)
-			controller = new Controller(canvas)
+		if ($canvas) {
+			render = new Render($canvas)
+			controller = new Controller($canvas)
 			// onLoadStorageData(canvas)
 
 			// onIntervalAutoSaveWithTimer()
@@ -80,12 +77,12 @@
 </script>
 
 {#if render && controller}
-	<ShapeRender bind:canvas bind:render />
-	<!-- <MotionRender bind:render bind:controller />
+	<ShapeRender bind:render />
+	<MotionRender bind:render bind:controller />
 	<Topbar />
 	{#if $sideBarOpen}
 		{#key sideBarKey}
-			<Sidebar {fill} {stroke} {strokeWidth} {type} />
+			<!-- <Sidebar /> -->
 		{/key}
-	{/if} -->
+	{/if}
 {/if}

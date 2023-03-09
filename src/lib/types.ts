@@ -1,6 +1,11 @@
 import type { HsvaColor, RgbaColor } from 'colord'
 import type { Controller } from './components/canvas/Controller'
 import type { Render } from './components/canvas/Render'
+// TODO - type : color
+export interface IPaletteColor {
+	color: string
+	type: PaintType
+}
 
 export enum MotionState {
 	DEFAULT = 'default',
@@ -27,7 +32,6 @@ export interface ColorType {
 	hex: string
 }
 export interface IShape {
-	id: string
 	fill: string | null
 	stroke: string | null
 	type: ObjectType | null

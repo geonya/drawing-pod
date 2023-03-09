@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { ObjectType, PaintType, type ICanvasContext, type IShape } from '$lib/types'
-	import type { IPaletteColor } from '$lib/store'
+	import { PaintType, type IPaletteColor } from '$lib/types'
 	import { onMount } from 'svelte'
-	import { sideBarOpen, sideBarKey, paletteColor } from '$lib/store'
+	import { sideBarOpen, sideBarKey, paletteColor, canvas } from '$lib/store'
 	import { fabric } from 'fabric'
 	import type { Render } from './Render'
 	export let render: Render
-	export let canvas: fabric.Canvas
+
 	let strokeWidth: number | null
 	$: {
 		if (strokeWidth && $paletteColor) {
@@ -60,6 +59,7 @@
 		clearPaletteColor()
 	}
 	onMount(() => {
+		if (!$canvas) return
 		const rect = new fabric.Rect({
 			left: 100,
 			top: 100,
@@ -67,10 +67,10 @@
 			width: 20,
 			height: 20,
 		})
-		canvas.add(rect)
-		canvas.on('selection:created', onObjectSelect)
-		canvas.on('selection:updated', onObjectSelectUpdate)
-		canvas.on('selection:cleared', onObjectSelectClear)
+		$canvas.add(rect)
+		$canvas.on('selection:created', onObjectSelect)
+		$canvas.on('selection:updated', onObjectSelectUpdate)
+		$canvas.on('selection:cleared', onObjectSelectClear)
 	})
 </script>
 
