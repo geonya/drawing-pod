@@ -1,50 +1,49 @@
 <script lang="ts">
-	import Icon from '../Icon.svelte';
-	import { getContext, onMount } from 'svelte';
-	import { AUTO_SAVE_DELAY, CANVAS_DATA, MOTION_CONTEXT_KEY } from '$lib/constants';
-	import { MotionState, type IMotionContext } from '$lib/types';
-	import { canvas, motionState } from '$lib/store';
-	let saveProgress: number = 0;
+	import Icon from '../Icon.svelte'
+	import { getContext, onMount } from 'svelte'
+	import { AUTO_SAVE_DELAY, CANVAS_DATA, MOTION_CONTEXT_KEY } from '$lib/constants'
+	import { canvas } from '$lib/store'
+	import type { IMotionContext } from '$lib/types'
+	let saveProgress: number = 0
 
 	const saveTimer = (m: number) => {
-		let saveTimerId: ReturnType<typeof requestAnimationFrame>;
-		let start: number | null = null;
+		let saveTimerId: ReturnType<typeof requestAnimationFrame>
+		let start: number | null = null
 		const loop = (timestamp: number) => {
-			if (!start) start = timestamp;
-			const elapsed = timestamp - start;
-			const progress = (elapsed / m) * 1.1;
+			if (!start) start = timestamp
+			const elapsed = timestamp - start
+			const progress = (elapsed / m) * 1.1
 			if (progress <= 1) {
-				requestAnimationFrame(loop);
+				requestAnimationFrame(loop)
 			}
-			saveProgress = progress;
-		};
-		saveTimerId = requestAnimationFrame(loop);
-		return saveTimerId;
-	};
+			saveProgress = progress
+		}
+		saveTimerId = requestAnimationFrame(loop)
+		return saveTimerId
+	}
 	const onIntervalAutoSaveWithTimer = () => {
-		let interval: ReturnType<typeof setInterval>;
-		let saveTimerId: ReturnType<typeof requestAnimationFrame> | null;
-		saveTimerId = saveTimer(AUTO_SAVE_DELAY);
+		let interval: ReturnType<typeof setInterval>
+		let saveTimerId: ReturnType<typeof requestAnimationFrame> | null
+		saveTimerId = saveTimer(AUTO_SAVE_DELAY)
 		interval = setInterval(() => {
-			saveTimerId = saveTimer(AUTO_SAVE_DELAY);
-		}, AUTO_SAVE_DELAY);
+			saveTimerId = saveTimer(AUTO_SAVE_DELAY)
+		}, AUTO_SAVE_DELAY)
 		return () => {
-			clearInterval(interval);
-			saveTimerId && cancelAnimationFrame(saveTimerId);
-		};
-	};
+			clearInterval(interval)
+			saveTimerId && cancelAnimationFrame(saveTimerId)
+		}
+	}
 	const onAutoSaveInLocalStorage = (canvas: fabric.Canvas) => {
-		let interval: ReturnType<typeof setInterval>;
+		let interval: ReturnType<typeof setInterval>
 		interval = setInterval(() => {
-			const json = canvas.toJSON();
-			localStorage.setItem(CANVAS_DATA, JSON.stringify(json));
-			console.log('canvas data auto saved!');
-		}, AUTO_SAVE_DELAY);
+			const json = canvas.toJSON()
+			localStorage.setItem(CANVAS_DATA, JSON.stringify(json))
+			console.log('canvas data auto saved!')
+		}, AUTO_SAVE_DELAY)
 		return () => {
-			clearInterval(interval);
-		};
-	};
-
+			clearInterval(interval)
+		}
+	}
 	const {
 		onAddImage,
 		onAddRect,
@@ -56,15 +55,14 @@
 		onSave,
 		onKeyDown,
 		onKeyUp,
-	} = getContext<IMotionContext>(MOTION_CONTEXT_KEY);
+	} = getContext<IMotionContext>(MOTION_CONTEXT_KEY)
 
 	onMount(() => {
 		if ($canvas) {
-			$canvas.on('selection:cleared', () => ($motionState = MotionState.DEFAULT));
-			onIntervalAutoSaveWithTimer();
-			onAutoSaveInLocalStorage($canvas);
+			onIntervalAutoSaveWithTimer()
+			onAutoSaveInLocalStorage($canvas)
 		}
-	});
+	})
 </script>
 
 <svelte:window on:keydown={onKeyDown} on:keyup={onKeyUp} />

@@ -13,6 +13,13 @@ export enum PaintType {
   STROKE = 'stroke',
 }
 
+export enum ObjectType {
+  RECT = 'rect',
+  CIRCLE = 'circle',
+  PATH = 'path',
+  IMAGE = 'image',
+}
+
 export interface ColorType {
   hsva: HsvaColor;
   rgba: RgbaColor;

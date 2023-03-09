@@ -1,34 +1,34 @@
 <script lang="ts">
-	import Picker from './Picker.svelte';
-	import Slider from './Slider.svelte';
-	import AlphaSlider from './AlphaSlider.svelte';
-	import { onMount } from 'svelte';
-	import { rgbaChecker, hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils';
-	import { paletteColor } from '$lib/store';
-	import type { PaintType } from '$lib/types';
+	import Picker from './Picker.svelte'
+	import Slider from './Slider.svelte'
+	import AlphaSlider from './AlphaSlider.svelte'
+	import { onMount } from 'svelte'
+	import { rgbaChecker, hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils'
+	import { paletteColor } from '$lib/store'
+	import type { PaintType } from '$lib/types'
 
-	export let color: string;
-	export let type: PaintType;
+	export let color: string
+	export let type: PaintType
 
-	let bgColor: string;
+	let bgColor: string
 
-	$: color = rgbaChecker(color);
+	$: color = rgbaChecker(color)
 
 	$: {
 		if (color) {
 			$paletteColor = {
 				color,
 				type,
-			};
+			}
 		}
 	}
 	onMount(() => {
 		if (color) {
-			const { h } = stringRgbaToHsva(color);
-			const bgHsva = { h, s: 100, v: 100, a: 1 };
-			bgColor = hsvaToStringRgba(bgHsva);
+			const { h } = stringRgbaToHsva(color)
+			const bgHsva = { h, s: 100, v: 100, a: 1 }
+			bgColor = hsvaToStringRgba(bgHsva)
 		}
-	});
+	})
 </script>
 
 <div id="baseModal" class="z-20 grid h-48 w-full grid-cols-7 space-x-3 rounded-md p-1 ">

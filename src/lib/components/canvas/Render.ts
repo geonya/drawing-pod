@@ -1,5 +1,6 @@
+import { INITIAL_RGBA } from '$lib/constants';
 import type { IPaletteColor } from '$lib/store';
-import { PaintType } from '$lib/types';
+import { ObjectType, PaintType } from '$lib/types';
 import { fabric } from 'fabric'
 import type { Writable } from 'svelte/store';
 
@@ -7,6 +8,8 @@ export class Render {
   fill: string | null = null;
   stroke: string | null = null;
   activeObject: fabric.Object | null = null;
+  type: ObjectType | null = null;
+  strokeWidth: number | null = null;
   constructor(
     private canvas: fabric.Canvas,
   ) {
@@ -102,7 +105,6 @@ export class Render {
   };
 
   onDrawingStart() {
-    this.onDraggingEnd()
     this.canvas.isDrawingMode = true;
     this.canvas.freeDrawingBrush.color = 'rgba(0,0,0,1)';
     this.canvas.freeDrawingBrush.width = 5;
@@ -145,6 +147,11 @@ export class Render {
     if (activeObject) {
       this.fill = activeObject.fill as string;
       this.stroke = activeObject.stroke as string;
+      this.type = activeObject.type as ObjectType;
+      this.strokeWidth = activeObject.strokeWidth as number;
+      if (this.type === ObjectType.IMAGE) {
+        this.stroke = INITIAL_RGBA;
+      }
     }
   };
 
@@ -153,20 +160,26 @@ export class Render {
     if (activeObject) {
       this.fill = activeObject.fill as string;
       this.stroke = activeObject.stroke as string;
+      this.type = activeObject.type as ObjectType;
+      this.strokeWidth = activeObject.strokeWidth as number;
+      if (this.type === ObjectType.IMAGE) {
+        this.stroke = INITIAL_RGBA;
+      }
     }
   };
   onObjectSelectClear() {
     this.canvas.discardActiveObject().renderAll()
-    this.onClearColor()
+    this.onClearObject()
   };
 
   onActiveObjectStoreUpdate(object: Writable<fabric.Object | null>) {
     object.set(this.canvas.getActiveObject())
   }
 
-  onClearColor() {
+  onClearObject() {
     this.fill = null
     this.stroke = null
+    this.strokeWidth = null
   }
 
   onUpdateColor(paletteColor: IPaletteColor) {
@@ -193,8 +206,19 @@ export class Render {
       this.canvas.requestRenderAll();
     }
 
-
   }
+  onUpdateStrokeWidth(value: number, paletteColor: IPaletteColor) {
+    const activeObject = this.canvas.getActiveObject();
+    if (activeObject) {
+      activeObject.set('strokeWidth', value)
+      if (paletteColor.type === PaintType.STROKE) {
+        activeObject.set('stroke', paletteColor.color)
+      }
+      this.strokeWidth = value
+      this.canvas.requestRenderAll();
+    }
+  }
+
   typeofActiveObject() {
     const activeObject = this.canvas.getActiveObject();
     if (activeObject) {

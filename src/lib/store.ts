@@ -1,5 +1,5 @@
 import { writable } from "svelte/store"
-import { MotionState, type PaintType } from "./types";
+import type { MotionState, PaintType } from "./types";
 
 const setCanvas = () => {
   const { subscribe, update, set } = writable<fabric.Canvas | null>(null)
@@ -7,13 +7,6 @@ const setCanvas = () => {
     subscribe,
     set,
     update,
-  }
-}
-const setMotionState = () => {
-  const { subscribe, set } = writable<MotionState>(MotionState.DEFAULT)
-  return {
-    subscribe,
-    set,
   }
 }
 const setSideBarOpen = () => {
@@ -57,7 +50,6 @@ const setActiveObject = () => {
 
 export const paletteColor = setPaletteColor()
 export const canvas = setCanvas()
-export const motionState = setMotionState()
 export const activeObject = setActiveObject()
 export const sideBarOpen = setSideBarOpen()
 export const sideBarKey = setSideBarKey()
