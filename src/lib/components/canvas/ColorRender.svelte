@@ -9,6 +9,7 @@
 	export let stroke: string | null
 	export let type: ObjectType | null
 	export let strokeWidth: number | null
+
 	const uiColorChange = (color: IPaletteColor) => {
 		if (color) {
 			if (color.type === PaintType.FILL) {
