@@ -41,6 +41,7 @@
   },
   "type": "module",
   "dependencies": {
+    "canvas": "^2.11.0",
     "colord": "^2.9.3",
     "fabric": "^5.3.0"
   }
