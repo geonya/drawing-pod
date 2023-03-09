@@ -1,12 +1,20 @@
 <script lang="ts">
 	import { MOTION_CONTEXT_KEY } from '$lib/constants';
-	import { motionState } from '$lib/store';
+	import {
+		activeObject,
+		canvas,
+		motionState,
+		paletteColor,
+		sideBarKey,
+		sideBarOpen,
+	} from '$lib/store';
 	import { MotionState, type IMotionContext } from '$lib/types';
 	import type { Controller } from './Controller';
 	import type { Render } from './Render';
 	import { CANVAS_CONTEXT_KEY } from '$lib/constants';
 	import type { ICanvasContext } from '$lib/types';
 	import { getContext, onMount, setContext } from 'svelte';
+	import { sidebarKey } from './Layer.svelte';
 
 	let controller: Controller;
 	let render: Render;
@@ -71,6 +79,35 @@
 		}
 	};
 
+	const onObjectSelect = () => {
+		render.onObjectSelect();
+		render.onActiveObjectStoreUpdate(activeObject);
+		onSideBarOpen();
+	};
+	const onObjectSelectUpdate = () => {
+		render.onObjectSelectUpdate();
+		render.onActiveObjectStoreUpdate(activeObject);
+		changeSideBar();
+		clearPaletteColor();
+	};
+	const onObjectSelectClear = () => {
+		render.onObjectSelectClear();
+		render.onActiveObjectStoreUpdate(activeObject);
+		onSidebarClose();
+		clearPaletteColor();
+	};
+	const clearPaletteColor = () => {
+		$paletteColor = null;
+	};
+	const onSideBarOpen = () => {
+		$sideBarOpen = true;
+	};
+	const onSidebarClose = () => {
+		$sideBarOpen = false;
+	};
+	const changeSideBar = () => {
+		$sideBarKey = Symbol();
+	};
 	setContext<IMotionContext>(MOTION_CONTEXT_KEY, {
 		onAddRect,
 		onAddCircle,
@@ -87,6 +124,11 @@
 	onMount(() => {
 		controller = getController();
 		render = getRender();
+		if ($canvas) {
+			$canvas.on('selection:created', onObjectSelect);
+			$canvas.on('selection:updated', onObjectSelectUpdate);
+			$canvas.on('selection:cleared', onObjectSelectClear);
+		}
 	});
 </script>
 

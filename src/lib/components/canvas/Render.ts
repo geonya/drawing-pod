@@ -10,7 +10,6 @@ export class Render {
   constructor(
     private canvas: fabric.Canvas,
   ) {
-    this.activeObject = this.canvas.getActiveObject();
   }
   onAddRect() {
     const rect = new fabric.Rect({

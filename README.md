@@ -10,7 +10,7 @@
 - [x] Refactoring... with class component
 - [x] AutoSave in time
 - [x] Image Upload
-- [ ] Refactor MotionRender
+- [x] Refactor MotionRender
 - [ ] Path Select Controller
 - [ ] Line Stroke
 - [ ] svg Download

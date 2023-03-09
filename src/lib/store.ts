@@ -16,6 +16,20 @@ const setMotionState = () => {
     set,
   }
 }
+const setSideBarOpen = () => {
+  const { subscribe, set } = writable<boolean>(false)
+  return {
+    subscribe,
+    set,
+  }
+}
+const setSideBarKey = () => {
+  const { subscribe, set } = writable<Symbol>(Symbol())
+  return {
+    subscribe,
+    set,
+  }
+}
 
 // TODO - type : color
 export interface IPaletteColor {
@@ -45,3 +59,5 @@ export const paletteColor = setPaletteColor()
 export const canvas = setCanvas()
 export const motionState = setMotionState()
 export const activeObject = setActiveObject()
+export const sideBarOpen = setSideBarOpen()
+export const sideBarKey = setSideBarKey()
