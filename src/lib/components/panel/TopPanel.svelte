@@ -7,8 +7,6 @@
 
 	const onDownload = () => {}
 
-	const motionContext = getContext<IMotionContext>(MOTION_CONTEXT_KEY)
-
 	onMount(() => {})
 </script>
 
