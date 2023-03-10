@@ -81,10 +81,10 @@ export class Motion {
   }
   onKeyDown(e: KeyboardEvent) {
     if (e.key === ' ') {
-      this.onDraggingStart()
+      this.onChangeMotionState(MotionState.DRAGGING)
     }
     if (e.key === 'Escape') {
-      motionState.set(MotionState.DEFAULT)
+      this.onChangeMotionState(MotionState.DEFAULT)
     }
   }
   onKeyUp(e: KeyboardEvent) {

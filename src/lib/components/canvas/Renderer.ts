@@ -8,6 +8,7 @@ export class Renderer {
 	type: ObjectType | null = null
 	strokeWidth: number | null = null
 	constructor(private canvas: fabric.Canvas) { }
+
 	onAddRect() {
 		const rect = new fabric.Rect({
 			fill: 'rgba(200,200,200,1)',
@@ -62,14 +63,12 @@ export class Renderer {
 			this.canvas.requestRenderAll()
 		}
 	}
-	onUpdateStrokeWidth(value: number, paletteColor: IPaletteColor) {
+	onUpdateStrokeWidth(value: number | null) {
+		if (!value) return;
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
 			activeObject.set('strokeWidth', value)
-			if (paletteColor.type === PaintType.STROKE) {
-				activeObject.set('stroke', paletteColor.color)
-			}
-			this.strokeWidth = value
+			this.strokeWidth = value;
 			this.canvas.requestRenderAll()
 		}
 	}

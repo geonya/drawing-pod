@@ -9,12 +9,6 @@
 	export let renderer: Renderer
 
 	$: {
-		if (renderer?.strokeWidth && $paletteColor) {
-			renderer.onUpdateStrokeWidth(renderer.strokeWidth, $paletteColor)
-		}
-	}
-
-	$: {
 		if ($paletteColor && renderer) {
 			if ($paletteColor.type === PaintType.FILL) {
 				renderer.fill = $paletteColor.color

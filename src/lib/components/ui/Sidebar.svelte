@@ -3,16 +3,21 @@
 	import { ObjectType, PaintType } from '$lib/types'
 	import { stringRgbaToHex } from '$lib/utils'
 	import { fly } from 'svelte/transition'
+	import type { Renderer } from '../canvas/Renderer'
 	import Icon from '../Icon.svelte'
 	import Palette from '../palette/Palette.svelte'
-	let fill: string | null
-	let stroke: string | null
-	let type: ObjectType | null
-	let strokeWidth: number | null
+
+	export let renderer: Renderer
+
+	let fill: string | null = $shape?.fill ?? null
+	let stroke: string | null = $shape?.stroke ?? null
+	let type: ObjectType | null = $shape?.type ?? null
+	let strokeWidth: number | null = $shape?.strokeWidth ?? null
+
 	$: fill = $shape?.fill ?? null
 	$: stroke = $shape?.stroke ?? null
 	$: type = $shape?.type ?? null
-	$: strokeWidth = $shape?.strokeWidth ?? null
+	$: renderer?.onUpdateStrokeWidth(strokeWidth)
 	$: fillHex = fill ? stringRgbaToHex(fill) : ''
 	$: strokeHex = stroke ? stringRgbaToHex(stroke) : ''
 	$: whichPalette = fill ? PaintType.FILL : PaintType.STROKE
