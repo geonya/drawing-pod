@@ -72,6 +72,24 @@ export class Renderer {
 			this.canvas.requestRenderAll()
 		}
 	}
-
+	onAddImage(e: Event) {
+		let file = (e.target as HTMLInputElement).files?.[0]
+		if (!file) return
+		const reader = new FileReader()
+		reader.onload = (e) => {
+			if (!e?.target?.result || typeof e.target.result !== 'string') return
+			let image = new Image()
+			image.src = e.target.result
+			image.onload = () => {
+				let img = new fabric.Image(image)
+				img.scaleToWidth(300)
+				this.canvas.add(img)
+				this.canvas.setActiveObject(img)
+				this.canvas.centerObject(img)
+				this.canvas.renderAll()
+			}
+		}
+		reader.readAsDataURL(file)
+	}
 
 }

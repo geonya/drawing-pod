@@ -95,55 +95,7 @@ export class Control {
 		a.click()
 		URL.revokeObjectURL(url)
 	}
-	onAddImage(e: Event) {
-		let file = (e.target as HTMLInputElement).files?.[0]
-		if (!file) return
-		const reader = new FileReader()
-		reader.onload = (e) => {
-			if (!e?.target?.result || typeof e.target.result !== 'string') return
-			let image = new Image()
-			image.src = e.target.result
-			image.onload = () => {
-				let img = new fabric.Image(image)
-				img.scaleToWidth(200)
-				this.canvas.add(img)
-				this.canvas.setActiveObject(img)
-				this.canvas.centerObject(img)
-				this.canvas.renderAll()
-			}
-		}
-		reader.readAsDataURL(file)
-	}
-	onPreventCanvasExit(e: fabric.IEvent<MouseEvent>) {
-		if (!e.target) return
-		if (!this.canvas) return
-		if (e.target.top && e.target.top < 0) {
-			e.target.top = 0
-		}
-		if (e.target.left && e.target.left < 0) {
-			e.target.left = 0
-		}
-		if (
-			e.target.left &&
-			e.target.width &&
-			this.canvas.width &&
-			e.target.left + e.target.width > this.canvas.width
-		) {
-			e.target.left = this.canvas.width - e.target.width
-		}
-		if (
-			e.target.top &&
-			e.target.height &&
-			this.canvas.height &&
-			e.target.top + e.target.height > this.canvas.height
-		) {
-			e.target.top = this.canvas.height - e.target.height
-		}
-	}
 
-	onKeyDown(e: KeyboardEvent) {
-		if (e.key === 'Delete' || e.key === 'Backspace') {
-			this.onDelete()
-		}
-	}
+
+
 }

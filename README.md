@@ -15,6 +15,7 @@
 - [x] Line Stroke
 - [x] Props Refactoring
 - [x] svg Download
+- [x] Image Boundary Bug Fix
 - [ ] sticky line
 - [ ] connect db
 - [ ] SVG library

@@ -11,7 +11,7 @@
 	export let renderer: Renderer
 </script>
 
-{#if motion}
+{#if motion && renderer && control}
 	<div
 		class="col-span-5 flex h-10 w-full items-center justify-evenly rounded-full border border-base-400 backdrop-blur-md"
 	>
@@ -39,7 +39,7 @@
 			type="file"
 			accept="image/*"
 			class="hidden"
-			on:change={(e) => control.onAddImage(e)}
+			on:change={(e) => renderer.onAddImage(e)}
 		/>
 		<label for="imageUpload" class="grid cursor-pointer place-content-center">
 			<button class="사진 업로드 pointer-events-none ">

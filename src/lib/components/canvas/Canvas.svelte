@@ -20,7 +20,6 @@
 			snapAngle: 0,
 			fireRightClick: true,
 			preserveObjectStacking: true,
-			backgroundColor: 'rgba(255,255,255,1)',
 		})
 	})
 </script>
@@ -30,7 +29,7 @@
 	<canvas id="canvas" />
 </div>
 {#if canvas}
-	<Layer {canvas} />
+	<Layer bind:canvas />
 {:else}
 	initializing...
 {/if}
