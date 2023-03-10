@@ -75,7 +75,7 @@ export class Motion {
     if (this.motionState !== MotionState.DRAWING) return;
     this.canvas.isDrawingMode = true
     this.canvas.freeDrawingBrush.color = 'rgba(0,0,0,1)'
-    this.canvas.freeDrawingBrush.width = 3
+    this.canvas.freeDrawingBrush.width = 2
   }
   onDrawingEnd() {
     this.canvas.defaultCursor = 'default'

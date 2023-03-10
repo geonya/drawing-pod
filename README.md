@@ -1,7 +1,8 @@
 # Drawing Pod
 
-## SvelteKit + fabric.js + tailwindcss + pocketbase + babylonjs
+## Simple Drawing Canvas
 
+### TODO 
 - [x] Color (Object Stroke & Fill)
   - [x] Palette
   - [x] Color Picker

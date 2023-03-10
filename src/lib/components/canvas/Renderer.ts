@@ -11,11 +11,14 @@ export class Renderer {
 
 	onAddRect() {
 		const rect = new fabric.Rect({
-			fill: 'rgba(200,200,200,1)',
+			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
-			strokeWidth: 2,
+			strokeWidth: 1,
 			width: 200,
 			height: 200,
+			rx: 10,
+			ry: 10
+
 		})
 		this.canvas.add(rect)
 		this.canvas.centerObject(rect)
@@ -25,7 +28,7 @@ export class Renderer {
 		const circle = new fabric.Circle({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
-			strokeWidth: 2,
+			strokeWidth: 1,
 			radius: 100,
 		})
 		this.canvas.add(circle)

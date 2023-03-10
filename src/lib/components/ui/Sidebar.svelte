@@ -14,9 +14,6 @@
 	let type: ObjectType | null = $shape?.type ?? null
 	let strokeWidth: number | null = $shape?.strokeWidth ?? null
 
-	$: fill = $shape?.fill ?? null
-	$: stroke = $shape?.stroke ?? null
-	$: type = $shape?.type ?? null
 	$: renderer?.onUpdateStrokeWidth(strokeWidth)
 	$: fillHex = fill ? stringRgbaToHex(fill) : ''
 	$: strokeHex = stroke ? stringRgbaToHex(stroke) : ''
