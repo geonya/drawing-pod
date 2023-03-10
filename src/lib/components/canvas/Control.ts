@@ -1,25 +1,20 @@
-import { CANVAS_DATA, INITIAL_RGBA } from '$lib/constants'
-import { sideBarOpen, sideBarKey, paletteColor } from '$lib/store'
-import { ObjectType } from '$lib/types'
+import { CANVAS_DATA } from '$lib/constants'
 import { fabric } from 'fabric'
 
 export class Control {
 	constructor(private readonly canvas: fabric.Canvas) { }
-	// onBringForward() {
-	// 	if (!this.activeObject) {
-	// 		this.activeObject = null
-	// 		return
-	// 	}
-	// 	this.canvas.bringForward(this.activeObject)
-	// }
-	// onSendBackward() {
-	// 	if (!this.activeObject) {
-	// 		this.activeObject = null
-	// 		return
-	// 	}
-	// 	this.canvas.sendBackwards(this.activeObject)
-	// }
-
+	onBringForward() {
+		const activeObject = this.canvas.getActiveObject()
+		if (activeObject) {
+			this.canvas.bringForward(activeObject)
+		}
+	}
+	onSendBackward() {
+		const activeObject = this.canvas.getActiveObject()
+		if (activeObject) {
+			this.canvas.sendBackwards(activeObject)
+		}
+	}
 
 	onSave() {
 		const storageString = localStorage.getItem(CANVAS_DATA)
@@ -29,6 +24,7 @@ export class Control {
 			})
 		}
 	}
+
 	onDelete() {
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
@@ -48,9 +44,9 @@ export class Control {
 		})
 		newCanvas.add(group)
 		const svgData = newCanvas.toSVG()
-		let blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
-		let url = URL.createObjectURL(blob)
-		let a = document.createElement('a')
+		const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
+		const url = URL.createObjectURL(blob)
+		const a = document.createElement('a')
 		a.download = 'canvas.svg'
 		a.href = url
 		a.click()

@@ -2,6 +2,7 @@
 	import { AUTO_SAVE_DELAY, CANVAS_DATA } from '$lib/constants'
 	import { saveProgress } from '$lib/store'
 	import { onMount } from 'svelte'
+	import type { fabric } from 'fabric'
 	export let canvas: fabric.Canvas
 
 	const onLoadStorageData = (canvas: fabric.Canvas) => {
@@ -13,6 +14,7 @@
 			})
 		}
 	}
+
 	const saveTimer = (m: number) => {
 		let saveTimerId: ReturnType<typeof requestAnimationFrame>
 		let start: number | null = null

@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store'
-import type { Shape } from "$lib/types"
+import type { Shape } from '$lib/types'
 import type { IPaletteColor, MotionState } from './types'
 
 const setSideBarOpen = () => {
@@ -19,7 +19,7 @@ const setShape = () => {
 }
 
 const setSideBarKey = () => {
-	const { subscribe, set } = writable<Symbol>(Symbol())
+	const { subscribe, set } = writable<symbol>(Symbol())
 	return {
 		subscribe,
 		set,
@@ -45,7 +45,7 @@ const setMotionState = () => {
 }
 
 const setSaveProgress = () => {
-	const { subscribe, set, } = writable<number>(0)
+	const { subscribe, set } = writable<number>(0)
 	return {
 		subscribe,
 		set,
@@ -57,6 +57,5 @@ export const sideBarOpen = setSideBarOpen()
 export const sideBarKey = setSideBarKey()
 export const saveProgress = setSaveProgress()
 export const motionState = setMotionState()
-
 
 export const shape = setShape()
