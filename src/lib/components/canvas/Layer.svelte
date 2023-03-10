@@ -3,34 +3,35 @@
 </script>
 
 <script lang="ts">
-	import { AUTO_SAVE_DELAY, CANVAS_DATA } from '$lib/constants'
 	import { onMount } from 'svelte'
 	import ShapeRender from './ShapeRender.svelte'
-	import { Render } from './Render'
+	import { Renderer } from './Renderer'
 	import { Control } from './Control'
-	import { canvas, saveProgress, shape, sideBarKey, sideBarOpen } from '$lib/store'
-	import MotionRender from './MotionRender.svelte'
 	import Topbar from '../ui/Topbar.svelte'
 	import Sidebar from '../ui/Sidebar.svelte'
 	import Controller from './Controller.svelte'
-	let render: Render
+	import { Motion } from './motion'
+	import { sideBarKey, sideBarOpen } from '$lib/store'
+	export let canvas: fabric.Canvas
+	let renderer: Renderer
 	let control: Control
+	let motion: Motion
 
 	onMount(() => {
-		if ($canvas) {
-			render = new Render($canvas)
-			control = new Control($canvas)
+		if (canvas) {
+			renderer = new Renderer(canvas)
+			control = new Control(canvas)
+			motion = new Motion(canvas)
 		}
 	})
 </script>
 
-{#if render && control}
-	<Controller bind:control />
-	<ShapeRender bind:render />
-	<MotionRender bind:render bind:control />
-	<Topbar />
+{#if renderer && control && motion}
+	<Controller {canvas} />
+	<ShapeRender {canvas} {control} {renderer} />
+	<Topbar {control} {motion} {renderer} />
 	{#if $sideBarOpen}
-		{#key sideBarKey}
+		{#key $sideBarKey}
 			<Sidebar />
 		{/key}
 	{/if}

@@ -1,8 +1,69 @@
 import { CANVAS_DATA } from '$lib/constants'
+import { sideBarOpen, sideBarKey, shape, paletteColor } from '$lib/store'
+import type { ObjectType } from '$lib/types'
 import { fabric } from 'fabric'
 
 export class Control {
 	constructor(private readonly canvas: fabric.Canvas) { }
+	// onBringForward() {
+	// 	if (!this.activeObject) {
+	// 		this.activeObject = null
+	// 		return
+	// 	}
+	// 	this.canvas.bringForward(this.activeObject)
+	// }
+	// onSendBackward() {
+	// 	if (!this.activeObject) {
+	// 		this.activeObject = null
+	// 		return
+	// 	}
+	// 	this.canvas.sendBackwards(this.activeObject)
+	// }
+	onSideBarOpen() {
+		sideBarOpen.set(true)
+	}
+	onSidebarClose() {
+		sideBarOpen.set(false)
+	}
+	changeSideBar() {
+		sideBarKey.set(Symbol())
+	}
+	onObjectSelect() {
+		const activeObject = this.canvas.getActiveObject()
+		if (activeObject) {
+			shape.set({
+				fill: activeObject.fill as string,
+				stroke: activeObject.stroke as string,
+				type: activeObject.type as ObjectType,
+				strokeWidth: activeObject.strokeWidth as number,
+			})
+			this.onSideBarOpen()
+		}
+	}
+	onObjectSelectUpdate() {
+		this.onObjectSelect()
+		this.changeSideBar()
+		this.setClearPaletteColor()
+	}
+	onObjectSelectClear() {
+		this.canvas.discardActiveObject().renderAll()
+		this.onSidebarClose()
+		this.setClearPaletteColor()
+		this.setClearShape()
+	}
+	setClearPaletteColor() {
+		paletteColor.set(null)
+	}
+	setClearShape() {
+		shape.set(null)
+	}
+	getTypeofActiveObject() {
+		const activeObject = this.canvas.getActiveObject()
+		if (activeObject) {
+			return activeObject.type
+		}
+		return null
+	}
 
 	onSave() {
 		const storageString = localStorage.getItem(CANVAS_DATA)
@@ -59,5 +120,39 @@ export class Control {
 		}
 		reader.readAsDataURL(file)
 	}
+	// TODO Add Function
+	onDownload() { }
 
+	onPreventCanvasExit(e: fabric.IEvent<MouseEvent>) {
+		if (!e.target) return
+		if (!this.canvas) return
+		if (e.target.top && e.target.top < 0) {
+			e.target.top = 0
+		}
+		if (e.target.left && e.target.left < 0) {
+			e.target.left = 0
+		}
+		if (
+			e.target.left &&
+			e.target.width &&
+			this.canvas.width &&
+			e.target.left + e.target.width > this.canvas.width
+		) {
+			e.target.left = this.canvas.width - e.target.width
+		}
+		if (
+			e.target.top &&
+			e.target.height &&
+			this.canvas.height &&
+			e.target.top + e.target.height > this.canvas.height
+		) {
+			e.target.top = this.canvas.height - e.target.height
+		}
+	}
+
+	onKeyDown(e: KeyboardEvent) {
+		if (e.key === 'Delete' || e.key === 'Backspace') {
+			this.onDelete()
+		}
+	}
 }

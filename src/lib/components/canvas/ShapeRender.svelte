@@ -1,70 +1,36 @@
 <script lang="ts">
 	import { PaintType, type IPaletteColor } from '$lib/types'
 	import { onMount } from 'svelte'
-	import { sideBarOpen, sideBarKey, paletteColor, canvas } from '$lib/store'
-	import type { Render } from './Render'
-	export let render: Render
-
-	let strokeWidth: number | null
+	import { paletteColor } from '$lib/store'
+	import type { Renderer } from './Renderer'
+	import type { Control } from './Control'
+	export let canvas: fabric.Canvas
+	export let control: Control
+	export let renderer: Renderer
 
 	$: {
-		if (strokeWidth && $paletteColor) {
-			onUpdateStrokeWidth(strokeWidth, $paletteColor)
+		if (renderer?.strokeWidth && $paletteColor) {
+			renderer.onUpdateStrokeWidth(renderer.strokeWidth, $paletteColor)
 		}
 	}
 
 	$: {
-		if ($paletteColor) {
-			uiColorChange($paletteColor)
-			render.onUpdateObjectColor($paletteColor)
-		}
-	}
-
-	const uiColorChange = (paletteColor: IPaletteColor) => {
-		if (paletteColor) {
-			if (paletteColor.type === PaintType.FILL) {
-				render.fill = paletteColor.color
+		if ($paletteColor && renderer) {
+			if ($paletteColor.type === PaintType.FILL) {
+				renderer.fill = $paletteColor.color
 			} else {
-				render.stroke = paletteColor.color
+				renderer.stroke = $paletteColor.color
 			}
+			renderer.onUpdateObjectColor($paletteColor)
 		}
-	}
-	const onUpdateStrokeWidth = (value: number, color: IPaletteColor) => {
-		if (!render) return
-		render.onUpdateStrokeWidth(value, color)
-	}
-	const clearPaletteColor = () => {
-		$paletteColor = null
-	}
-	const onSideBarOpen = () => {
-		$sideBarOpen = true
-	}
-	const onSidebarClose = () => {
-		$sideBarOpen = false
-	}
-	const changeSideBar = () => {
-		$sideBarKey = Symbol()
-	}
-	const onObjectSelect = () => {
-		render.onObjectSelect()
-		onSideBarOpen()
-	}
-	const onObjectSelectUpdate = () => {
-		render.onObjectSelectUpdate()
-		changeSideBar()
-		clearPaletteColor()
-	}
-	const onObjectSelectClear = () => {
-		render.onObjectSelectClear()
-		onSidebarClose()
-		clearPaletteColor()
 	}
 
 	onMount(() => {
-		if (!$canvas) return
-		$canvas.on('selection:created', onObjectSelect)
-		$canvas.on('selection:updated', onObjectSelectUpdate)
-		$canvas.on('selection:cleared', onObjectSelectClear)
+		if (canvas && control) {
+			canvas.on('selection:created', () => control.onObjectSelect())
+			canvas.on('selection:updated', () => control.onObjectSelectUpdate())
+			canvas.on('selection:cleared', () => control.onObjectSelectClear())
+		}
 	})
 </script>
 

@@ -13,6 +13,7 @@
 - [x] Refactor MotionRender
 - [x] Path Select Controller
 - [x] Line Stroke
+- [ ] Props Refactoring
 - [ ] svg Download
 - [ ] sticky line
 - [ ] connect db
