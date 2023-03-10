@@ -14,9 +14,13 @@
 - [x] Path Select Controller
 - [x] Line Stroke
 - [x] Props Refactoring
-- [x] svg Download
+- [x] svg Download 
+  - [ ] Empty image Bug
+  - [ ] Image Size does not fit with canvas
 - [x] Image Boundary Bug Fix
-- [ ] Adding Text
+- [x] Adding Text
 - [ ] sticky line
 - [ ] connect db
+- [ ] login / register
 - [ ] SVG library
+- [ ]
