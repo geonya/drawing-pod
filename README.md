@@ -16,6 +16,7 @@
 - [x] Props Refactoring
 - [x] svg Download
 - [x] Image Boundary Bug Fix
+- [ ] Adding Text
 - [ ] sticky line
 - [ ] connect db
 - [ ] SVG library

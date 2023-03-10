@@ -2,7 +2,7 @@
 	import type { Control } from '../canvas/Control'
 	import type { Motion } from '../canvas/Motion'
 	import type { Renderer } from '../canvas/Renderer'
-	import Icon from '../Icon.svelte'
+	import Icon from './Icon.svelte'
 	import TopPanel from '../panel/TopPanel.svelte'
 	export let control: Control
 	export let motion: Motion

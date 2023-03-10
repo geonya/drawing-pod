@@ -92,4 +92,17 @@ export class Renderer {
 		reader.readAsDataURL(file)
 	}
 
+	onTextAdd() {
+		const text = new fabric.IText('안녕?', {
+			fill: 'rgba(0,0,0,1)',
+			stroke: 'rgba(0,0,0,1)',
+			fontSize: 60,
+			strokeWidth: 1,
+			fontFamily: 'Nanum Pen Script',
+		})
+		this.canvas.add(text)
+		this.canvas.centerObject(text)
+		this.canvas.setActiveObject(text)
+	}
+
 }

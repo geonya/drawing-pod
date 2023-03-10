@@ -4,7 +4,7 @@
 	import { stringRgbaToHex } from '$lib/utils'
 	import { fly } from 'svelte/transition'
 	import type { Renderer } from '../canvas/Renderer'
-	import Icon from '../Icon.svelte'
+	import Icon from './Icon.svelte'
 	import Palette from '../palette/Palette.svelte'
 
 	export let renderer: Renderer
@@ -34,7 +34,7 @@
 
 <nav
 	transition:fly={{ x: -200, duration: 500 }}
-	class="fixed top-24 left-8 z-10 h-full max-h-[600px] w-64 rounded-md border border-base-400 shadow-md backdrop-blur-lg md:block"
+	class="fixed top-24 left-8 z-10 h-96 w-64 rounded-md border border-base-400 shadow-md backdrop-blur-lg md:block"
 >
 	<div class="scroll-none scroll scrollbar-hide relative h-full w-full">
 		<div class="컨트롤 박스">

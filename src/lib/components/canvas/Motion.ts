@@ -1,5 +1,6 @@
 import { motionState } from "$lib/store"
 import { MotionState } from "$lib/types"
+import type { IEvent } from "fabric/fabric-impl"
 
 export class Motion {
   motionState: MotionState
@@ -74,9 +75,10 @@ export class Motion {
     if (this.motionState !== MotionState.DRAWING) return;
     this.canvas.isDrawingMode = true
     this.canvas.freeDrawingBrush.color = 'rgba(0,0,0,1)'
-    this.canvas.freeDrawingBrush.width = 5
+    this.canvas.freeDrawingBrush.width = 3
   }
   onDrawingEnd() {
+    this.canvas.defaultCursor = 'default'
     this.canvas.isDrawingMode = false
   }
   onPreventCanvasExit(e: fabric.IEvent<MouseEvent>) {
@@ -115,20 +117,37 @@ export class Motion {
     }
   }
   onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      this.onChangeMotionState(MotionState.DEFAULT)
+      this.canvas.discardActiveObject()
+    }
+    const activeObject = this.canvas.getActiveObject()
+    if (activeObject) {
+      if (activeObject.isType('i-text')) {
+        const textObject = activeObject as fabric.IText
+        if (textObject.isEditing) {
+          if (e.key === 'Escape') {
+            textObject.exitEditing()
+            this.canvas.discardActiveObject()
+          }
+          return
+        }
+      }
+    }
     if (e.key === ' ') {
       this.onChangeMotionState(MotionState.DRAGGING)
     }
-    if (e.key === 'Escape') {
-      this.onChangeMotionState(MotionState.DEFAULT)
-    }
+
     if (e.key === 'Delete' || e.key === 'Backspace') {
       this.onDelete()
     }
   }
   onKeyUp(e: KeyboardEvent) {
+    e.preventDefault()
     if (e.key === ' ') {
       this.onDraggingEnd()
     }
   }
+
 
 }

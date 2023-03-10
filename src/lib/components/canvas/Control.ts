@@ -29,6 +29,7 @@ export class Control {
 		sideBarKey.set(Symbol())
 	}
 	onObjectSelect() {
+
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
 			shape.set({

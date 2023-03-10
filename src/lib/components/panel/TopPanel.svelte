@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Icon from '../Icon.svelte'
+	import Icon from '../ui/Icon.svelte'
 	import { saveProgress } from '$lib/store'
 	import { MotionState } from '$lib/types'
 	import type { Control } from '../canvas/Control'
@@ -9,6 +9,10 @@
 	export let control: Control
 	export let motion: Motion
 	export let renderer: Renderer
+
+	const onFreeDrawingStart = () => {
+		motion?.onChangeMotionState(MotionState.DRAWING)
+	}
 </script>
 
 {#if motion && renderer && control}
@@ -30,7 +34,7 @@
 		<button id="원" on:click={() => renderer.onAddCircle()}>
 			<Icon name="circle" />
 		</button>
-		<button id="연필" on:click={() => motion.onChangeMotionState(MotionState.DRAWING)}>
+		<button id="연필" on:click={onFreeDrawingStart}>
 			<Icon name="pencil" />
 		</button>
 		<input
@@ -41,6 +45,9 @@
 			class="hidden"
 			on:change={(e) => renderer.onAddImage(e)}
 		/>
+		<button id="텍스트" on:click={() => renderer.onTextAdd()} class="select-none pt-1">
+			<span class="text-2xl font-bold">T</span>
+		</button>
 		<label for="imageUpload" class="grid cursor-pointer place-content-center">
 			<button class="사진 업로드 pointer-events-none ">
 				<Icon name="upload" />

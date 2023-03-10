@@ -20,6 +20,7 @@
 			snapAngle: 0,
 			fireRightClick: true,
 			preserveObjectStacking: true,
+			selection: true,
 		})
 	})
 </script>
