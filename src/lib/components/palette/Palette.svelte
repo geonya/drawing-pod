@@ -12,12 +12,12 @@
 
 	let bgColor: string
 
-	$: color = rgbaChecker(color)
+	$: _color = rgbaChecker(color)
 
 	$: {
-		if (color) {
+		if (_color) {
 			$paletteColor = {
-				color,
+				color: _color,
 				type,
 			}
 		}

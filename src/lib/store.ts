@@ -1,8 +1,6 @@
 import { writable } from 'svelte/store'
-import type { IShape } from "$lib/types"
+import type { Shape } from "$lib/types"
 import type { IPaletteColor, MotionState } from './types'
-
-
 
 const setSideBarOpen = () => {
 	const { subscribe, set } = writable<boolean>(false)
@@ -12,7 +10,7 @@ const setSideBarOpen = () => {
 	}
 }
 const setShape = () => {
-	const { subscribe, set, update } = writable<IShape | null>(null)
+	const { subscribe, set, update } = writable<Shape | null>(null)
 	return {
 		subscribe,
 		update,

@@ -1,5 +1,7 @@
-import { ObjectType, PaintType, type IPaletteColor } from '$lib/types'
+import { sideBarKey, sideBarOpen } from '$lib/store'
+import type { ObjectType, Shape } from '$lib/types'
 import { fabric } from 'fabric'
+import { writable, type Subscriber, type Writable } from 'svelte/store'
 
 export class Renderer {
 	fill: string | null = null
@@ -7,7 +9,61 @@ export class Renderer {
 	activeObject: fabric.Object | null = null
 	type: ObjectType | null = null
 	strokeWidth: number | null = null
-	constructor(private canvas: fabric.Canvas) { }
+	shape: Writable<Shape>
+	constructor(
+		private canvas: fabric.Canvas) {
+		this.shape = writable<Shape>(null)
+	}
+	onSideBarOpen() {
+		sideBarOpen.set(true)
+	}
+	onSidebarClose() {
+		sideBarOpen.set(false)
+	}
+	changeSideBar() {
+		sideBarKey.set(Symbol())
+	}
+	onObjectSelect() {
+		const activeObject = this.canvas.getActiveObject()
+		if (activeObject) {
+			this.shape.set({
+				fill: activeObject.fill as string,
+				stroke: activeObject.stroke as string,
+				type: activeObject.type as ObjectType,
+				strokeWidth: activeObject.strokeWidth as number,
+			})
+			this.onSideBarOpen()
+		}
+	}
+	onObjectSelectUpdate() {
+		this.onObjectSelect()
+		this.changeSideBar()
+
+	}
+	onObjectSelectClear() {
+		this.canvas.discardActiveObject().renderAll()
+		this.onSidebarClose()
+		this.setClearShape()
+	}
+
+	setClearShape() {
+		this.shape.set(null)
+	}
+
+	updateShape(args: Partial<Shape>) {
+		this.shape.update((shape) => {
+			if (shape) {
+				return {
+					...shape,
+					...args,
+				}
+			}
+		})
+	}
+
+	subscribe(run: Subscriber<Shape>) {
+		return this.shape.subscribe(run)
+	}
 
 	onAddRect() {
 		const rect = new fabric.Rect({
@@ -42,39 +98,16 @@ export class Renderer {
 		this.canvas.add(textBox)
 		this.canvas.centerObject(textBox)
 	}
-	onUpdateColor(paletteColor: IPaletteColor) {
-		const { color, type } = paletteColor
-		if (type === PaintType.FILL && this.fill) {
-			this.fill = color
-		}
-		if (type === PaintType.STROKE && this.stroke) {
-			this.stroke = color
-		}
-	}
-	onUpdateObjectColor(paletteColor: IPaletteColor) {
-		const { type, color } = paletteColor
+	onUpdateObject(shape: Shape) {
 		const activeObject = this.canvas.getActiveObject()
-		if (activeObject) {
-			if (type === PaintType.FILL) {
-				activeObject.set('fill', color)
-				this.fill = color
-			}
-			if (type === PaintType.STROKE) {
-				activeObject.set('stroke', color)
-				this.stroke = color
-			}
+		if (activeObject && shape) {
+			shape.fill && activeObject.set('fill', shape.fill as string)
+			shape.stroke && activeObject.set('stroke', shape.stroke as string)
+			shape.strokeWidth && activeObject.set('strokeWidth', shape.strokeWidth as number)
 			this.canvas.requestRenderAll()
 		}
 	}
-	onUpdateStrokeWidth(value: number | null) {
-		if (!value) return;
-		const activeObject = this.canvas.getActiveObject()
-		if (activeObject) {
-			activeObject.set('strokeWidth', value)
-			this.strokeWidth = value;
-			this.canvas.requestRenderAll()
-		}
-	}
+
 	onAddImage(e: Event) {
 		let file = (e.target as HTMLInputElement).files?.[0]
 		if (!file) return

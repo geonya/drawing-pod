@@ -1,8 +1,8 @@
 import type { HsvaColor, RgbaColor } from 'colord'
 // TODO - type : color
-export interface IPaletteColor {
+export type IPaletteColor = {
+	type: PaintType,
 	color: string
-	type: PaintType
 }
 
 export enum MotionState {
@@ -28,6 +28,7 @@ export interface ColorType {
 	rgba: RgbaColor
 	hex: string
 }
+export type Shape = IShape | null | undefined
 export interface IShape {
 	fill: string | null
 	stroke: string | null

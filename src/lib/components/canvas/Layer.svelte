@@ -29,7 +29,7 @@
 
 {#if renderer && control && motion}
 	<Controller bind:canvas />
-	<ShapeRender bind:canvas bind:control bind:renderer />
+	<ShapeRender bind:canvas bind:renderer />
 	<Topbar bind:control bind:motion bind:renderer />
 	{#if $sideBarOpen}
 		{#key $sideBarKey}

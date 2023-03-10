@@ -9,15 +9,25 @@
 
 	export let renderer: Renderer
 
-	let fill: string | null = $shape?.fill ?? null
-	let stroke: string | null = $shape?.stroke ?? null
-	let type: ObjectType | null = $shape?.type ?? null
-	let strokeWidth: number | null = $shape?.strokeWidth ?? null
+	let fill: string | null
+	let stroke: string | null
+	let type: ObjectType | null
+	let strokeWidth: number | null = $renderer?.strokeWidth ?? null
 
-	$: renderer?.onUpdateStrokeWidth(strokeWidth)
+	$: {
+		if ($renderer) {
+			fill = $renderer.fill
+			stroke = $renderer.stroke
+			type = $renderer.type
+		}
+	}
+
+	$: renderer.updateShape({ strokeWidth })
+
 	$: fillHex = fill ? stringRgbaToHex(fill) : ''
 	$: strokeHex = stroke ? stringRgbaToHex(stroke) : ''
 	$: whichPalette = fill ? PaintType.FILL : PaintType.STROKE
+
 	$: {
 		if (type) {
 			if (type === ObjectType.PATH) {
