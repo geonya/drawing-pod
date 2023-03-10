@@ -1,0 +1,15 @@
+<script lang="ts">
+	import { onMount } from 'svelte'
+	import type { Motion } from './Motion'
+
+	export let motion: Motion
+	export let canvas: fabric.Canvas
+
+	onMount(() => {
+		if (canvas) {
+			canvas.on('object:moving', (e) => motion?.onPreventCanvasExit(e))
+		}
+	})
+</script>
+
+<svelte:window on:keydown={(e) => motion?.onKeyDown(e)} on:keyup={(e) => motion?.onKeyUp(e)} />

@@ -4,15 +4,14 @@
 	import { MotionState } from '$lib/types'
 	import type { Control } from '../canvas/Control'
 
-	import type { Motion } from '../canvas/motion'
+	import type { Motion } from '../canvas/Motion'
 	import type { Renderer } from '../canvas/Renderer'
 	export let control: Control
 	export let motion: Motion
 	export let renderer: Renderer
 </script>
 
-<svelte:window on:keydown={(e) => motion?.onKeyDown(e)} on:keyup={(e) => motion?.onKeyUp(e)} />
-{#if motion}
+{#if motion && renderer && control}
 	<div
 		class="col-span-5 flex h-10 w-full items-center justify-evenly rounded-full border border-base-400 backdrop-blur-md"
 	>
@@ -40,7 +39,7 @@
 			type="file"
 			accept="image/*"
 			class="hidden"
-			on:change={(e) => control.onAddImage(e)}
+			on:change={(e) => renderer.onAddImage(e)}
 		/>
 		<label for="imageUpload" class="grid cursor-pointer place-content-center">
 			<button class="사진 업로드 pointer-events-none ">
@@ -50,7 +49,7 @@
 		<button class="쓰레기통" on:click={() => control.onDelete()}>
 			<Icon name="trash" />
 		</button>
-		<button id="다운로드" on:click={() => control.onDownload()}>
+		<button id="다운로드" on:click={() => control.onDownloadAsSVG()}>
 			<Icon name="download" />
 		</button>
 		<button id="저장" class="relative" on:click={() => control.onSave()}>

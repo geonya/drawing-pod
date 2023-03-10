@@ -10,8 +10,9 @@
 	import Topbar from '../ui/Topbar.svelte'
 	import Sidebar from '../ui/Sidebar.svelte'
 	import Controller from './Controller.svelte'
-	import { Motion } from './motion'
+	import { Motion } from './Motion'
 	import { sideBarKey, sideBarOpen } from '$lib/store'
+	import MotionRender from './MotionRender.svelte'
 	export let canvas: fabric.Canvas
 	let renderer: Renderer
 	let control: Control
@@ -27,12 +28,13 @@
 </script>
 
 {#if renderer && control && motion}
-	<Controller {canvas} />
-	<ShapeRender {canvas} {control} {renderer} />
-	<Topbar {control} {motion} {renderer} />
+	<Controller bind:canvas />
+	<ShapeRender bind:canvas bind:control bind:renderer />
+	<Topbar bind:control bind:motion bind:renderer />
 	{#if $sideBarOpen}
 		{#key $sideBarKey}
-			<Sidebar />
+			<Sidebar {renderer} />
 		{/key}
 	{/if}
+	<MotionRender bind:motion bind:canvas />
 {/if}
