@@ -28,13 +28,13 @@
 </script>
 
 {#if renderer && control && motion}
-	<Controller {canvas} bind:control />
-	<ShapeRender {canvas} bind:renderer />
-	<Topbar bind:control bind:motion bind:renderer />
+	<Controller {canvas} />
+	<ShapeRender {canvas} {renderer} />
+	<Topbar {control} {motion} {renderer} />
 	{#if $sideBarOpen}
 		{#key $sideBarKey}
-			<Sidebar {renderer} />
+			<Sidebar {renderer} {control} />
 		{/key}
 	{/if}
-	<MotionRender bind:motion bind:canvas />
+	<MotionRender {motion} {canvas} />
 {/if}

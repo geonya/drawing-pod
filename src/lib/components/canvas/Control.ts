@@ -1,22 +1,22 @@
-import { CANVAS_DATA, INITIAL_RGBA } from '$lib/constants'
+import { CANVAS_DATA } from '$lib/constants'
 import { fabric } from 'fabric'
 
 export class Control {
 	constructor(private readonly canvas: fabric.Canvas) { }
-	// onBringForward() {
-	// 	if (!this.activeObject) {
-	// 		this.activeObject = null
-	// 		return
-	// 	}
-	// 	this.canvas.bringForward(this.activeObject)
-	// }
-	// onSendBackward() {
-	// 	if (!this.activeObject) {
-	// 		this.activeObject = null
-	// 		return
-	// 	}
-	// 	this.canvas.sendBackwards(this.activeObject)
-	// }
+	onBringForward() {
+		console.log('front')
+		const activeObject = this.canvas.getActiveObject()
+		if (activeObject) {
+			this.canvas.bringForward(activeObject)
+		}
+	}
+	onSendBackward() {
+		console.log('back')
+		const activeObject = this.canvas.getActiveObject()
+		if (activeObject) {
+			this.canvas.sendBackwards(activeObject)
+		}
+	}
 
 
 	onSave() {

@@ -4,7 +4,6 @@
 	import { onMount } from 'svelte'
 	import type { Control } from './Control'
 	export let canvas: fabric.Canvas
-	export let control: Control
 
 	const onLoadStorageData = (canvas: fabric.Canvas) => {
 		const storageJsonData = localStorage.getItem(CANVAS_DATA)
