@@ -1,12 +1,6 @@
 <script lang="ts">
-	import type { Control } from '../canvas/Control'
-	import type { Motion } from '../canvas/Motion'
-	import type { Renderer } from '../canvas/Renderer'
 	import Icon from './Icon.svelte'
 	import TopPanel from '../panel/TopPanel.svelte'
-	export let control: Control
-	export let motion: Motion
-	export let renderer: Renderer
 </script>
 
 <div class="fixed top-5 left-0 right-0 z-40 mx-auto w-full ">
@@ -17,7 +11,7 @@
 			</button>
 		</div>
 		<!-- Top Control Panel -->
-		<TopPanel bind:control bind:motion bind:renderer />
+		<TopPanel />
 		<!-- 우측 버튼 모음 -->
 		<div class="col-span-3 hidden h-full w-full md:block">
 			<div class="flex h-full items-center justify-center space-x-3">

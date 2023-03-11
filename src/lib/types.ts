@@ -1,7 +1,6 @@
 import type { HsvaColor, RgbaColor } from 'colord'
-// TODO - type : color
-export type IPaletteColor = {
-	type: PaintType,
+export type ColorObj = {
+	type: PaintType
 	color: string
 }
 
@@ -30,8 +29,8 @@ export interface ColorType {
 }
 export type Shape = IShape | null | undefined
 export interface IShape {
-	fill: string | null
-	stroke: string | null
-	type: ObjectType | null
-	strokeWidth: number | null
+	fill?: string | null
+	stroke?: string | null
+	objectType?: ObjectType | null
+	strokeWidth?: number | null
 }

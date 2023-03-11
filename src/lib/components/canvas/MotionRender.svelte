@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { MotionState } from '$lib/types'
 	import { onMount } from 'svelte'
-	import type { Motion } from './Motion'
+	import { motion } from '$lib/store'
 
-	export let motion: Motion
 	export let canvas: fabric.Canvas
 
 	onMount(() => {
 		if (canvas) {
-			canvas.on('object:moving', (e) => motion?.onPreventCanvasExit(e))
-			canvas.on('selection:created', () => motion?.onChangeMotionState(MotionState.DEFAULT))
+			canvas.on('object:moving', (e) => $motion?.onPreventCanvasExit(e))
+			canvas.on('selection:created', () => $motion?.onChangeMotionState(MotionState.DEFAULT))
 			canvas.on('before:render', () => {
 				const zoom = canvas.getZoom()
 				const vp = canvas.viewportTransform
@@ -23,4 +22,4 @@
 	})
 </script>
 
-<svelte:window on:keydown={(e) => motion?.onKeyDown(e)} on:keyup={(e) => motion?.onKeyUp(e)} />
+<svelte:window on:keydown={(e) => $motion?.onKeyDown(e)} on:keyup={(e) => $motion?.onKeyUp(e)} />

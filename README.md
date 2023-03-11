@@ -2,7 +2,8 @@
 
 ## Simple Drawing Canvas
 
-### TODO 
+### TODO
+
 - [x] Color (Object Stroke & Fill)
   - [x] Palette
   - [x] Color Picker
@@ -15,14 +16,14 @@
 - [x] Path Select Controller
 - [x] Line Stroke
 - [x] Props Refactoring
-- [x] svg Download 
+- [x] svg Download
   - [ ] Empty image Bug
   - [ ] Image Size does not fit with canvas
 - [x] Image Boundary Bug Fix
 - [x] Adding Text : 230310
 - [x] Sidebar Palette Bug Fix : 230310
-- [ ] Zoom 
-- [ ] Send Object Forward & Backward
+- [x] Zoom
+- [x] Send Object Forward & Backward
 - [ ] sticky line
 - [ ] connect db
 - [ ] login / register

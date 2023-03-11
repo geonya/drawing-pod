@@ -1,18 +1,13 @@
 import { sideBarKey, sideBarOpen } from '$lib/store'
-import type { ObjectType, Shape } from '$lib/types'
+import type { ColorObj, ObjectType, Shape } from '$lib/types'
 import { fabric } from 'fabric'
-import { writable, type Subscriber, type Writable } from 'svelte/store'
+import { writable } from 'svelte/store'
+
+export const colorStore = writable<ColorObj | null>(null)
+export const shape = writable<Shape | null>(null)
 
 export class Renderer {
-	fill: string | null = null
-	stroke: string | null = null
-	activeObject: fabric.Object | null = null
-	type: ObjectType | null = null
-	strokeWidth: number | null = null
-	shape: Writable<Shape>
-	constructor(
-		private canvas: fabric.Canvas) {
-		this.shape = writable<Shape>(null)
+	constructor(private canvas: fabric.Canvas) {
 	}
 	onSideBarOpen() {
 		sideBarOpen.set(true)
@@ -24,13 +19,12 @@ export class Renderer {
 		sideBarKey.set(Symbol())
 	}
 	onObjectSelect() {
-		console.log('render', this.canvas)
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
-			this.shape.set({
+			shape.set({
 				fill: activeObject.fill as string,
 				stroke: activeObject.stroke as string,
-				type: activeObject.type as ObjectType,
+				objectType: activeObject.type as ObjectType,
 				strokeWidth: activeObject.strokeWidth as number,
 			})
 			this.onSideBarOpen()
@@ -39,7 +33,6 @@ export class Renderer {
 	onObjectSelectUpdate() {
 		this.onObjectSelect()
 		this.changeSideBar()
-
 	}
 	onObjectSelectClear() {
 		this.canvas.discardActiveObject().renderAll()
@@ -48,25 +41,11 @@ export class Renderer {
 	}
 
 	setClearShape() {
-		this.shape.set(null)
-	}
-
-	updateShape(args: Partial<Shape>) {
-		this.shape.update((shape) => {
-			if (shape) {
-				return {
-					...shape,
-					...args,
-				}
-			}
-		})
-	}
-
-	subscribe(run: Subscriber<Shape>) {
-		return this.shape.subscribe(run)
+		shape.set(null)
 	}
 
 	onAddRect() {
+		console.log('add rect')
 		const rect = new fabric.Rect({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
@@ -142,5 +121,4 @@ export class Renderer {
 		this.canvas.centerObject(text)
 		this.canvas.setActiveObject(text)
 	}
-
 }

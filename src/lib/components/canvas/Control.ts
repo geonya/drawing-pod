@@ -2,23 +2,19 @@ import { CANVAS_DATA } from '$lib/constants'
 import { fabric } from 'fabric'
 
 export class Control {
-	constructor(private readonly canvas: fabric.Canvas) { }
+	constructor(private readonly canvas: fabric.Canvas) {}
 	onBringForward() {
-		console.log('front')
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
 			this.canvas.bringForward(activeObject)
 		}
 	}
 	onSendBackward() {
-		console.log('back')
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
 			this.canvas.sendBackwards(activeObject)
 		}
 	}
-
-
 	onSave() {
 		const storageString = localStorage.getItem(CANVAS_DATA)
 		if (storageString) {
@@ -54,5 +50,4 @@ export class Control {
 		a.click()
 		URL.revokeObjectURL(url)
 	}
-
 }

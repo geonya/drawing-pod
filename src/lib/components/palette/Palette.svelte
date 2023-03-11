@@ -2,26 +2,25 @@
 	import Picker from './Picker.svelte'
 	import Slider from './Slider.svelte'
 	import AlphaSlider from './AlphaSlider.svelte'
-	import { onMount } from 'svelte'
-	import { rgbaChecker, hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils'
-	import { paletteColor } from '$lib/store'
-	import type { PaintType } from '$lib/types'
+	import { createEventDispatcher, onMount } from 'svelte'
+	import { hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils'
+	import { shape } from '../canvas/Renderer'
+	import { PaintType } from '$lib/types'
 
-	export let color: string
-	export let type: PaintType
+	const dispatcher = createEventDispatcher()
+
+	export let paintType: PaintType
+	export let color: string | null | undefined =
+		paintType === PaintType.FILL ? $shape?.fill : $shape?.stroke
 
 	let bgColor: string
 
-	$: _color = rgbaChecker(color)
-
 	$: {
-		if (_color) {
-			$paletteColor = {
-				color: _color,
-				type,
-			}
+		if (color) {
+			dispatcher('colorUpdate', { paintType, color })
 		}
 	}
+
 	onMount(() => {
 		if (color) {
 			const { h } = stringRgbaToHsva(color)
