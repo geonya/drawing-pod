@@ -28,8 +28,10 @@
   - [x] arrow line
   - [ ] stick to near object
 - [x] Group
-- [ ] selected item delete
+- [x] selected item delete
+- [ ] Brush
 - [ ] Align
+- [ ] Lock mode
 - [ ] connect db
 - [ ] login / register
 - [ ] SVG library

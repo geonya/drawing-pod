@@ -50,3 +50,7 @@ export const rgbaChecker = (color: string) => {
 	if (color.includes('NaN')) return INITIAL_RGBA
 	return color
 }
+
+export const getDistance = (point1: fabric.Point, point2: fabric.Point) => {
+	return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2))
+}

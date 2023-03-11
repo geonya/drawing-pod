@@ -11,12 +11,13 @@ export class CanvasFactory {
 				centeredRotation: true,
 				backgroundColor: 'rgba(255,255,255,0)',
 				preserveObjectStacking: true,
-				selectionLineWidth: 1,
 				selection: true,
 				hoverCursor: 'pointer',
 				moveCursor: 'move',
 				defaultCursor: 'default',
 				fireRightClick: true,
+				perPixelTargetFind: true,
+				targetFindTolerance: 4,
 			})
 			fabric.ActiveSelection.prototype.cornerStyle = 'circle'
 			fabric.Group.prototype.cornerStyle = 'circle'
@@ -27,7 +28,7 @@ export class CanvasFactory {
 		}
 		return this.instance
 	}
-	constructor(public readonly canvas: fabric.Canvas) { }
+	constructor(public readonly canvas: fabric.Canvas) {}
 }
 
 export class StaticCanvasFactory {
@@ -46,44 +47,47 @@ export class StaticCanvasFactory {
 		}
 		return this.instance
 	}
-	constructor(public readonly canvas: fabric.StaticCanvas) { }
+	constructor(public readonly canvas: fabric.StaticCanvas) {}
 }
-
 
 export const makeArrowLine = () => {
 	if (typeof document !== 'undefined') {
 		return fabric.util.createClass(fabric.Line, {
-
 			type: 'line_width_arrow',
 			initialize(element: HTMLElement, options: Partial<fabric.ILineOptions>) {
-				options || (options = {});
-				this.callSuper('initialize', element, options);
+				options || (options = {})
+				this.callSuper('initialize', element, options)
 
 				// Set default options
 				this.set({
-					hasBorders: false,
-					hasControls: false,
-				});
+					stroke: 'rgba(0,0,0,1)',
+					strokeWidth: 3,
+					strokeLineCap: 'round',
+					originX: 'center',
+					originY: 'center',
+					selectable: true,
+					targetFindTolerance: true,
+				})
 			},
 
 			_render(ctx: CanvasRenderingContext2D) {
-				this.callSuper('_render', ctx);
-				ctx.save();
-				const xDiff = this.x2 - this.x1;
-				const yDiff = this.y2 - this.y1;
-				const angle = Math.atan2(yDiff, xDiff);
-				ctx.translate((this.x2 - this.x1) / 2, (this.y2 - this.y1) / 2);
-				ctx.rotate(angle);
-				ctx.beginPath();
+				this.callSuper('_render', ctx)
+				ctx.save()
+				const xDiff = this.x2 - this.x1
+				const yDiff = this.y2 - this.y1
+				const angle = Math.atan2(yDiff, xDiff)
+				ctx.translate((this.x2 - this.x1) / 2, (this.y2 - this.y1) / 2)
+				ctx.rotate(angle)
+				ctx.beginPath()
 				// Move 5px in front of line to start the arrow so it does not have the square line end showing in front (0,0)
-				ctx.moveTo(5, 0);
-				ctx.lineTo(-5, 5);
-				ctx.lineTo(-5, -5);
-				ctx.closePath();
-				ctx.fillStyle = this.stroke;
-				ctx.fill();
-				ctx.restore();
-			}
+				ctx.moveTo(5, 0)
+				ctx.lineTo(-5, 5)
+				ctx.lineTo(-5, -5)
+				ctx.closePath()
+				ctx.fillStyle = this.stroke
+				ctx.fill()
+				ctx.restore()
+			},
 		})
 	}
 }

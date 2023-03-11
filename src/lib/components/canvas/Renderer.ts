@@ -1,5 +1,6 @@
 import { motion, sideBarKey, sideBarOpen } from '$lib/store'
 import { MotionState, type ColorObj, type ObjectType, type Shape } from '$lib/types'
+import { getDistance } from '$lib/utils'
 import { fabric } from 'fabric'
 import { writable } from 'svelte/store'
 import { makeArrowLine } from './canvasFactory'
@@ -126,17 +127,7 @@ export class Renderer {
 		this.canvas.on('mouse:down', (e) => {
 			isDrawing = true
 			const pointer = this.canvas.getPointer(e.e)
-			const ArrowLine = makeArrowLine()
-			stickyLine = new ArrowLine([pointer.x, pointer.y, pointer.x, pointer.y], {
-				stroke: 'rgba(0,0,0,1)',
-				strokeWidth: 3,
-				strokeLineCap: 'round',
-				originX: 'center',
-				originY: 'center',
-				selectable: true,
-				evented: false,
-				padding: 10,
-			})
+			stickyLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {})
 			if (stickyLine) {
 				this.canvas.add(stickyLine)
 			}
@@ -144,15 +135,65 @@ export class Renderer {
 		this.canvas.on('mouse:move', (e) => {
 			if (!isDrawing) return
 			const pointer = this.canvas.getPointer(e.e)
-			stickyLine && stickyLine.set({ x2: pointer.x, y2: pointer.y })
-			stickyLine?.set({})
+			const point = new fabric.Point(pointer.x, pointer.y)
+			stickyLine &&
+				stickyLine.set({
+					x2: pointer.x,
+					y2: pointer.y,
+					stroke: 'rgba(0,0,0,1)',
+					strokeWidth: 3,
+					strokeLineCap: 'round',
+					originX: 'center',
+					originY: 'center',
+					selectable: true,
+				})
+
+			let closestObject: fabric.Object | null = null
+			let closestDistance = Infinity
+
+			this.canvas.forEachObject((object) => {
+				if (object.containsPoint(point)) {
+					const distance = getDistance(point, object.getCenterPoint())
+					if (distance < closestDistance) {
+						closestObject = object
+						closestDistance = distance
+					}
+				}
+			})
+			if (closestObject) {
+				const object = closestObject as fabric.Object
+				if (closestDistance <= Math.sqrt(object!.width! ** 2 + object!.height! ** 2) + 30) {
+					const bound = object.getBoundingRect()
+					const tl = new fabric.Point(bound.left, bound.top)
+					const tr = new fabric.Point(bound.left + bound.width, bound.top)
+					const bl = new fabric.Point(bound.left, bound.top + bound.height)
+					const br = new fabric.Point(bound.left + bound.width, bound.top + bound.height)
+					const center = new fabric.Point(
+						bound.left + bound.width / 2,
+						bound.top + bound.height / 2,
+					)
+					const tc = new fabric.Point(bound.left + bound.width / 2, bound.top)
+					const bc = new fabric.Point(bound.left + bound.width / 2, bound.top + bound.height)
+					const lc = new fabric.Point(bound.left, bound.top + bound.height / 2)
+					const rc = new fabric.Point(bound.left + bound.width, bound.top + bound.height / 2)
+
+					const closestPoint = [tc, bc, lc, rc, center].reduce((prev, curr) =>
+						getDistance(prev, point) > getDistance(curr, point) ? curr : prev,
+					)
+					const diffX = point.x - closestPoint.x
+					const diffY = point.y - closestPoint.y
+					if (Math.abs(diffX) > Math.abs(diffY)) {
+						stickyLine?.set({ x2: closestPoint.x, y2: point.y })
+					} else {
+						stickyLine?.set({ x2: point.x, y2: closestPoint.y })
+					}
+				}
+			}
 			this.canvas.renderAll()
 		})
 		this.canvas.on('mouse:up', (e) => {
-			const pointer = this.canvas.getPointer(e.e)
-			stickyLine && stickyLine.set({ x2: pointer.x, y2: pointer.y })
-			stickyLine?.set({})
-			this.canvas.renderAll()
+			stickyLine?.setCoords()
+			isDrawing = false
 		})
 		return () => {
 			this.canvas.off('mouse:down')

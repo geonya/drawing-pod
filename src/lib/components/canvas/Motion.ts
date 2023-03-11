@@ -105,10 +105,10 @@ export class Motion {
 			e.target.left >= this.canvas.width - objWidth ? this.canvas.width - objWidth : e.target.left
 	}
 	onDelete() {
-		const activeObject = this.canvas.getActiveObject()
-		if (activeObject) {
-			this.canvas.remove(activeObject)
-		}
+		const activeObjects = this.canvas.getActiveObjects()
+		this.canvas.remove(...activeObjects)
+		this.canvas.discardActiveObject()
+		this.canvas.renderAll()
 	}
 	onKeyDown(e: KeyboardEvent) {
 		if (e.repeat) return
