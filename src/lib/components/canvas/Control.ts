@@ -1,8 +1,7 @@
 import { CANVAS_DATA } from '$lib/constants'
-import { fabric } from 'fabric'
 
 export class Control {
-	constructor(private readonly canvas: fabric.Canvas) {}
+	constructor(private readonly canvas: fabric.Canvas) { }
 	onBringForward() {
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
@@ -35,19 +34,12 @@ export class Control {
 		}, time)
 	}
 	onDownloadAsSVG() {
-		const group = new fabric.Group(this.canvas.getObjects())
-		const newCanvas = new fabric.Canvas('newCanvas', {
-			width: group.width,
-			height: group.height,
-		})
-		newCanvas.add(group)
-		const svgData = newCanvas.toSVG()
-		const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
-		const url = URL.createObjectURL(blob)
-		const a = document.createElement('a')
-		a.download = 'canvas.svg'
-		a.href = url
-		a.click()
-		URL.revokeObjectURL(url)
+		this.canvas.backgroundColor = 'rgba(255,255,255,1)'
+		const svg = this.canvas.toSVG();
+		this.canvas.backgroundColor = 'rgba(255,255,255,0)'
+		const downloadLink = document.createElement('a');
+		downloadLink.setAttribute('download', 'canvas.svg');
+		downloadLink.setAttribute('href', 'data:image/svg+xml;utf8,' + encodeURIComponent(svg));
+		downloadLink.click();
 	}
 }

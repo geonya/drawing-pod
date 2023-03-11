@@ -9,7 +9,7 @@ export class CanvasFactory {
 				height: window.innerHeight,
 				centeredScaling: true,
 				centeredRotation: true,
-				backgroundColor: 'transparent',
+				backgroundColor: 'rgba(255,255,255,0)',
 				preserveObjectStacking: true,
 				selectionLineWidth: 1,
 				selection: true,
@@ -35,7 +35,7 @@ export class StaticCanvasFactory {
 			const staticCanvas = new fabric.StaticCanvas(canvas, {
 				width: window.innerWidth,
 				height: window.innerHeight,
-				backgroundColor: 'transparent',
+				backgroundColor: 'rgba(255,255,255,0)',
 			})
 			if (!staticCanvas) {
 				return null
