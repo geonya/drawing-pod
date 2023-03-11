@@ -44,10 +44,10 @@ export class Control {
 		}
 	}
 	onDelete() {
-		const activeObject = this.canvas.getActiveObject()
-		if (activeObject) {
-			this.canvas.remove(activeObject)
-		}
+		const activeObjects = this.canvas.getActiveObjects()
+		this.canvas.remove(...activeObjects)
+		this.canvas.discardActiveObject()
+		this.canvas.renderAll()
 	}
 	onAutoSave(time: number) {
 		return setInterval(() => {

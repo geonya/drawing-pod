@@ -24,8 +24,11 @@
 - [x] Sidebar Palette Bug Fix : 230310
 - [x] Zoom
 - [x] Send Object Forward & Backward
-- [ ] sticky line
-- [ ] Group
+- [x] sticky line
+  - [x] arrow line
+  - [ ] stick to near object
+- [x] Group
+- [ ] selected item delete
 - [ ] Align
 - [ ] connect db
 - [ ] login / register
