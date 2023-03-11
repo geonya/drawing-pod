@@ -3,7 +3,7 @@
 	import type { HsvaColor } from 'colord'
 	import { onMount } from 'svelte'
 	import { DOT_RADIUS } from './constants'
-	export let color: string
+	export let hsva: HsvaColor
 	export let bgColor: string
 
 	interface RatioPositionXY {
@@ -39,9 +39,8 @@
 
 	const updateHsva = (position: RatioPositionXY) => {
 		const sv = positionToSv(position)
-		const hsva = stringRgbaToHsva(color)
 		const newHsva = { ...hsva, ...sv }
-		color = hsvaToStringRgba(newHsva)
+		hsva = newHsva
 	}
 	const handleMouseDown = () => {
 		isMouseDown = true
@@ -102,8 +101,6 @@
 				yRatio: (dotRadius / pickerBgRect.height) * 100,
 			}
 			if (dotRadiusRatio) {
-				const rgba = convertStringToRgba(color)
-				const hsva = rgbaToHsva(rgba)
 				pickerPosition = hsvaToPickerPosition(hsva)
 			}
 		}

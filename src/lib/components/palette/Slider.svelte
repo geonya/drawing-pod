@@ -2,8 +2,9 @@
 	import { onMount } from 'svelte'
 	import { DOT_RADIUS } from './constants'
 	import { hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils'
+	import type { HsvaColor } from 'colord'
 
-	export let color: string
+	export let hsva: HsvaColor
 	export let bgColor: string
 
 	let slider: HTMLElement
@@ -14,9 +15,8 @@
 	let sliderPositionRatio: number
 
 	const updateColor = (h: number) => {
-		const hsva = stringRgbaToHsva(color)
 		const newHsva = { ...hsva, h }
-		color = hsvaToStringRgba(newHsva)
+		hsva = newHsva
 		const bgHsva = { h, s: 100, v: 100, a: 1 }
 		bgColor = hsvaToStringRgba(bgHsva)
 	}
@@ -37,7 +37,6 @@
 		if (sliderPositionRatio >= 100 - dotRadiusRatio) sliderPositionRatio = 100 - dotRadiusRatio
 		const h = setHValue(sliderPositionRatio)
 		updateColor(h)
-		// updateBgColor(h);
 	}
 	const hsvaToSliderPosition = (h: number) => {
 		let vRatio = (h / 360) * 100
@@ -58,11 +57,9 @@
 
 	onMount(() => {
 		sliderRect = slider.getBoundingClientRect()
-
 		if (!sliderRect.height) return
 		dotRadiusRatio = (dotRadius / sliderRect.height) * 100
 		if (dotRadiusRatio) {
-			const hsva = stringRgbaToHsva(color)
 			sliderPositionRatio = hsvaToSliderPosition(hsva.h)
 		}
 	})

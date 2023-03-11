@@ -1,8 +1,10 @@
 import { colord, type HsvaColor, type RgbaColor } from 'colord'
 import { INITIAL_RGBA } from './constants'
 
-export const stringifyRgba = (rgba: RgbaColor): string => `rgba(${Object.values(rgba).join()})`
-
+export const stringifyRgba = (rgba: RgbaColor): string => {
+	const srgba = `rgba(${Object.values(rgba).join()})`
+	return srgba
+}
 export const stringifyRgbaWithAlpha1 = (sRgba: string): string => {
 	const rgba = convertStringToRgba(sRgba)
 	const { r, g, b } = rgba

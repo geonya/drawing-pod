@@ -47,7 +47,6 @@ export class Renderer {
 	}
 
 	onAddRect() {
-		console.log('add rect')
 		const rect = new fabric.Rect({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',

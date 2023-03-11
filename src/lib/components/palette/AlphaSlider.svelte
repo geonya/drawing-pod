@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { DOT_RADIUS } from './constants'
-	import { hsvaToStringRgba, stringifyRgbaWithAlpha1, stringRgbaToHsva } from '$lib/utils'
+	import { colord, type HsvaColor } from 'colord'
 
-	export let color: string
-	$: rgbColor = stringifyRgbaWithAlpha1(color)
+	export let hsva: HsvaColor
+	$: rgbColor = colord(hsva).toRgbString()
 
 	let slider: HTMLElement
 	let isMouseDown = false
@@ -14,9 +14,8 @@
 	let sliderPositionRatio: number
 
 	const updateColor = (a: number) => {
-		const hsva = stringRgbaToHsva(color)
 		const newHsva = { ...hsva, a }
-		color = hsvaToStringRgba(newHsva)
+		hsva = newHsva
 	}
 
 	const handleMouseDown = () => {
@@ -57,7 +56,6 @@
 		if (sliderRect.height) {
 			dotRadiusRatio = (dotRadius / sliderRect.height) * 100
 			if (dotRadiusRatio) {
-				const hsva = stringRgbaToHsva(color)
 				sliderPositionRatio = hsvaToSliderPosition(hsva.a)
 			}
 		}
