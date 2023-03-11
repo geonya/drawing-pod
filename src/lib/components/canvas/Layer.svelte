@@ -28,8 +28,8 @@
 </script>
 
 {#if renderer && control && motion}
-	<Controller bind:canvas />
-	<ShapeRender bind:canvas bind:renderer />
+	<Controller {canvas} bind:control />
+	<ShapeRender {canvas} bind:renderer />
 	<Topbar bind:control bind:motion bind:renderer />
 	{#if $sideBarOpen}
 		{#key $sideBarKey}

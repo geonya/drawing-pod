@@ -24,6 +24,7 @@ export class Renderer {
 		sideBarKey.set(Symbol())
 	}
 	onObjectSelect() {
+		console.log('render', this.canvas)
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
 			this.shape.set({
@@ -70,11 +71,11 @@ export class Renderer {
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
 			strokeWidth: 1,
-			width: 200,
-			height: 200,
+			width: 100,
+			height: 100,
 			rx: 10,
-			ry: 10
-
+			ry: 10,
+			cornerStyle: 'circle',
 		})
 		this.canvas.add(rect)
 		this.canvas.centerObject(rect)
@@ -86,6 +87,7 @@ export class Renderer {
 			stroke: 'rgba(0,0,0,1)',
 			strokeWidth: 1,
 			radius: 100,
+			cornerStyle: 'circle',
 		})
 		this.canvas.add(circle)
 		this.canvas.centerObject(circle)
@@ -109,15 +111,15 @@ export class Renderer {
 	}
 
 	onAddImage(e: Event) {
-		let file = (e.target as HTMLInputElement).files?.[0]
+		const file = (e.target as HTMLInputElement).files?.[0]
 		if (!file) return
 		const reader = new FileReader()
 		reader.onload = (e) => {
 			if (!e?.target?.result || typeof e.target.result !== 'string') return
-			let image = new Image()
+			const image = new Image()
 			image.src = e.target.result
 			image.onload = () => {
-				let img = new fabric.Image(image)
+				const img = new fabric.Image(image)
 				img.scaleToWidth(300)
 				this.canvas.add(img)
 				this.canvas.setActiveObject(img)

@@ -9,7 +9,7 @@
 	export let renderer: Renderer
 </script>
 
-<div class="fixed top-5 left-0 right-0 z-10 mx-auto w-full ">
+<div class="fixed top-5 left-0 right-0 z-40 mx-auto w-full ">
 	<div class="grid w-full grid-cols-10">
 		<div class="col-span-2 ml-5 place-self-center">
 			<button class="self-start">

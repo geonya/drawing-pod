@@ -1,6 +1,5 @@
 import { motionState } from "$lib/store"
 import { MotionState } from "$lib/types"
-import type { IEvent } from "fabric/fabric-impl"
 
 export class Motion {
   motionState: MotionState
@@ -31,7 +30,7 @@ export class Motion {
     if (this.motionState !== MotionState.DRAGGING) return;
     let lastClientX = 0
     let lastClientY = 0
-    let state: string = 'ready'
+    let state = 'ready'
     this.canvas.discardActiveObject()
     this.canvas.defaultCursor = 'grab'
     this.canvas.forEachObject((o: fabric.Object) => {
@@ -39,7 +38,7 @@ export class Motion {
       o.selectable = false
     })
     this.canvas.selection = false
-    this.canvas.on('mouse:up', (e: fabric.IEvent<MouseEvent>) => {
+    this.canvas.on('mouse:up', () => {
       state = 'ready'
     })
     this.canvas.on('mouse:down', (e: fabric.IEvent<MouseEvent>) => {
@@ -49,10 +48,13 @@ export class Motion {
     })
     this.canvas.on('mouse:move', (e: fabric.IEvent<MouseEvent>) => {
       if (state === 'moving' && e && e.e) {
+        const clientX = e.e.clientX
+        const clientY = e.e.clientY
         const delta = {
-          x: e.e.clientX - lastClientX,
-          y: e.e.clientY - lastClientY,
+          x: clientX - lastClientX,
+          y: clientY - lastClientY,
         }
+
         this.canvas.relativePan(delta)
         lastClientX = e.e.clientX
         lastClientY = e.e.clientY
@@ -84,31 +86,13 @@ export class Motion {
   onPreventCanvasExit(e: fabric.IEvent<MouseEvent>) {
     if (!e.target) return
     if (!this.canvas) return
-
-    const objWidth = e.target.width! * e.target.scaleX!
-    const objHeight = e.target.height! * e.target.scaleY!
-    if (e.target.top && e.target.top < 0) {
-      e.target.top = 0
-    }
-    if (e.target.left && e.target.left < 0) {
-      e.target.left = 0
-    }
-    if (
-      e.target.left &&
-      objWidth &&
-      this.canvas.width &&
-      e.target.left + objWidth > this.canvas.width
-    ) {
-      e.target.left = this.canvas.width - objWidth
-    }
-    if (
-      e.target.top &&
-      objHeight &&
-      this.canvas.height &&
-      e.target.top + objHeight > this.canvas.height
-    ) {
-      e.target.top = this.canvas.height - objHeight
-    }
+    const objWidth = e.target.width && e.target.scaleX && e.target.width * e.target.scaleX
+    const objHeight = e.target.height && e.target.scaleY && e.target.height * e.target.scaleY
+    if (!e.target.top || !e.target.height || !e.target.left || !e.target.width || !this.canvas.width || !this.canvas.height || !objHeight || !objWidth) return
+    e.target.top = e.target.top <= 0 ? 0 : e.target.top
+    e.target.top = e.target.top >= this.canvas.height - objHeight ? this.canvas.height - objHeight : e.target.top
+    e.target.left = e.target.left <= 0 ? 0 : e.target.left
+    e.target.left = e.target.left >= this.canvas.width - objWidth ? this.canvas.width - objWidth : e.target.left
   }
   onDelete() {
     const activeObject = this.canvas.getActiveObject()

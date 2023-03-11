@@ -1,6 +1,4 @@
 import { CANVAS_DATA, INITIAL_RGBA } from '$lib/constants'
-import { sideBarOpen, sideBarKey, paletteColor } from '$lib/store'
-import { ObjectType } from '$lib/types'
 import { fabric } from 'fabric'
 
 export class Control {
@@ -48,12 +46,13 @@ export class Control {
 		})
 		newCanvas.add(group)
 		const svgData = newCanvas.toSVG()
-		let blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
-		let url = URL.createObjectURL(blob)
-		let a = document.createElement('a')
+		const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
+		const url = URL.createObjectURL(blob)
+		const a = document.createElement('a')
 		a.download = 'canvas.svg'
 		a.href = url
 		a.click()
 		URL.revokeObjectURL(url)
 	}
+
 }

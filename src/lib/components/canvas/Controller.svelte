@@ -2,7 +2,9 @@
 	import { AUTO_SAVE_DELAY, CANVAS_DATA } from '$lib/constants'
 	import { saveProgress } from '$lib/store'
 	import { onMount } from 'svelte'
+	import type { Control } from './Control'
 	export let canvas: fabric.Canvas
+	export let control: Control
 
 	const onLoadStorageData = (canvas: fabric.Canvas) => {
 		const storageJsonData = localStorage.getItem(CANVAS_DATA)
@@ -53,8 +55,8 @@
 	}
 	onMount(() => {
 		if (!canvas) return
-		onLoadStorageData(canvas)
-		onIntervalAutoSaveWithTimer()
-		onAutoSaveInLocalStorage(canvas)
+		// onLoadStorageData(canvas)
+		// onIntervalAutoSaveWithTimer()
+		// onAutoSaveInLocalStorage(canvas)
 	})
 </script>

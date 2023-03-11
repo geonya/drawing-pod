@@ -41,7 +41,7 @@
 
 <nav
 	transition:fly={{ x: -200, duration: 500 }}
-	class="fixed top-24 left-8 z-10 h-96 w-64 rounded-md border border-base-400 shadow-md backdrop-blur-lg md:block"
+	class="fixed top-24 left-8 z-40 h-full w-64 rounded-md border shadow-md backdrop-blur-md md:block"
 >
 	<div class="scroll-none scroll scrollbar-hide relative h-full w-full">
 		<div class="컨트롤 박스">
