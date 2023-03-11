@@ -17,14 +17,16 @@
 - [x] Line Stroke
 - [x] Props Refactoring
 - [x] svg Download
-  - [ ] Empty image Bug
-  - [ ] Image Size does not fit with canvas
+  - [x] Empty image Bug
+  - [x] Image Size does not fit with canvas
 - [x] Image Boundary Bug Fix
 - [x] Adding Text : 230310
 - [x] Sidebar Palette Bug Fix : 230310
 - [x] Zoom
 - [x] Send Object Forward & Backward
 - [ ] sticky line
+- [ ] Group
+- [ ] Align
 - [ ] connect db
 - [ ] login / register
 - [ ] SVG library

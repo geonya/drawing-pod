@@ -29,6 +29,9 @@
 	<button id="연필" on:click={onFreeDrawingStart}>
 		<Icon name="pencil" />
 	</button>
+	<button id="라인" on:click={() => $renderer?.onAddStickyLine()}>
+		<Icon name="stickyLine" />
+	</button>
 	<input
 		name="image-upload"
 		id="imageUpload"

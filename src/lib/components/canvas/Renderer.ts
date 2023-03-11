@@ -1,5 +1,5 @@
-import { sideBarKey, sideBarOpen } from '$lib/store'
-import type { ColorObj, ObjectType, Shape } from '$lib/types'
+import { motion, sideBarKey, sideBarOpen } from '$lib/store'
+import { MotionState, type ColorObj, type ObjectType, type Shape } from '$lib/types'
 import { fabric } from 'fabric'
 import { writable } from 'svelte/store'
 
@@ -113,5 +113,56 @@ export class Renderer {
 		this.canvas.add(text)
 		this.canvas.centerObject(text)
 		this.canvas.setActiveObject(text)
+	}
+
+	onAddStickyLine() {
+		motion.subscribe(m => {
+			m?.onChangeMotionState(MotionState.DEFAULT)
+		})
+		let isDrawing = false
+		let stickyLine: fabric.Line | null = null
+
+		this.canvas.on('mouse:down', (e) => {
+			isDrawing = true
+			const pointer = this.canvas.getPointer(e.e)
+			stickyLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+				stroke: 'rgba(0,0,0,1)',
+				strokeWidth: 3,
+				scaleX: 1,
+				scaleY: 1,
+				strokeLineCap: 'round'
+			})
+			this.canvas.add(stickyLine)
+		})
+		this.canvas.on('mouse:move', (e) => {
+			if (!isDrawing) return
+			const pointer = this.canvas.getPointer(e.e)
+			stickyLine && stickyLine.set({ x2: pointer.x, y2: pointer.y })
+			stickyLine?.set({
+				selectable: false,
+				evented: false,
+			})
+			this.canvas.renderAll()
+		})
+		this.canvas.on('mouse:up', (e) => {
+			isDrawing = false
+			const pointer = this.canvas.getPointer(e.e)
+
+			stickyLine && stickyLine.set({ x2: pointer.x, y2: pointer.y })
+			stickyLine?.set({
+				selectable: true,
+				evented: true,
+				strokeWidth: 1,
+				scaleX: 1,
+				scaleY: 1,
+				strokeLineCap: 'arrow'
+			})
+			this.canvas.renderAll()
+		})
+		return () => {
+			this.canvas.off('mouse:down')
+			this.canvas.off('mouse:move')
+			this.canvas.off('mouse:up')
+		}
 	}
 }

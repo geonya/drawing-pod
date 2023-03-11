@@ -16,6 +16,7 @@
 		| 'menu'
 		| 'download'
 		| 'text'
+		| 'stickyLine'
 
 	interface IIcon {
 		name: string
@@ -165,6 +166,12 @@
 		{
 			name: 'backward',
 			svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25"></path>`,
+		},
+		{
+			name: 'stickyLine',
+			svg: `
+  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"></path>
+			`,
 		},
 	]
 	let icon = icons.find((e: IIcon) => e.name === name)

@@ -9,6 +9,7 @@
 		if (canvas) {
 			canvas.on('object:moving', (e) => $motion?.onPreventCanvasExit(e))
 			canvas.on('selection:created', () => $motion?.onChangeMotionState(MotionState.DEFAULT))
+			canvas.on('selection:updated', () => $motion?.onChangeMotionState(MotionState.DEFAULT))
 			canvas.on('before:render', () => {
 				const zoom = canvas.getZoom()
 				const vp = canvas.viewportTransform
