@@ -2,13 +2,14 @@ import { motion, sideBarKey, sideBarOpen } from '$lib/store'
 import { MotionState, type ColorObj, type ObjectType, type Shape } from '$lib/types'
 import { fabric } from 'fabric'
 import { writable } from 'svelte/store'
+import { makeArrowLine } from './canvasFactory'
 
 export const colorStore = writable<ColorObj | null>(null)
 export const shape = writable<Shape | null>(null)
 
 export class Renderer {
-	constructor(private canvas: fabric.Canvas) {
-	}
+	constructor(private canvas: fabric.Canvas) {}
+
 	onSideBarOpen() {
 		sideBarOpen.set(true)
 	}
@@ -49,9 +50,9 @@ export class Renderer {
 		const rect = new fabric.Rect({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
-			strokeWidth: 1,
-			width: 100,
-			height: 100,
+			strokeWidth: 3,
+			width: 200,
+			height: 200,
 			rx: 10,
 			ry: 10,
 			cornerStyle: 'circle',
@@ -64,7 +65,7 @@ export class Renderer {
 		const circle = new fabric.Circle({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
-			strokeWidth: 1,
+			strokeWidth: 3,
 			radius: 100,
 			cornerStyle: 'circle',
 		})
@@ -116,7 +117,7 @@ export class Renderer {
 	}
 
 	onAddStickyLine() {
-		motion.subscribe(m => {
+		motion.subscribe((m) => {
 			m?.onChangeMotionState(MotionState.DEFAULT)
 		})
 		let isDrawing = false
@@ -125,38 +126,32 @@ export class Renderer {
 		this.canvas.on('mouse:down', (e) => {
 			isDrawing = true
 			const pointer = this.canvas.getPointer(e.e)
-			stickyLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+			const ArrowLine = makeArrowLine()
+			stickyLine = new ArrowLine([pointer.x, pointer.y, pointer.x, pointer.y], {
 				stroke: 'rgba(0,0,0,1)',
 				strokeWidth: 3,
-				scaleX: 1,
-				scaleY: 1,
-				strokeLineCap: 'round'
+				strokeLineCap: 'round',
+				originX: 'center',
+				originY: 'center',
+				selectable: true,
+				evented: false,
+				padding: 10,
 			})
-			this.canvas.add(stickyLine)
+			if (stickyLine) {
+				this.canvas.add(stickyLine)
+			}
 		})
 		this.canvas.on('mouse:move', (e) => {
 			if (!isDrawing) return
 			const pointer = this.canvas.getPointer(e.e)
 			stickyLine && stickyLine.set({ x2: pointer.x, y2: pointer.y })
-			stickyLine?.set({
-				selectable: false,
-				evented: false,
-			})
+			stickyLine?.set({})
 			this.canvas.renderAll()
 		})
 		this.canvas.on('mouse:up', (e) => {
-			isDrawing = false
 			const pointer = this.canvas.getPointer(e.e)
-
 			stickyLine && stickyLine.set({ x2: pointer.x, y2: pointer.y })
-			stickyLine?.set({
-				selectable: true,
-				evented: true,
-				strokeWidth: 1,
-				scaleX: 1,
-				scaleY: 1,
-				strokeLineCap: 'arrow'
-			})
+			stickyLine?.set({})
 			this.canvas.renderAll()
 		})
 		return () => {

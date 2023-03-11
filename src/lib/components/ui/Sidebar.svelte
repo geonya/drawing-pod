@@ -127,6 +127,12 @@
 			<button id="밑으로" on:click={() => $control?.onSendBackward()}>
 				<span>밑으로</span> <Icon name="backward" /></button
 			>
+			<button id="그룹" on:click={() => $control?.onBindGroup()}>
+				<span>그룹 묶기</span> <Icon name="bind" /></button
+			>
+			<button id="그룹" on:click={() => $control?.onUnBindGroup()}>
+				<span>그룹 풀기</span> <Icon name="unbind" /></button
+			>
 		</div>
 	</div>
 </nav>
