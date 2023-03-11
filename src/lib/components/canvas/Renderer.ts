@@ -72,13 +72,6 @@ export class Renderer {
 		this.canvas.centerObject(circle)
 		this.canvas.setActiveObject(circle)
 	}
-	onAddText() {
-		const textBox = new fabric.Textbox('Hello', {
-			editable: true,
-		})
-		this.canvas.add(textBox)
-		this.canvas.centerObject(textBox)
-	}
 	onUpdateObject(shape: Shape) {
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject && shape) {
@@ -110,7 +103,7 @@ export class Renderer {
 	}
 
 	onTextAdd() {
-		const text = new fabric.IText('안녕?', {
+		const text = new fabric.IText('Hello World', {
 			fill: 'rgba(0,0,0,1)',
 			stroke: 'rgba(0,0,0,1)',
 			fontSize: 60,
