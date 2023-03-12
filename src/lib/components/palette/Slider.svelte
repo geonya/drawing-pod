@@ -71,16 +71,16 @@
 	<div
 		bind:this={slider}
 		on:mousedown={handleMouseDown}
-		class="slider relative h-full w-3 rounded-md"
+		class="slider relative h-full w-2.5 rounded-md"
 		style=""
 	>
 		{#if sliderPositionRatio && dotRadiusRatio}
 			<div
 				on:mousedown={handleMouseDown}
-				class="sliderDot z-1 absolute left-0 right-0 m-auto cursor-grab
-							rounded-full bg-base-500"
-				style="width:{dotRadius * 2}px; height:{dotRadius *
-					2}px; translate(0, 0); top:{sliderPositionRatio - dotRadiusRatio}%;"
+				class="sliderDot z-1 absolute left-0 right-0 mx-auto cursor-grab
+							rounded-full bg-base-500 "
+				style="width:{dotRadius * 2}px; height:{dotRadius * 2}px; top:{sliderPositionRatio -
+					dotRadiusRatio}%;"
 			/>
 		{/if}
 	</div>

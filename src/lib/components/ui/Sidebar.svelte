@@ -39,7 +39,7 @@
 
 <nav
 	transition:fly={{ x: -200, duration: 500 }}
-	class="fixed top-24 left-8 z-40 w-64 rounded-md border text-xs shadow-md backdrop-blur-md md:block"
+	class="fixed top-24 left-8 z-40 w-48 rounded-md border text-xs shadow-md backdrop-blur-md md:block"
 >
 	<div class="scroll-none scroll scrollbar-hide relative h-full w-full">
 		<div class="컨트롤 박스">
@@ -119,7 +119,7 @@
 				{/if}
 			</div>
 		</div>
-		<div class="flex w-full justify-around py-3 text-xs">
+		<div class="flex w-full justify-around py-2 text-xs">
 			<button id="위로" class="" on:click={() => $control?.onBringForward()}>
 				<span>위로</span>
 				<Icon name="forward" />
@@ -133,6 +133,34 @@
 			<button id="그룹" on:click={() => $control?.onUnBindGroup()}>
 				<span>그룹 풀기</span> <Icon name="unbind" /></button
 			>
+		</div>
+		<div class="flex w-full justify-around py-2 text-xs">
+			<button id="좌로정렬" class="" on:click={() => $control?.onAlignLeft()}>
+				<span>좌로 정렬</span>
+				<Icon name="alignLeft" />
+			</button>
+			<button id="우로정렬" class="" on:click={() => $control?.onAlignRight()}>
+				<span>우로 정렬</span>
+				<Icon name="alignRight" />
+			</button>
+			<button id="중앙정렬" class="" on:click={() => $control?.onAlignCenter()}>
+				<span>중앙 정렬</span>
+				<Icon name="alignCenter" />
+			</button>
+		</div>
+		<div class="flex w-full justify-around py-2 text-xs">
+			<button id="위로정렬" class="" on:click={() => $control?.onAlignTop()}>
+				<span>위로 정렬</span>
+				<Icon name="alignTop" />
+			</button>
+			<button id="아래로정렬" class="" on:click={() => $control?.onAlignBottom()}>
+				<span>아래로 정렬</span>
+				<Icon name="alignBottom" />
+			</button>
+			<button id="정중앙" class="" on:click={() => $control?.onAlignMiddle()}>
+				<span>정중앙 정렬</span>
+				<Icon name="alignMiddle" />
+			</button>
 		</div>
 	</div>
 </nav>

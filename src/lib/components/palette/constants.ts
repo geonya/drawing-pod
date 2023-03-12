@@ -1,1 +1,1 @@
-export const DOT_RADIUS = 6
+export const DOT_RADIUS = 4.5

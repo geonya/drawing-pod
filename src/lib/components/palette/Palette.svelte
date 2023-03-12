@@ -31,7 +31,7 @@
 	}
 </script>
 
-<div id="baseModal" class="z-10 grid h-48 w-full grid-cols-7 space-x-3 rounded-md p-1 ">
+<div id="baseModal" class="z-10 grid h-40 w-full grid-cols-7 space-x-2 rounded-md p-1 ">
 	{#if hsva}
 		<div id="pickerWrapper" class="col-span-5 grid h-full w-full place-content-center">
 			<Picker bind:hsva {bgColor} />

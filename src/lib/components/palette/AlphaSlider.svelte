@@ -63,11 +63,11 @@
 </script>
 
 <svelte:window on:mouseup={handleMouseUp} />
-<div class="sliderWrapper h-full w-full select-none p-1" on:mousemove={handleMouseMove}>
+<div class="sliderWrapper h-full w-full select-none" on:mousemove={handleMouseMove}>
 	<div
 		bind:this={slider}
 		on:mousedown={handleMouseDown}
-		class="alpha relative h-full w-3 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
+		class="alpha relative h-full w-2.5 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
 		style="--alpha-color: {rgbColor}; --pathern-size:5px"
 	>
 		{#if sliderPositionRatio && dotRadiusRatio}

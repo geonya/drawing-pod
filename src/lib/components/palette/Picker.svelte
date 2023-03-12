@@ -114,7 +114,7 @@
 	on:mousemove={handleMouseMove}
 >
 	<div
-		class="relative h-40 w-40 rounded-md"
+		class="relative h-32 w-32 rounded-md"
 		id="pickerBg"
 		style="--bg-color:{bgColor};"
 		on:mousedown|self={handleMouseDown}

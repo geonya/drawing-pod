@@ -31,7 +31,7 @@
 - [x] selected item delete
 - [x] Delete Static Canvas
 - [x] Brush
-- [ ] Align
+- [x] Align
 - [ ] Lock mode
 - [ ] Menu
 - [ ]

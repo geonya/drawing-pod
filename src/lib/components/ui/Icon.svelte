@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let name:
+	type IConName =
 		| 'forward'
 		| 'backward'
 		| 'storage'
@@ -20,12 +20,17 @@
 		| 'bind'
 		| 'unbind'
 		| 'brush'
-		| 'leftAlign'
-		| 'rightAlign'
-		| 'centerAlign'
+		| 'alignLeft'
+		| 'alignRight'
+		| 'alignCenter'
+		| 'alignTop'
+		| 'alignBottom'
+		| 'alignMiddle'
+
+	export let name: IConName
 
 	interface IIcon {
-		name: string
+		name: IConName
 		svg: string
 	}
 	let icons: IIcon[] = [
@@ -60,40 +65,6 @@
 							stroke-linejoin="round"
 							d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59"
 						/>`,
-		},
-		{
-			name: 'movingFoword',
-			svg: `<g
-							clip-path="url(#a)"
-							stroke="currentColor"
-							stroke-width="1.25"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							><path
-								fill-rule="evenodd"
-								clip-rule="evenodd"
-								d="M6.944 12.5H12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
-								fill="currentColor"
-							/><path
-								d="M13.889 4.167H8.333c-.767 0-1.389.621-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.768-.622-1.39-1.39-1.39Z"
-							/></g
-						><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs>`,
-		},
-		{
-			name: 'movingBackward',
-			svg: `<g
-						clip-path="url(#a)"
-						stroke="currentColor"
-						stroke-width="1.25"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						><path
-							d="M13.889 4.167H8.333c-.767 0-1.389.622-1.389 1.389v5.555c0 .767.622 1.389 1.39 1.389h5.555c.767 0 1.389-.622 1.389-1.389V5.556c0-.767-.622-1.39-1.39-1.39Z"
-							fill="currentColor"
-						/><path
-							d="M12.5 12.5v1.389a1.389 1.389 0 0 1-1.389 1.389H5.556a1.389 1.389 0 0 1-1.39-1.39V8.334a1.389 1.389 0 0 1 1.39-1.389h1.388"
-						/></g
-					><defs><clipPath id="a"><path fill="#fff" d="M0 0h20v20H0z" /></clipPath></defs>`,
 		},
 		{
 			name: 'storage',
@@ -198,21 +169,39 @@
 			`,
 		},
 		{
-			name: 'leftAlign',
+			name: 'alignLeft',
 			svg: `
   <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"></path>
 			`,
 		},
 		{
-			name: 'rightAlign',
+			name: 'alignRight',
 			svg: `
   <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25"></path>
 			`,
 		},
 		{
-			name: 'centerAlign',
+			name: 'alignCenter',
 			svg: `
   <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+			`,
+		},
+		{
+			name: 'alignTop',
+			svg: `
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12"></path>
+			`,
+		},
+		{
+			name: 'alignBottom',
+			svg: `
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25"></path>
+			`,
+		},
+		{
+			name: 'alignMiddle',
+			svg: `
+  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
 			`,
 		},
 	]

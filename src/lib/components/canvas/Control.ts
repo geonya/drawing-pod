@@ -34,6 +34,116 @@ export class Control {
 			}
 		}
 	}
+
+	onAlignLeft() {
+		const activeObjects = this.canvas.getActiveObjects()
+		if (activeObjects.length <= 1) return
+		let minLeft = 0
+		activeObjects.forEach((obj) => {
+			if (obj.left! < minLeft) {
+				minLeft = obj.left as number
+			}
+		})
+		activeObjects.forEach((obj) => {
+			obj.set('left', minLeft)
+		})
+		this.canvas.renderAll()
+	}
+
+	onAlignRight() {
+		const activeObjects = this.canvas.getActiveObjects()
+		if (activeObjects.length <= 1) return
+		let maxRight = -Infinity
+		activeObjects.forEach((obj) => {
+			const right = obj.left! + obj.width! * obj.scaleX!
+			if (right > maxRight) {
+				maxRight = right as number
+			}
+		})
+		activeObjects.forEach((obj) => {
+			const width = obj.width! * obj.scaleX!
+			obj.set('left', maxRight - width)
+		})
+		this.canvas.renderAll()
+	}
+
+	onAlignCenter() {
+		const activeObjects = this.canvas.getActiveObjects()
+		if (activeObjects.length <= 1) return
+		let minLeft = 0
+		let maxright = -Infinity
+		activeObjects.forEach((obj) => {
+			const right = obj.left! + obj.width! * obj.scaleX!
+			if (right > maxright) {
+				maxright = right as number
+			}
+			if (obj.left! < minLeft) {
+				minLeft = obj.left as number
+			}
+		})
+		const center = (maxright + minLeft) / 2
+		activeObjects.forEach((obj) => {
+			const width = obj.width! * obj.scaleX!
+			obj.set('left', center - width / 2)
+		})
+		this.canvas.renderAll()
+	}
+
+	onAlignTop() {
+		const activeObjects = this.canvas.getActiveObjects()
+		if (activeObjects.length <= 1) return
+		let minTop = 0
+		activeObjects.forEach((obj) => {
+			if (obj.top! < minTop) {
+				minTop = obj.top as number
+			}
+		})
+		activeObjects.forEach((obj) => {
+			obj.set('top', minTop)
+		})
+		this.canvas.renderAll()
+	}
+	onAlignBottom() {
+		const activeObjects = this.canvas.getActiveObjects()
+		if (activeObjects.length <= 1) return
+		let maxBottom = -Infinity
+		activeObjects.forEach((obj) => {
+			const bottom = obj.top! + obj.height! * obj.scaleY!
+			if (bottom > maxBottom) {
+				maxBottom = bottom as number
+			}
+		})
+		activeObjects.forEach((obj) => {
+			const height = obj.height! * obj.scaleY!
+			obj.set('top', maxBottom - height)
+		})
+		this.canvas.renderAll()
+	}
+	onAlignMiddle() {
+		const activeObjects = this.canvas.getActiveObjects()
+		if (activeObjects.length <= 1) return
+		let minTop = 0
+		let maxBottom = -Infinity
+		activeObjects.forEach((obj) => {
+			const bottom = obj.top! + obj.height! * obj.scaleY!
+			if (bottom > maxBottom) {
+				maxBottom = bottom as number
+			}
+		})
+		activeObjects.forEach((obj) => {
+			if (obj.top! < minTop) {
+				minTop = obj.top as number
+			}
+		})
+
+		const center = (maxBottom + minTop) / 2
+		activeObjects.forEach((obj) => {
+			const height = obj.height! * obj.scaleY!
+			obj.set('top', center - height / 2)
+		})
+		this.canvas.renderAll()
+	}
+
 	onPreventCanvasExit(e: fabric.IEvent<MouseEvent>) {
 		if (!e.target) return
 		if (!this.canvas) return
