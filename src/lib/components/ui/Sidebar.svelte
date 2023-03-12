@@ -10,13 +10,13 @@
 	let stroke: string | null = $shape?.stroke ?? null
 	let objectType: ObjectType | null = $shape?.objectType ?? null
 	let strokeWidth: number | null = $shape?.strokeWidth ?? null
-	let whichPalette = 'fill'
+	let whichPalette = fill ? PaintType.FILL : PaintType.STROKE
 
-	$: console.log(whichPalette)
+	$: console.log('fill', fill)
 	$: fillHex = fill ? stringRgbaToHex(fill) : ''
 	$: strokeHex = stroke ? stringRgbaToHex(stroke) : ''
 
-	function onOpenPalette(paintType: string) {
+	function onOpenPalette(paintType: PaintType) {
 		whichPalette = paintType
 	}
 	const onColorUpdate = (e: CustomEvent) => {
@@ -56,7 +56,7 @@
 								class={'샘플컬러 h-7 w-7 rounded-md ' +
 									(whichPalette === PaintType.FILL ? 'ring-2 ring-blue-500' : '')}
 								style="background-color:{fill};"
-								on:click={() => onOpenPalette('fill')}
+								on:click={() => onOpenPalette(PaintType.FILL)}
 							/>
 							<input
 								id="fill"

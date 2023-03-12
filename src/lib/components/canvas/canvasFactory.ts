@@ -9,7 +9,7 @@ export class CanvasFactory {
 				height: window.innerHeight,
 				centeredScaling: true,
 				centeredRotation: true,
-				backgroundColor: 'rgba(255,255,255,0)',
+				backgroundColor: 'rgba(255, 255, 255, 0)',
 				preserveObjectStacking: true,
 				selection: true,
 				hoverCursor: 'pointer',

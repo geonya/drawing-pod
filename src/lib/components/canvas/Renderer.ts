@@ -8,6 +8,56 @@ export const colorStore = writable<ColorObj | null>(null)
 export const shape = writable<Shape | null>(null)
 
 export class Renderer {
+	getRectObj = () =>
+		new fabric.Rect({
+			fill: 'rgba(236, 239, 244, 0.8)',
+			stroke: 'rgba(76, 86, 106, 1)',
+			shadow: '0 25px 50px -12px rgb(0 0 0 / 0.25);',
+			strokeWidth: 1,
+			width: 250,
+			height: 100,
+			rx: 10,
+			ry: 10,
+			cornerStyle: 'circle',
+			originX: 'center',
+			originY: 'center',
+		})
+	getTextBoxObj = (text: string = 'hello world') =>
+		new fabric.Textbox(text, {
+			fill: 'rgba(76, 86, 106, 1)',
+			stroke: 'rgba(76, 86, 106, 1)',
+			fontSize: 30,
+			strokeWidth: 0,
+			fontFamily: 'Nanum Pen Script',
+			cornerStyle: 'circle',
+			originX: 'center',
+			originY: 'center',
+			textAlign: 'center',
+		})
+	getITextObj = (text: string = 'hello world') =>
+		new fabric.IText(text, {
+			fill: 'rgba(76, 86, 106, 1)',
+			stroke: 'rgba(76, 86, 106, 1)',
+			fontSize: 30,
+			strokeWidth: 0,
+			fontFamily: 'Nanum Pen Script',
+			cornerStyle: 'circle',
+			originX: 'center',
+			originY: 'center',
+			textAlign: 'center',
+		})
+	getCircleObj = () =>
+		new fabric.Circle({
+			fill: 'rgba(236, 239, 244, 0.8)',
+			stroke: 'rgba(76, 86, 106, 1)',
+			shadow: '0 25px 50px -12px rgb(0 0 0 / 0.25);',
+			strokeWidth: 1,
+			radius: 100,
+			cornerStyle: 'circle',
+			originX: 'center',
+			originY: 'center',
+		})
+
 	constructor(private canvas: fabric.Canvas) {}
 
 	onSideBarOpen() {
@@ -45,81 +95,41 @@ export class Renderer {
 		shape.set(null)
 	}
 
-	onMakeObject(type: ObjectType) {
-		const strokeWidth = 3
-		const rectObj = new fabric.Rect({
-			fill: 'rgba(255,255,255,1)',
-			stroke: 'rgba(0,0,0,1)',
-			strokeWidth,
-			width: 250,
-			height: 100,
-			rx: 10,
-			ry: 10,
-			cornerStyle: 'circle',
+	onMakeGroup(objects: fabric.Object[]) {
+		const group = new fabric.Group(objects, {
 			originX: 'center',
 			originY: 'center',
-		})
-		const textObj = new fabric.Textbox('Hello World', {
-			fill: 'rgba(0,0,0,1)',
-			stroke: 'rgba(0,0,0,1)',
-			fontSize: 30,
+			fill: 'rgba(236, 239, 244, 0.9)',
+			stroke: 'rgba(76, 86, 106, 1)',
+			shadow: '0 25px 50px -12px rgb(0 0 0 / 0.25);',
 			strokeWidth: 1,
-			fontFamily: 'Nanum Pen Script',
-			cornerStyle: 'circle',
-			originX: 'center',
-			originY: 'center',
-			textAlign: 'center',
 		})
+		return group
+	}
 
-		const circleObj = new fabric.Circle({
-			fill: 'rgba(255,255,255,1)',
-			stroke: 'rgba(0,0,0,1)',
-			strokeWidth,
-			radius: 100,
-			cornerStyle: 'circle',
-			originX: 'center',
-			originY: 'center',
-		})
+	onMakeObject(type: ObjectType) {
 		switch (type) {
 			case 'rect':
-				this.canvas.centerObject(rectObj)
-				textObj.set({
-					left: rectObj.left!,
-					top: rectObj.top!,
-					width: rectObj.width!,
-					height: rectObj.height!,
+				const rect = this.getRectObj()
+				const rectText = this.getTextBoxObj()
+				this.canvas.centerObject(rect)
+				rectText.set({
+					left: rect.left!,
+					top: rect.top!,
+					width: rect.width!,
 					splitByGrapheme: true,
 				})
-				const group = new fabric.Group([rectObj, textObj], {
-					originX: 'center',
-					originY: 'center',
-					fill: 'rgba(255,255,255,1)',
-					stroke: 'rgba(0,0,0,1)',
-					strokeWidth: 1,
-					backgroundColor: 'rgba(255,255,255,1)',
-				})
-				group.on('mousedblclick', (e) => {
-					const tempText = new fabric.Textbox(textObj.text!, {
-						fill: 'rgba(0,0,0,1)',
-						stroke: 'rgba(0,0,0,1)',
-						fontSize: 30,
-						strokeWidth: 1,
-						fontFamily: 'Nanum Pen Script',
-						cornerStyle: 'circle',
-						originX: 'center',
-						originY: 'center',
-						textAlign: 'center',
-					})
+				const rectGroup = this.onMakeGroup([rect, rectText])
+				rectGroup.on('mousedblclick', (e) => {
+					const tempText = this.getTextBoxObj(rectText.text!)
 					tempText.set({
 						left: e.target!.left,
 						top: e.target!.top,
-						width: rectObj.width!,
-						height: rectObj.height!,
+						width: rect.width!,
 						splitByGrapheme: true,
 					})
-
-					textObj.visible = false
-					group.addWithUpdate()
+					rectText.visible = false
+					rectGroup.addWithUpdate()
 					tempText.visible = true
 					tempText.selectable = false
 					this.canvas.add(tempText)
@@ -128,23 +138,59 @@ export class Renderer {
 					tempText.selectAll()
 					tempText.on('editing:exited', () => {
 						const newText = tempText.text
-						textObj.text = newText
-						textObj.visible = true
+						rectText.text = newText
+						rectText.visible = true
 						tempText.visible = false
-						group.addWithUpdate()
+						rectGroup.addWithUpdate()
 						this.canvas.remove(tempText)
-						this.canvas.setActiveObject(group)
+						this.canvas.setActiveObject(rectGroup)
 					})
 				})
-				this.canvas.add(group)
+				this.canvas.add(rectGroup)
 
 				break
 			case 'circle':
-				this.canvas.centerObject(circleObj)
-				this.canvas.add(circleObj)
-				this.canvas.setActiveObject(circleObj)
+				const circle = this.getCircleObj()
+				const circleText = this.getTextBoxObj()
+				this.canvas.centerObject(circle)
+				circleText.set({
+					left: circle.left!,
+					top: circle.top!,
+					width: circle.radius! * 2,
+				})
+				const circleGroup = this.onMakeGroup([circle, circleText])
+				circleGroup.on('mousedblclick', (e) => {
+					const tempText = this.getTextBoxObj(circleText.text!)
+					tempText.set({
+						left: e.target!.left,
+						top: e.target!.top,
+						width: circle.width!,
+						splitByGrapheme: true,
+					})
+
+					circleText.visible = false
+					circleGroup.addWithUpdate()
+					tempText.visible = true
+					tempText.selectable = false
+					this.canvas.add(tempText)
+					this.canvas.setActiveObject(tempText)
+					tempText.enterEditing()
+					tempText.selectAll()
+					tempText.on('editing:exited', () => {
+						const newText = tempText.text
+						circleText.text = newText
+						circleText.visible = true
+						tempText.visible = false
+						circleGroup.addWithUpdate()
+						this.canvas.remove(tempText)
+						this.canvas.setActiveObject(circleGroup)
+					})
+				})
+				this.canvas.add(circleGroup)
+
 				break
 			case 'text':
+				const textObj = this.getITextObj()
 				this.canvas.discardActiveObject()
 				this.canvas.centerObject(textObj)
 				this.canvas.add(textObj)
@@ -165,7 +211,7 @@ export class Renderer {
 			if (activeObject.type === 'group') {
 				const group = activeObject as fabric.Group
 				group.forEachObject((obj) => {
-					if (obj.type === 'rect') {
+					if (obj.type === 'rect' || obj.type === 'circle') {
 						shape.fill && obj.set('fill', shape.fill as string)
 						shape.stroke && obj.set('stroke', shape.stroke as string)
 					}
