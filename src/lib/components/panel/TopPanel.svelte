@@ -1,14 +1,7 @@
 <script lang="ts">
 	import Icon from '../ui/Icon.svelte'
-	import { motion, saveProgress, control, renderer } from '$lib/store'
-	import { MotionState } from '$lib/types'
-
-	const onFreeDrawingStart = () => {
-		$motion?.onChangeMotionState(MotionState.DRAWING)
-	}
-	const onBrushDrawingStart = () => {
-		$motion?.onBrushDrawingStart()
-	}
+	import { saveProgress, control, renderer, action } from '$lib/store'
+	import { Action } from '$lib/types'
 </script>
 
 <div
@@ -17,10 +10,10 @@
 	<button id="자물쇠">
 		<Icon name="lock" />
 	</button>
-	<button id="마우스" on:click={() => $motion?.onCursorMove()}>
+	<button id="마우스" on:click={() => ($action = Action.DEFAULT)}>
 		<Icon name="mouse" />
 	</button>
-	<button id="손" on:click={() => $motion?.onChangeMotionState(MotionState.DRAGGING)}>
+	<button id="손" on:click={() => ($action = Action.DRAG)}>
 		<Icon name="hand" />
 	</button>
 	<button id="네모 cursor-pointer" on:click={() => $renderer?.onAddRect()}>
@@ -29,13 +22,13 @@
 	<button id="원" on:click={() => $renderer?.onAddCircle()}>
 		<Icon name="circle" />
 	</button>
-	<button id="연필" on:click={onFreeDrawingStart}>
+	<button id="연필" on:click={() => ($action = Action.PENCIL)}>
 		<Icon name="pencil" />
 	</button>
-	<button id="브러쉬" on:click={() => onBrushDrawingStart()}>
+	<button id="브러쉬" on:click={() => ($action = Action.BRUSH)}>
 		<Icon name="brush" />
 	</button>
-	<button id="라인" on:click={() => $renderer?.onAddStickyLine()}>
+	<button id="라인" on:click={() => ($action = Action.LINE)}>
 		<Icon name="stickyLine" />
 	</button>
 	<input

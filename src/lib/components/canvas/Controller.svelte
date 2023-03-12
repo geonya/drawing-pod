@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { AUTO_SAVE_DELAY, CANVAS_DATA } from '$lib/constants'
-	import { saveProgress } from '$lib/store'
+	import { control, saveProgress } from '$lib/store'
 	import { onMount } from 'svelte'
 	export let canvas: fabric.Canvas
 
@@ -53,6 +53,8 @@
 	}
 	onMount(() => {
 		if (!canvas) return
+
+		canvas.on('before:render', () => $control?.onZoom())
 		// onLoadStorageData(canvas)
 		// onIntervalAutoSaveWithTimer()
 		// onAutoSaveInLocalStorage(canvas)

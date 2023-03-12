@@ -1,9 +1,8 @@
-import { motion, sideBarKey, sideBarOpen } from '$lib/store'
-import { MotionState, type ColorObj, type ObjectType, type Shape } from '$lib/types'
+import { sideBarKey, sideBarOpen } from '$lib/store'
+import type { ColorObj, ObjectType, Shape } from '$lib/types'
 import { getDistance } from '$lib/utils'
 import { fabric } from 'fabric'
 import { writable } from 'svelte/store'
-import { makeArrowLine } from './canvasFactory'
 
 export const colorStore = writable<ColorObj | null>(null)
 export const shape = writable<Shape | null>(null)
@@ -117,9 +116,6 @@ export class Renderer {
 	}
 
 	onAddStickyLine() {
-		motion.subscribe((m) => {
-			m?.onChangeMotionState(MotionState.DEFAULT)
-		})
 		let isDrawing = false
 		let stickyLine: fabric.Line | null = null
 
@@ -190,14 +186,14 @@ export class Renderer {
 			}
 			this.canvas.renderAll()
 		})
+
 		this.canvas.on('mouse:up', (e) => {
 			stickyLine?.setCoords()
+			// cancel line mode
 			isDrawing = false
-		})
-		return () => {
 			this.canvas.off('mouse:down')
 			this.canvas.off('mouse:move')
 			this.canvas.off('mouse:up')
-		}
+		})
 	}
 }

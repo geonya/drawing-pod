@@ -4,10 +4,15 @@ export type ColorObj = {
 	color: string
 }
 
-export enum MotionState {
+export enum Action {
 	DEFAULT = 'default',
-	DRAWING = 'drawing',
-	DRAGGING = 'dragging',
+	DRAG = 'drag',
+	PENCIL = 'pencil',
+	ERASE = 'erase',
+	TEXT = 'text',
+	BRUSH = 'brush',
+	LOADING = 'loading',
+	LINE = 'line',
 }
 
 export enum PaintType {
