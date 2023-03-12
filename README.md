@@ -30,9 +30,11 @@
 - [x] Group
 - [x] selected item delete
 - [x] Delete Static Canvas
-- [ ] Brush
+- [x] Brush
 - [ ] Align
 - [ ] Lock mode
+- [ ] Menu
+- [ ]
 - [ ] connect db
 - [ ] login / register
 - [ ] SVG library
