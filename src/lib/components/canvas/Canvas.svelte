@@ -9,16 +9,10 @@
 	let layerCanvasElement: HTMLCanvasElement
 	let canvasWrapper: HTMLElement
 	let canvas: fabric.Canvas | null | undefined
-	let layerCanvas: fabric.Canvas | null | undefined
-	let staticCanvas: fabric.StaticCanvas | null | undefined
 	let layoutRect: fabric.Object | null | undefined
 
 	async function initCanvas(canvasElement: HTMLCanvasElement) {
 		const canvasFactory = await CanvasFactory.getInstance(canvasElement)
-		return canvasFactory?.canvas
-	}
-	async function initStaticCanvas(canvasElement: HTMLCanvasElement) {
-		const canvasFactory = await StaticCanvasFactory.getInstance(canvasElement)
 		return canvasFactory?.canvas
 	}
 	function onResize() {
@@ -27,54 +21,24 @@
 			width: window.innerWidth,
 			height: window.innerHeight,
 		})
-		if (!staticCanvas) return
-		staticCanvas.setDimensions({
-			width: window.innerWidth * 0.7,
-			height: window.innerHeight * 0.7,
-		})
 		canvas.calcOffset()
 	}
 	function onZoom(e: IEvent<WheelEvent>) {
-		if (!canvas || !canvas.width || !canvas.height || !staticCanvas || !layoutRect) return
+		if (!canvas || !canvas.width || !canvas.height) return
 		const delta = e.e.deltaY
 		let zoom = canvas.getZoom()
 		zoom *= 0.999 ** delta
 		if (zoom > 5) zoom = 5
 		if (zoom < 1) zoom = 1
 		canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
-		layoutRect.scale(zoom)
-		staticCanvas.renderAll()
 		e.e.preventDefault()
 		e.e.stopPropagation()
 	}
 	onMount(async () => {
 		canvas = await initCanvas(canvasElement)
-		staticCanvas = await initStaticCanvas(staticCanvasElement)
-		layerCanvas = await initCanvas(layerCanvasElement)
 		if (canvas) {
-			canvas.on('resizing', () => {
-				staticCanvas?.setDimensions({
-					width: canvas!.getWidth(),
-					height: canvas!.getHeight(),
-				})
-			})
+			canvas.on('resizing', () => {})
 			canvas.on('mouse:wheel', (e) => onZoom(e))
-		}
-		if (layerCanvas) {
-		}
-		if (staticCanvas) {
-			layoutRect = new fabric.Rect({
-				fill: 'rgba(255,255,255,1)',
-				width: staticCanvas.getWidth() * 0.7,
-				height: staticCanvas.getHeight() * 0.7,
-				originX: 'center',
-				originY: 'center',
-				rx: 10,
-				ry: 10,
-				shadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);',
-			})
-			staticCanvas.centerObject(layoutRect)
-			staticCanvas.add(layoutRect)
 		}
 	})
 </script>

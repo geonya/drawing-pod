@@ -29,6 +29,7 @@
   - [ ] stick to near object
 - [x] Group
 - [x] selected item delete
+- [x] Delete Static Canvas
 - [ ] Brush
 - [ ] Align
 - [ ] Lock mode
