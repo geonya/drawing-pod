@@ -34,9 +34,13 @@
 - [x] Brush
 - [x] Align
 - [x] Object Text Box
+- [ ] Background Grid
+- [ ] px to mm
 - [ ] Menu
-- [ ] Lock mode with Layer
-- [ ] connect db
+- [ ] Layer
+- [ ] Lock/Invisible mode with Layer
+- [ ] Connect BabylonJS
+- [ ] DB Setup (PocketBase)
 - [ ] login / register
 - [ ] SVG library
 - [ ]
