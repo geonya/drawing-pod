@@ -210,6 +210,7 @@ export class Control {
 	onDownloadAsSVG() {
 		this.canvas.backgroundColor = 'rgba(255,255,255,1)'
 		const svg = this.canvas.toSVG()
+
 		this.canvas.backgroundColor = 'rgba(255,255,255,0)'
 		const downloadLink = document.createElement('a')
 		downloadLink.setAttribute('download', 'canvas.svg')

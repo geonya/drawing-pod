@@ -58,6 +58,14 @@ const setIsLocked = () => {
 		set,
 	}
 }
+
+const setSVG = () => {
+	const { subscribe, set } = writable<string>('')
+	return {
+		subscribe,
+		set,
+	}
+}
 export const renderer = setRenderer()
 export const control = setControl()
 export const sideBarOpen = setSideBarOpen()
@@ -65,3 +73,4 @@ export const sideBarKey = setSideBarKey()
 export const saveProgress = setSaveProgress()
 export const action = setAction()
 export const isLocked = setIsLocked()
+export const canvasSVG = setSVG()

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { action, renderer } from '$lib/store'
+	import { action, canvasSVG, renderer } from '$lib/store'
 	import { Action } from '$lib/types'
 	import { text } from '@sveltejs/kit'
 	import { onMount } from 'svelte'
@@ -182,9 +182,17 @@
 			onDraggingEnd()
 		}
 	}
+	function onCanvasUpdated() {
+		canvas.backgroundColor = 'rgba(255,255,255,1)'
+		const svg = canvas.toSVG()
+		$canvasSVG = svg
+	}
 	onMount(() => {
 		canvas.on('selection:created', () => ($action = Action.DEFAULT))
 		canvas.on('selection:updated', () => ($action = Action.DEFAULT))
+		canvas.on('object:added', () => onCanvasUpdated())
+		canvas.on('object:modified', () => onCanvasUpdated())
+		canvas.on('object:moving', () => onCanvasUpdated())
 	})
 </script>
 
