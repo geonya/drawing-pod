@@ -15,6 +15,7 @@ export class Motion {
 		if (motionState === MotionState.DRAWING) {
 			this.onDraggingEnd()
 			this.onDrawingStart()
+			this.onBrushDrawingStart()
 		}
 		if (motionState === MotionState.DRAGGING) {
 			this.onDrawingEnd()
@@ -80,6 +81,26 @@ export class Motion {
 	onDrawingEnd() {
 		this.canvas.defaultCursor = 'default'
 		this.canvas.isDrawingMode = false
+	}
+	getRandomColor(): string {
+		const getRandomNumberTo256 = () => Math.floor(Math.random() * 256)
+		const rgba = {
+			a: getRandomNumberTo256(),
+			b: getRandomNumberTo256(),
+			g: getRandomNumberTo256(),
+			r: this.getRandomOpacity(),
+		}
+		return `rgba(${rgba.r},${rgba.g},${rgba.b},${rgba.a})`
+	}
+	getRandomOpacity() {
+		return Math.random() * 0.5 + 0.2
+	}
+	onBrushDrawingStart() {
+		if (this.motionState !== MotionState.DRAWING) return
+		this.canvas.isDrawingMode = true
+		this.canvas.freeDrawingBrush.color = this.getRandomColor()
+		this.canvas.freeDrawingBrush.width = Math.random() * 10 + 6
+		this.canvas.freeDrawingBrush.decimate = 3
 	}
 	onPreventCanvasExit(e: fabric.IEvent<MouseEvent>) {
 		if (!e.target) return

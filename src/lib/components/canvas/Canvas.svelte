@@ -2,14 +2,11 @@
 	import { fabric } from 'fabric'
 	import type { IEvent } from 'fabric/fabric-impl'
 	import { onMount } from 'svelte'
-	import { CanvasFactory, StaticCanvasFactory } from './canvasFactory'
+	import { CanvasFactory } from './canvasFactory'
 	import Layer from './Layer.svelte'
 	let canvasElement: HTMLCanvasElement
-	let staticCanvasElement: HTMLCanvasElement
-	let layerCanvasElement: HTMLCanvasElement
 	let canvasWrapper: HTMLElement
 	let canvas: fabric.Canvas | null | undefined
-	let layoutRect: fabric.Object | null | undefined
 
 	async function initCanvas(canvasElement: HTMLCanvasElement) {
 		const canvasFactory = await CanvasFactory.getInstance(canvasElement)
@@ -44,14 +41,8 @@
 </script>
 
 <svelte:window on:resize={onResize} />
-<div class="relative h-screen w-full bg-neutral-100" bind:this={canvasWrapper}>
+<div class="relative h-screen w-full overflow-hidden " bind:this={canvasWrapper}>
 	<canvas id="canvas" bind:this={canvasElement} class="absolute inset-0 z-30 h-full w-full" />
-	<canvas id="layerCanvas" bind:this={layerCanvasElement} class="absolute inset-0 h-full w-full" />
-	<canvas
-		id="staticCanvas"
-		bind:this={staticCanvasElement}
-		class="absolute inset-0 h-full w-full"
-	/>
 </div>
 {#if canvas}
 	<Layer {canvas} />

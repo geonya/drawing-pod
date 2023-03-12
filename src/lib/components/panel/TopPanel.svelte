@@ -6,6 +6,9 @@
 	const onFreeDrawingStart = () => {
 		$motion?.onChangeMotionState(MotionState.DRAWING)
 	}
+	const onBrushDrawingStart = () => {
+		$motion?.onBrushDrawingStart()
+	}
 </script>
 
 <div
@@ -28,6 +31,9 @@
 	</button>
 	<button id="연필" on:click={onFreeDrawingStart}>
 		<Icon name="pencil" />
+	</button>
+	<button id="브러쉬" on:click={() => onBrushDrawingStart()}>
+		<Icon name="brush" />
 	</button>
 	<button id="라인" on:click={() => $renderer?.onAddStickyLine()}>
 		<Icon name="stickyLine" />
