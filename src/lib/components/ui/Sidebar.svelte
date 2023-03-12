@@ -10,18 +10,14 @@
 	let stroke: string | null = $shape?.stroke ?? null
 	let objectType: ObjectType | null = $shape?.objectType ?? null
 	let strokeWidth: number | null = $shape?.strokeWidth ?? null
+	let whichPalette = 'fill'
 
+	$: console.log(whichPalette)
 	$: fillHex = fill ? stringRgbaToHex(fill) : ''
 	$: strokeHex = stroke ? stringRgbaToHex(stroke) : ''
-	$: whichPalette = fill ? PaintType.FILL : PaintType.STROKE
-	$: {
-		if (objectType) {
-			if (objectType === ObjectType.PATH) {
-				whichPalette = PaintType.STROKE
-			} else if (objectType === ObjectType.IMAGE) {
-				whichPalette = PaintType.STROKE
-			}
-		}
+
+	function onOpenPalette(paintType: string) {
+		whichPalette = paintType
 	}
 	const onColorUpdate = (e: CustomEvent) => {
 		const { color, paintType } = e.detail
@@ -43,10 +39,10 @@
 >
 	<div class="scroll-none scroll scrollbar-hide relative h-full w-full">
 		<div class="컨트롤 박스">
-			{#if fill && whichPalette === PaintType.FILL && objectType !== ObjectType.PATH}
+			{#if whichPalette === PaintType.FILL && objectType !== ObjectType.PATH}
 				<Palette paintType={PaintType.FILL} on:colorUpdate={onColorUpdate} />
 			{/if}
-			{#if stroke && whichPalette === PaintType.STROKE}
+			{#if whichPalette === PaintType.STROKE}
 				<Palette paintType={PaintType.STROKE} on:colorUpdate={onColorUpdate} />
 			{/if}
 			<div class="컬러리뷰박스 space-y-2 px-2">
@@ -60,7 +56,7 @@
 								class={'샘플컬러 h-7 w-7 rounded-md ' +
 									(whichPalette === PaintType.FILL ? 'ring-2 ring-blue-500' : '')}
 								style="background-color:{fill};"
-								on:click={() => (whichPalette = PaintType.FILL)}
+								on:click={() => onOpenPalette('fill')}
 							/>
 							<input
 								id="fill"
@@ -82,7 +78,7 @@
 								class={'샘플컬러 h-7 w-7 rounded-md ' +
 									(whichPalette === PaintType.STROKE ? 'ring-2 ring-blue-500' : '')}
 								style="background-color:{stroke};"
-								on:click={() => (whichPalette = PaintType.STROKE)}
+								on:click={() => onOpenPalette(PaintType.STROKE)}
 							/>
 							{#if strokeWidth !== null && strokeWidth >= 0}
 								<input

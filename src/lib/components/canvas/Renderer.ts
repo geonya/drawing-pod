@@ -1,6 +1,6 @@
 import { sideBarKey, sideBarOpen } from '$lib/store'
 import type { ColorObj, ObjectType, Shape } from '$lib/types'
-import { getDistance } from '$lib/utils'
+import { getDistance, rgbaChecker } from '$lib/utils'
 import { fabric } from 'fabric'
 import { writable } from 'svelte/store'
 
@@ -19,19 +19,19 @@ export class Renderer {
 	changeSideBar() {
 		sideBarKey.set(Symbol())
 	}
-	onObjectSelect() {
+	onObjectSelect(e?: fabric.IEvent) {
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
 			shape.set({
-				fill: activeObject.fill as string,
-				stroke: activeObject.stroke as string,
+				fill: rgbaChecker(activeObject.fill) as string,
+				stroke: rgbaChecker(activeObject.stroke) as string,
 				objectType: activeObject.type as ObjectType,
 				strokeWidth: activeObject.strokeWidth as number,
 			})
 			this.onSideBarOpen()
 		}
 	}
-	onObjectSelectUpdate() {
+	onObjectSelectUpdate(e: fabric.IEvent) {
 		this.onObjectSelect()
 		this.changeSideBar()
 	}
@@ -46,7 +46,6 @@ export class Renderer {
 	}
 
 	onMakeObject(type: ObjectType) {
-		let object: fabric.Object | null = null
 		const strokeWidth = 3
 		const rectObj = new fabric.Rect({
 			fill: 'rgba(255,255,255,1)',
@@ -57,55 +56,125 @@ export class Renderer {
 			rx: 10,
 			ry: 10,
 			cornerStyle: 'circle',
+			originX: 'center',
+			originY: 'center',
 		})
-		const textObj = new fabric.IText('Hello World', {
+		const textObj = new fabric.Textbox('Hello World', {
 			fill: 'rgba(0,0,0,1)',
 			stroke: 'rgba(0,0,0,1)',
-			fontSize: 50,
+			fontSize: 30,
 			strokeWidth: 1,
 			fontFamily: 'Nanum Pen Script',
-			isEditing: true,
+			cornerStyle: 'circle',
+			originX: 'center',
+			originY: 'center',
+			textAlign: 'center',
+		})
+
+		const circleObj = new fabric.Circle({
+			fill: 'rgba(255,255,255,1)',
+			stroke: 'rgba(0,0,0,1)',
+			strokeWidth,
+			radius: 100,
+			cornerStyle: 'circle',
+			originX: 'center',
+			originY: 'center',
 		})
 		switch (type) {
 			case 'rect':
 				this.canvas.centerObject(rectObj)
-				this.canvas.add(rectObj)
-				const centerX = rectObj.left! + rectObj.width! / 2
-				const centerY = rectObj.top! + rectObj.height! / 2
 				textObj.set({
-					left: centerX,
-					top: centerY,
+					left: rectObj.left!,
+					top: rectObj.top!,
+					width: rectObj.width!,
+					height: rectObj.height!,
+					splitByGrapheme: true,
+				})
+				const group = new fabric.Group([rectObj, textObj], {
 					originX: 'center',
 					originY: 'center',
-				})
-				this.canvas.add(textObj)
-				this.canvas.setActiveObject(textObj)
-				break
-			case 'circle':
-				object = new fabric.Circle({
 					fill: 'rgba(255,255,255,1)',
 					stroke: 'rgba(0,0,0,1)',
-					strokeWidth,
-					radius: 100,
-					cornerStyle: 'circle',
+					strokeWidth: 1,
+					backgroundColor: 'rgba(255,255,255,1)',
 				})
+				group.on('mousedblclick', (e) => {
+					const tempText = new fabric.Textbox(textObj.text!, {
+						fill: 'rgba(0,0,0,1)',
+						stroke: 'rgba(0,0,0,1)',
+						fontSize: 30,
+						strokeWidth: 1,
+						fontFamily: 'Nanum Pen Script',
+						cornerStyle: 'circle',
+						originX: 'center',
+						originY: 'center',
+						textAlign: 'center',
+					})
+					tempText.set({
+						left: e.target!.left,
+						top: e.target!.top,
+						width: rectObj.width!,
+						height: rectObj.height!,
+						splitByGrapheme: true,
+					})
+
+					textObj.visible = false
+					group.addWithUpdate()
+					tempText.visible = true
+					tempText.selectable = false
+					this.canvas.add(tempText)
+					this.canvas.setActiveObject(tempText)
+					tempText.enterEditing()
+					tempText.selectAll()
+					tempText.on('editing:exited', () => {
+						const newText = tempText.text
+						textObj.text = newText
+						textObj.visible = true
+						tempText.visible = false
+						group.addWithUpdate()
+						this.canvas.remove(tempText)
+						this.canvas.setActiveObject(group)
+					})
+				})
+				this.canvas.add(group)
+
+				break
+			case 'circle':
+				this.canvas.centerObject(circleObj)
+				this.canvas.add(circleObj)
+				this.canvas.setActiveObject(circleObj)
 				break
 			case 'text':
-				object = textObj
+				this.canvas.discardActiveObject()
+				this.canvas.centerObject(textObj)
+				this.canvas.add(textObj)
+				this.canvas.setActiveObject(textObj)
+				textObj.enterEditing()
+				textObj.setSelectionStart(0)
+				textObj.setSelectionEnd(textObj.text!.length)
 				break
 			default:
 				break
-		}
-		if (object) {
-			this.canvas.add(object)
-			this.canvas.setActiveObject(object)
-			this.canvas.renderAll()
 		}
 	}
 
 	onUpdateObject(shape: Shape) {
 		const activeObject = this.canvas.getActiveObject()
+
 		if (activeObject && shape) {
+			if (activeObject.type === 'group') {
+				const group = activeObject as fabric.Group
+				group.forEachObject((obj) => {
+					if (obj.type === 'rect') {
+						shape.fill && obj.set('fill', shape.fill as string)
+						shape.stroke && obj.set('stroke', shape.stroke as string)
+					}
+					if (obj.type === 'textbox') {
+						shape.stroke && obj.set('stroke', shape.stroke as string)
+						shape.strokeWidth && obj.set('strokeWidth', shape.strokeWidth as number)
+					}
+				})
+			}
 			shape.fill && activeObject.set('fill', shape.fill as string)
 			shape.stroke && activeObject.set('stroke', shape.stroke as string)
 			shape.strokeWidth && activeObject.set('strokeWidth', shape.strokeWidth as number)

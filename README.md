@@ -26,7 +26,9 @@
 - [x] Send Object Forward & Backward
 - [x] sticky line
   - [x] arrow line
-  - [ ] stick to near object
+  - [x] stick to near object
+  - [ ] To attach the center of the corner
+  - [ ]
 - [x] Group
 - [x] selected item delete
 - [x] Delete Static Canvas

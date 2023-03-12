@@ -16,7 +16,11 @@
 	<button id="손" on:click={() => ($action = Action.DRAG)}>
 		<Icon name="hand" />
 	</button>
-	<button id="네모 cursor-pointer" on:click={() => $renderer?.onMakeObject(ObjectType.RECT)}>
+	<button
+		id="네모 cursor-pointer"
+		class="select-none"
+		on:click={() => $renderer?.onMakeObject(ObjectType.RECT)}
+	>
 		<Icon name="rectangle" />
 	</button>
 	<button id="원" on:click={() => $renderer?.onMakeObject(ObjectType.CIRCLE)}>

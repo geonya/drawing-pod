@@ -9,7 +9,7 @@
 	import type { HsvaColor } from 'colord'
 
 	export let paintType: PaintType
-	export let color: string | null | undefined =
+	let color: string | null | undefined =
 		paintType === PaintType.FILL ? $shape?.fill : $shape?.stroke
 
 	let hsva: HsvaColor | null

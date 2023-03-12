@@ -49,3 +49,6 @@
 {:else}
 	initializing...
 {/if}
+
+<style>
+</style>

@@ -3,6 +3,7 @@
 	import { Action } from '$lib/types'
 	import { text } from '@sveltejs/kit'
 	import { onMount } from 'svelte'
+	import { fabric } from 'fabric'
 	export let canvas: fabric.Canvas
 	let prevAction = Action.DEFAULT
 
@@ -157,17 +158,21 @@
 		}
 
 		if (e.key === 'Backspace' || e.key === 'Delete') {
-			const activeObject = canvas.getActiveObject()
-			if (!activeObject) return
-			if (activeObject.type === 'itext') {
-				const textObject = activeObject as fabric.IText
-				if (textObject.isEditing === true) {
-					return
-				}
-				if (textObject.text && textObject.text.length === 0) {
-					return
+			const activeObjects = canvas.getActiveObjects()
+			if (!activeObjects || activeObjects.length === 0) return
+			for (const activeObject of activeObjects) {
+				if (activeObject instanceof fabric.IText) {
+					const textObject = activeObject as fabric.IText
+					if (textObject.isEditing === true) {
+						console.log('editing')
+						return
+					}
+					if (textObject.text && textObject.text.length === 0) {
+						return
+					}
 				}
 			}
+
 			onDelete()
 		}
 	}

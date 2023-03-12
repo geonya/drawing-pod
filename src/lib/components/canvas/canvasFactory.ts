@@ -16,8 +16,6 @@ export class CanvasFactory {
 				moveCursor: 'move',
 				defaultCursor: 'default',
 				fireRightClick: true,
-				perPixelTargetFind: true,
-				targetFindTolerance: 4,
 			})
 			fabric.ActiveSelection.prototype.cornerStyle = 'circle'
 			fabric.Group.prototype.cornerStyle = 'circle'

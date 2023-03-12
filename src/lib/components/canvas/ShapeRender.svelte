@@ -12,8 +12,10 @@
 
 	onMount(() => {
 		if (canvas) {
-			canvas.on('selection:created', () => $renderer?.onObjectSelect())
-			canvas.on('selection:updated', () => $renderer?.onObjectSelectUpdate())
+			canvas.on('selection:created', (e) => $renderer?.onObjectSelect(e))
+			canvas.on('selection:updated', (e) => $renderer?.onObjectSelectUpdate(e))
+			canvas.on('object:selected', (e) => $renderer?.onObjectSelect(e))
+			canvas.on('object:modified', (e) => $renderer?.onObjectSelectUpdate(e))
 			canvas.on('selection:cleared', () => $renderer?.onObjectSelectClear())
 		}
 	})

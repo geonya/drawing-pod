@@ -46,10 +46,10 @@ export const stringRgbaToHex = (color: string): string => {
 	const hex = colord(rgba).toHex()
 	return hex
 }
-export const rgbaChecker = (color: string) => {
+export const rgbaChecker = (color: any) => {
+	if (!color) return INITIAL_RGBA
+	if (color.includes('rgb(')) return color.replace(')', ',1)')
 	if (!color.includes('rgba')) return INITIAL_RGBA
-	if (typeof color === 'object') return INITIAL_RGBA
-	if (color.includes('NaN')) return INITIAL_RGBA
 	return color
 }
 
