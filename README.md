@@ -28,15 +28,14 @@
   - [x] arrow line
   - [x] stick to near object
   - [ ] To attach the center of the corner
-  - [ ]
 - [x] Group
 - [x] selected item delete
 - [x] Delete Static Canvas
 - [x] Brush
 - [x] Align
-- [ ] Lock mode
+- [x] Object Text Box
 - [ ] Menu
-- [ ]
+- [ ] Lock mode with Layer
 - [ ] connect db
 - [ ] login / register
 - [ ] SVG library
