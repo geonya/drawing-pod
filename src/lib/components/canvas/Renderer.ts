@@ -45,33 +45,64 @@ export class Renderer {
 		shape.set(null)
 	}
 
-	onAddRect() {
-		const rect = new fabric.Rect({
+	onMakeObject(type: ObjectType) {
+		let object: fabric.Object | null = null
+		const strokeWidth = 3
+		const rectObj = new fabric.Rect({
 			fill: 'rgba(255,255,255,1)',
 			stroke: 'rgba(0,0,0,1)',
-			strokeWidth: 3,
-			width: 200,
-			height: 200,
+			strokeWidth,
+			width: 250,
+			height: 100,
 			rx: 10,
 			ry: 10,
 			cornerStyle: 'circle',
 		})
-		this.canvas.add(rect)
-		this.canvas.centerObject(rect)
-		this.canvas.setActiveObject(rect)
-	}
-	onAddCircle() {
-		const circle = new fabric.Circle({
-			fill: 'rgba(255,255,255,1)',
+		const textObj = new fabric.IText('Hello World', {
+			fill: 'rgba(0,0,0,1)',
 			stroke: 'rgba(0,0,0,1)',
-			strokeWidth: 3,
-			radius: 100,
-			cornerStyle: 'circle',
+			fontSize: 50,
+			strokeWidth: 1,
+			fontFamily: 'Nanum Pen Script',
+			isEditing: true,
 		})
-		this.canvas.add(circle)
-		this.canvas.centerObject(circle)
-		this.canvas.setActiveObject(circle)
+		switch (type) {
+			case 'rect':
+				this.canvas.centerObject(rectObj)
+				this.canvas.add(rectObj)
+				const centerX = rectObj.left! + rectObj.width! / 2
+				const centerY = rectObj.top! + rectObj.height! / 2
+				textObj.set({
+					left: centerX,
+					top: centerY,
+					originX: 'center',
+					originY: 'center',
+				})
+				this.canvas.add(textObj)
+				this.canvas.setActiveObject(textObj)
+				break
+			case 'circle':
+				object = new fabric.Circle({
+					fill: 'rgba(255,255,255,1)',
+					stroke: 'rgba(0,0,0,1)',
+					strokeWidth,
+					radius: 100,
+					cornerStyle: 'circle',
+				})
+				break
+			case 'text':
+				object = textObj
+				break
+			default:
+				break
+		}
+		if (object) {
+			this.canvas.add(object)
+			this.canvas.setActiveObject(object)
+			this.canvas.renderAll()
+		}
 	}
+
 	onUpdateObject(shape: Shape) {
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject && shape) {
@@ -100,19 +131,6 @@ export class Renderer {
 			}
 		}
 		reader.readAsDataURL(file)
-	}
-
-	onTextAdd() {
-		const text = new fabric.IText('Hello World', {
-			fill: 'rgba(0,0,0,1)',
-			stroke: 'rgba(0,0,0,1)',
-			fontSize: 60,
-			strokeWidth: 1,
-			fontFamily: 'Nanum Pen Script',
-		})
-		this.canvas.add(text)
-		this.canvas.centerObject(text)
-		this.canvas.setActiveObject(text)
 	}
 
 	onAddStickyLine() {

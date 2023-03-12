@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Icon from '../ui/Icon.svelte'
 	import { saveProgress, control, renderer, action } from '$lib/store'
-	import { Action } from '$lib/types'
+	import { Action, ObjectType } from '$lib/types'
 </script>
 
 <div
 	class="col-span-5 flex h-10 w-full items-center justify-evenly rounded-full border border-base-400 backdrop-blur-md"
 >
-	<button id="자물쇠">
+	<button id="자물쇠" on:click={() => $control?.onLockCanvas()}>
 		<Icon name="lock" />
 	</button>
 	<button id="마우스" on:click={() => ($action = Action.DEFAULT)}>
@@ -16,10 +16,10 @@
 	<button id="손" on:click={() => ($action = Action.DRAG)}>
 		<Icon name="hand" />
 	</button>
-	<button id="네모 cursor-pointer" on:click={() => $renderer?.onAddRect()}>
+	<button id="네모 cursor-pointer" on:click={() => $renderer?.onMakeObject(ObjectType.RECT)}>
 		<Icon name="rectangle" />
 	</button>
-	<button id="원" on:click={() => $renderer?.onAddCircle()}>
+	<button id="원" on:click={() => $renderer?.onMakeObject(ObjectType.CIRCLE)}>
 		<Icon name="circle" />
 	</button>
 	<button id="연필" on:click={() => ($action = Action.PENCIL)}>
@@ -39,7 +39,11 @@
 		class="hidden"
 		on:change={(e) => $renderer?.onAddImage(e)}
 	/>
-	<button id="텍스트" on:click={() => $renderer?.onTextAdd()} class="select-none pt-1">
+	<button
+		id="텍스트"
+		on:click={() => $renderer?.onMakeObject(ObjectType.TEXT)}
+		class="select-none pt-1"
+	>
 		<span class="text-2xl font-bold">T</span>
 	</button>
 	<label for="imageUpload" class="grid cursor-pointer place-content-center">

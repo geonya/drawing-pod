@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { action, renderer } from '$lib/store'
 	import { Action } from '$lib/types'
+	import { text } from '@sveltejs/kit'
 	import { onMount } from 'svelte'
 	export let canvas: fabric.Canvas
 	let prevAction = Action.DEFAULT
@@ -154,7 +155,19 @@
 				onDraggingStart()
 			}
 		}
-		if (e.key === 'Delete' || e.key === 'Backspace') {
+
+		if (e.key === 'Backspace' || e.key === 'Delete') {
+			const activeObject = canvas.getActiveObject()
+			if (!activeObject) return
+			if (activeObject.type === 'itext') {
+				const textObject = activeObject as fabric.IText
+				if (textObject.isEditing === true) {
+					return
+				}
+				if (textObject.text && textObject.text.length === 0) {
+					return
+				}
+			}
 			onDelete()
 		}
 	}

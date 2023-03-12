@@ -1,6 +1,7 @@
 import { CANVAS_DATA } from '$lib/constants'
-
+import { isLocked } from '$lib/store'
 export class Control {
+	isLocked = false
 	constructor(private readonly canvas: fabric.Canvas) {}
 	onBringForward() {
 		const activeObject = this.canvas.getActiveObject()
@@ -142,6 +143,26 @@ export class Control {
 			obj.set('top', center - height / 2)
 		})
 		this.canvas.renderAll()
+	}
+
+	onLockCanvas() {
+		this.isLocked = !this.isLocked
+		if (this.isLocked) {
+			this.canvas.discardActiveObject()
+			this.canvas.isDrawingMode = false
+			this.canvas.selection = false
+			this.canvas.forEachObject((obj) => {
+				obj.selectable = false
+			})
+			this.canvas.renderAll()
+		} else {
+			this.canvas.isDrawingMode = false
+			this.canvas.selection = true
+			this.canvas.forEachObject((obj) => {
+				obj.selectable = true
+			})
+			this.canvas.renderAll()
+		}
 	}
 
 	onPreventCanvasExit(e: fabric.IEvent<MouseEvent>) {

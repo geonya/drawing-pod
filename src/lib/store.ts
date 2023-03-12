@@ -51,9 +51,17 @@ const setSaveProgress = () => {
 	}
 }
 
+const setIsLocked = () => {
+	const { subscribe, set } = writable<boolean>(false)
+	return {
+		subscribe,
+		set,
+	}
+}
 export const renderer = setRenderer()
 export const control = setControl()
 export const sideBarOpen = setSideBarOpen()
 export const sideBarKey = setSideBarKey()
 export const saveProgress = setSaveProgress()
 export const action = setAction()
+export const isLocked = setIsLocked()

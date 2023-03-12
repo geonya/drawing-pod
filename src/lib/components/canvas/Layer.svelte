@@ -7,7 +7,7 @@
 	import { Renderer } from './Renderer'
 	import { Control } from './Control'
 	import { control, renderer, sideBarKey, sideBarOpen } from '$lib/store'
-	import { Action, Controller, MotionRender, ShapeRender, Sidebar, Topbar } from '$lib'
+	import { Action, Controller, ShapeRender, Sidebar, Topbar } from '$lib'
 	export let canvas: fabric.Canvas
 
 	onMount(() => {

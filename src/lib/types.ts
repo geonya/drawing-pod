@@ -25,6 +25,7 @@ export enum ObjectType {
 	CIRCLE = 'circle',
 	PATH = 'path',
 	IMAGE = 'image',
+	TEXT = 'text',
 }
 
 export interface ColorType {
