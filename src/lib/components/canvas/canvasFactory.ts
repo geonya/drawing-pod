@@ -21,7 +21,7 @@ export class CanvasFactory {
 				defaultCursor: 'default',
 				fireRightClick: true,
 			})
-			// 배경 그리드 추가 TODO : 객체로 만들지 말 것 (STATIC CANVAS)
+			// 배경 그리드 추가 TODO : 객체로 만들지 말 것 (STATIC CANVAS.)
 			// setGridOnCanvasWithMM(newCanvas)
 			newCanvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), 2.7)
 
