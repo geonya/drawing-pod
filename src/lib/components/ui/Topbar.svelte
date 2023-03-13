@@ -19,9 +19,12 @@
 
 <div class="fixed top-5 left-0 right-0 z-50 mx-auto w-full ">
 	<div class="">
-		<div class="absolute left-20 top-3">
-			<button class="" on:click={toggleMenu}>
-				<Icon name="menu" />
+		<div class="absolute left-20 top-2">
+			<button
+				class="p-2 hover:rounded-full hover:bg-base-100 hover:opacity-80"
+				on:click={toggleMenu}
+			>
+				<Icon name="menu" class="h-6 w-6" />
 			</button>
 			{#if isMenuOpen}
 				<MenuPanel on:close={closeMenu} bind:isMenuOpen bind:menuTitle />

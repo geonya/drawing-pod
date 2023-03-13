@@ -4,6 +4,7 @@
 	import Layer from './Layer.svelte'
 
 	import { setGridOnCanvasWithMM } from '$lib/utils'
+	import BjsCanvas from '../babylonjs/BJSCanvas.svelte'
 	let canvasWrapper: HTMLElement
 	let canvas: fabric.Canvas
 	let staticCanvas: fabric.StaticCanvas
@@ -48,9 +49,9 @@
 </div>
 {#if canvas}
 	<Layer {canvas} {staticCanvas} />
-	<!-- <div class="absolute right-32 top-1/2 z-50 -translate-y-1/2 cursor-grab backdrop-blur-lg">
+	<div class="absolute right-24 top-24 z-50 cursor-grab">
 		<BjsCanvas />
-	</div> -->
+	</div>
 {:else}
 	initializing...
 {/if}

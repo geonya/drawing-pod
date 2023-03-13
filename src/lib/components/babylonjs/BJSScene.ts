@@ -1,6 +1,7 @@
 import { MM_TO_PX } from '$lib/constants'
 import { canvasSVG } from '$lib/store'
 import {
+	Animation,
 	ArcRotateCamera,
 	Color3,
 	Color4,
@@ -26,41 +27,79 @@ export class BJSScene {
 	constructor(private readonly engine: Engine, private readonly canvas: HTMLCanvasElement) {
 		this._scene = new Scene(this.engine)
 		this._scene.clearColor = new Color4(0, 0, 0, 0)
-		const camera = new ArcRotateCamera(
-			'camera',
-			-Math.PI / 2,
-			Math.PI / 2.5,
-			6,
-			new Vector3(0, 0, 0),
+		var scene = new Scene(engine)
+
+		var camera = new ArcRotateCamera(
+			'Camera',
+			-Math.PI / 3,
+			Math.PI / 4,
+			10,
+			Vector3.Zero(),
+			this._scene,
 		)
-		const groundMat = new StandardMaterial('groundMat')
-		groundMat.diffuseColor = new Color3(0, 1, 0)
+
 		camera.attachControl(canvas, true)
-		new DirectionalLight('light', new Vector3(1, 0, 1), this._scene)
-		new DirectionalLight('light', new Vector3(0, 1, -1), this._scene)
-		const faceUV = []
-		faceUV[0] = new Vector4(0.0, 0.0, 0.0, 0.0)
-		faceUV[1] = new Vector4(0.0, 0.0, 1.0, 1.0)
-		faceUV[2] = new Vector4(0.0, 0.0, 0.0, 0.0)
-		faceUV[3] = new Vector4(0.0, 0.0, 0.0, 0.0)
-		faceUV[4] = new Vector4(0.0, 0.0, 0.0, 0.0)
-		faceUV[4] = new Vector4(0.0, 0.0, 0.0, 0.0)
 
-		const box = MeshBuilder.CreateBox('box', {
-			width: 4,
-			height: 3,
-			depth: 0.3,
-			faceUV,
-			wrap: true,
+		var light1 = new DirectionalLight('DirectionalLight', new Vector3(0, -1, 1), this._scene)
+		var light2 = new HemisphericLight('HemiLight', new Vector3(0, 1, 0), this._scene)
+		light1.intensity = 0.7
+		light2.intensity = 0.6
+
+		var box = MeshBuilder.CreateBox(
+			'box',
+			{
+				width: 2,
+				height: 2,
+				depth: 2,
+				faceColors: [
+					new Color4(1, 0, 0, 1),
+					new Color4(0, 1, 0, 1),
+					new Color4(0, 0, 1, 1),
+					new Color4(1, 1, 0, 1),
+					new Color4(1, 0, 1, 1),
+					new Color4(0, 1, 1, 1),
+				],
+			},
+			this._scene,
+		)
+		box.position.y = 2
+
+		var frameRate = 10
+		//Position Animation
+
+		//Rotation Animation
+		var yRot = new Animation(
+			'yRot',
+			'rotation.y',
+			frameRate,
+			Animation.ANIMATIONTYPE_FLOAT,
+			Animation.ANIMATIONLOOPMODE_CYCLE,
+		)
+
+		var keyFramesR = []
+
+		keyFramesR.push({
+			frame: 0,
+			value: 0,
 		})
-		box.position.y = 1
 
-		const boxMat = new StandardMaterial('boxMat', this._scene)
-		box.material = boxMat
-
-		canvasSVG.subscribe((dataURL) => {
-			boxMat.diffuseTexture = new Texture(dataURL, this._scene)
+		keyFramesR.push({
+			frame: 2.5 * frameRate,
+			value: 2 * Math.PI,
 		})
+
+		keyFramesR.push({
+			frame: 5 * frameRate,
+			value: 4 * Math.PI,
+		})
+
+		yRot.setKeys(keyFramesR)
+
+		const nextAnimation = () => {
+			this._scene.beginDirectAnimation(box, [yRot], 0, 2 * frameRate, true)
+		}
+
+		this._scene.beginDirectAnimation(box, [yRot], 0, 2 * frameRate, false, 1, nextAnimation)
 	}
 	get scene(): Scene {
 		return this._scene

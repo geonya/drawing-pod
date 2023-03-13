@@ -181,12 +181,16 @@ export class Control {
 			!objWidth
 		)
 			return
-		e.target.top = e.target.top <= 0 ? 0 : e.target.top
+		e.target.top = e.target.top <= e.target.height / 2 ? e.target.height / 2 : e.target.top
 		e.target.top =
-			e.target.top >= this.canvas.height - objHeight ? this.canvas.height - objHeight : e.target.top
-		e.target.left = e.target.left <= 0 ? 0 : e.target.left
+			e.target.top >= this.canvas.height - e.target.height / 2
+				? this.canvas.height - e.target.height / 2
+				: e.target.top
+		e.target.left = e.target.left <= e.target.width / 2 ? e.target.width / 2 : e.target.left
 		e.target.left =
-			e.target.left >= this.canvas.width - objWidth ? this.canvas.width - objWidth : e.target.left
+			e.target.left >= this.canvas.width - e.target.width / 2
+				? this.canvas.width - e.target.width / 2
+				: e.target.left
 	}
 	onSave() {
 		const storageString = localStorage.getItem(CANVAS_DATA)

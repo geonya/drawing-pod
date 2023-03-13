@@ -100,7 +100,8 @@ export class Renderer {
 		const group = new fabric.Group(objects, {
 			fill: 'rgba(236, 239, 244, 0.9)',
 			stroke: 'rgba(76, 86, 106, 1)',
-
+			originX: 'center',
+			originY: 'center',
 			strokeWidth: 1,
 		})
 		return group
