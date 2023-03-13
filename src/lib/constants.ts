@@ -4,3 +4,6 @@ export const INITIAL_HSVA = { h: 0, s: 0, v: 100, a: 1 }
 export const AUTO_SAVE_DELAY = 2000000
 export const MOTION_CONTEXT_KEY = Symbol()
 export const CANVAS_CONTEXT_KEY = Symbol()
+// 1px = 0.264583 mm
+export const PX_TO_MM = 3.7795275590551
+export const MM_TO_PX = 0.264583

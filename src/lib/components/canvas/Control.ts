@@ -31,7 +31,7 @@ export class Control {
 			if (activeObject.type === 'group') {
 				const objectGroup = activeObject as fabric.Group
 				objectGroup.toActiveSelection()
-				this.canvas.renderAll()
+				this.canvas.discardActiveObject()
 			}
 		}
 	}

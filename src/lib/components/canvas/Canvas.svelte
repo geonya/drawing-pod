@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { fabric } from 'fabric'
-	import type { IEvent } from 'fabric/fabric-impl'
+	import { renderer } from '$lib/store'
 	import { onMount } from 'svelte'
-	import { CanvasFactory } from './canvasFactory'
+	import BjsCanvas from '../babylonjs/BJSCanvas.svelte'
+	import { CanvasFactory } from './CanvasFactory'
 	import Layer from './Layer.svelte'
 	let canvasElement: HTMLCanvasElement
 	let canvasWrapper: HTMLElement
@@ -12,40 +12,29 @@
 		const canvasFactory = await CanvasFactory.getInstance(canvasElement)
 		return canvasFactory?.canvas
 	}
-	function onResize() {
-		if (!canvas) return
-		canvas.setDimensions({
-			width: window.innerWidth,
-			height: window.innerHeight,
-		})
-		canvas.calcOffset()
-	}
-	function onZoom(e: IEvent<WheelEvent>) {
-		if (!canvas || !canvas.width || !canvas.height) return
-		const delta = e.e.deltaY
-		let zoom = canvas.getZoom()
-		zoom *= 0.999 ** delta
-		if (zoom > 5) zoom = 5
-		if (zoom < 1) zoom = 1
-		canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
-		e.e.preventDefault()
-		e.e.stopPropagation()
-	}
+
 	onMount(async () => {
 		canvas = await initCanvas(canvasElement)
 		if (canvas) {
-			canvas.on('resizing', () => {})
-			canvas.on('mouse:wheel', (e) => onZoom(e))
 		}
 	})
 </script>
 
-<svelte:window on:resize={onResize} />
-<div class="relative h-screen w-full overflow-hidden " bind:this={canvasWrapper}>
-	<canvas id="canvas" bind:this={canvasElement} class="absolute inset-0 z-30 h-full w-full" />
+<svelte:window />
+<div
+	id="canvasWrapper"
+	class="relative grid h-screen w-full grid-flow-col justify-items-center overflow-hidden"
+	bind:this={canvasWrapper}
+>
+	<div class="hidden border lg:block" />
+	<canvas id="canvas" bind:this={canvasElement} class="block border" />
+	<div class="hidden border lg:block" />
 </div>
 {#if canvas}
 	<Layer {canvas} />
+	<!-- <div class="absolute right-32 top-1/2 z-50 -translate-y-1/2 cursor-grab backdrop-blur-lg">
+		<BjsCanvas />
+	</div> -->
 {:else}
 	initializing...
 {/if}

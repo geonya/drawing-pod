@@ -61,7 +61,7 @@
 	<button id="다운로드" on:click={() => $control?.onDownloadAsSVG()}>
 		<Icon name="download" />
 	</button>
-	<button id="저장" class="relative" on:click={() => $control?.onSave()}>
+	<button id="저장" class="relative" on:click={() => $renderer?.onAddSignBoard()}>
 		<div class="absolute -top-6 -right-3 z-10 h-3 w-12 overflow-hidden rounded-full border text-xs">
 			{#if $saveProgress >= 1.0}
 				<div class="flex h-full items-center justify-center bg-green-500" style="width:100%">

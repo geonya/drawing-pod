@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { action, canvasSVG, renderer } from '$lib/store'
-	import { Action } from '$lib/types'
-	import { text } from '@sveltejs/kit'
+	import { action, canvasSVG, control, renderer } from '$lib/store'
+	import { Action, ObjectType } from '$lib/types'
+	import type { IEvent } from 'fabric/fabric-impl'
 	import { onMount } from 'svelte'
 	import { fabric } from 'fabric'
+	import { setGridOnCanvasWithMM } from '$lib/utils'
+	import { MM_TO_PX } from '$lib/constants'
 	export let canvas: fabric.Canvas
 	let prevAction = Action.DEFAULT
 
@@ -183,23 +185,91 @@
 		}
 	}
 	function onCanvasUpdated() {
-		canvas.backgroundColor = 'rgba(255,255,255,1)'
-		const svg = canvas.toSVG()
-		$canvasSVG = svg
+		const objects = canvas.getObjects()
+		const _canvas = new fabric.Canvas(null, {
+			width: 200,
+			height: 100,
+			backgroundColor: 'rgba(255,255,255,0)',
+		})
+		if (!objects || objects.length === 0) return
+		objects.forEach((o: fabric.Object) => {
+			o.clone((_o: fabric.Object) => {
+				_canvas.centerObject(_o)
+				_canvas.add(_o)
+				_canvas.renderAll()
+				const dataURL = _canvas.toDataURL({
+					format: 'png',
+					quality: 10,
+				})
+				canvasSVG.set(dataURL)
+			})
+		})
 	}
+	function onZoom(e: IEvent<WheelEvent>) {
+		if (!canvas || !canvas.width || !canvas.height) return
+		const delta = e.e.deltaY
+		let zoom = canvas.getZoom()
+		zoom *= 0.999 ** delta
+		if (zoom > 5) zoom = 5
+		if (zoom < 1) zoom = 1
+		canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
+		e.e.preventDefault()
+		e.e.stopPropagation()
+	}
+	function onResize() {
+		canvas.setWidth(window.innerHeight)
+		canvas.setHeight(window.innerHeight)
+		setGridOnCanvasWithMM(canvas)
+	}
+
+	function setInitSvgOnBabylon() {
+		// canvas.backgroundColor = 'rgba(255,255,255,1)'
+		// const svg = canvas.toSVG()
+		// $canvasSVG = svg
+	}
+
 	onMount(() => {
-		canvas.backgroundColor = 'rgba(255,255,255,1)'
-		const svg = canvas.toSVG()
-		$canvasSVG = svg
-		canvas.on('selection:created', () => ($action = Action.DEFAULT))
-		canvas.on('selection:updated', () => ($action = Action.DEFAULT))
-		canvas.on('selection:cleared', () => onCanvasUpdated())
-		canvas.on('object:added', () => onCanvasUpdated())
-		canvas.on('object:modified', () => onCanvasUpdated())
-		canvas.on('object:scaling', () => onCanvasUpdated())
-		canvas.on('object:moving', () => onCanvasUpdated())
+		canvas.on('resizing', onResize)
+		canvas.on('mouse:wheel', (e) => onZoom(e))
+		canvas.on('selection:created', () => {
+			$action = Action.DEFAULT
+			onCanvasUpdated()
+		})
+		canvas.on('selection:updated', () => {
+			$action = Action.DEFAULT
+			onCanvasUpdated()
+		})
+		canvas.on('selection:cleared', () => {
+			onCanvasUpdated()
+		})
+		canvas.on('object:added', () => {
+			onCanvasUpdated()
+		})
+		canvas.on('object:modified', () => {
+			onCanvasUpdated()
+		})
+		canvas.on('object:scaling', () => {
+			onCanvasUpdated()
+		})
+		canvas.on('object:moving', (e) => {
+			$control?.onPreventCanvasExit(e)
+			{
+				onCanvasUpdated()
+			}
+		})
+		return () => {
+			canvas.off('resizing')
+			canvas.off('mouse:wheel')
+			canvas.off('selection:created')
+			canvas.off('selection:updated')
+			canvas.off('selection:cleared')
+			canvas.off('object:added')
+			canvas.off('object:modified')
+			canvas.off('object:scaling')
+			canvas.off('object:moving')
+		}
 	})
 </script>
 
-<svelte:window on:keydown={(e) => onKeyDown(e)} on:keyup={(e) => onKeyUp(e)} />
+<svelte:window on:keydown={(e) => onKeyDown(e)} on:keyup={(e) => onKeyUp(e)} on:resize={onResize} />
 <slot />
