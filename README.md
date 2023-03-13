@@ -38,10 +38,13 @@
 - [x] Background Grid
 - [x] px to mm
 - [x] signboard
+
   - [ ] add child canvas X
   - [ ]
   - [ ]
-- [ ] Menu
+
+- [x] Menu
+- [ ] Ctrl-C / Ctrl-V / Ctrl-Z
 - [ ] Layer
 - [ ] Lock/Invisible mode with Layer
 - [ ] Connect BabylonJS

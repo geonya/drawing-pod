@@ -28,7 +28,7 @@
 			defaultCursor: 'default',
 			fireRightClick: true,
 		})
-		canvas.zoomToPoint(new fabric.Point(canvas.width! / 2, canvas.height! / 2), 2.7)
+		canvas.zoomToPoint(new fabric.Point(canvas.width! / 2, canvas.height! / 2), 2)
 		fabric.ActiveSelection.prototype.cornerStyle = 'circle'
 		fabric.Group.prototype.cornerStyle = 'circle'
 		fabric.Object.prototype.cornerStyle = 'circle'
@@ -38,7 +38,7 @@
 			height: canvasWrapper.getBoundingClientRect().height,
 		})
 		setGridOnCanvasWithMM(staticCanvas)
-		staticCanvas.zoomToPoint(new fabric.Point(canvas.width! / 2, canvas.height! / 2), 2.7)
+		staticCanvas.zoomToPoint(new fabric.Point(canvas.width! / 2, canvas.height! / 2), 2)
 	})
 </script>
 

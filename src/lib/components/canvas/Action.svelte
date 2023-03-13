@@ -7,6 +7,7 @@
 	export let canvas: fabric.Canvas
 	export let staticCanvas: fabric.StaticCanvas
 	let prevAction = Action.DEFAULT
+	let clipboard: fabric.Object | null = null
 
 	$: {
 		onActionHandler($action)
@@ -148,6 +149,39 @@
 	}
 	function onKeyDown(e: KeyboardEvent) {
 		if (e.repeat) return
+		console.log(e)
+		if ((e.key === 'c' && e.ctrlKey) || (e.key === 'c' && e.metaKey)) {
+			canvas.getActiveObject()?.clone((cloned: fabric.Object) => {
+				clipboard = cloned
+			})
+		}
+		if ((e.key === 'v' && e.ctrlKey) || (e.key === 'v' && e.metaKey)) {
+			if (!clipboard) return
+			clipboard.clone((cloned: fabric.Object) => {
+				canvas.discardActiveObject()
+				cloned.set({
+					left: cloned.left! + 10,
+					top: cloned.top! + 10,
+					evented: true,
+				})
+				if (cloned.type === 'activeSelection') {
+					// active selection needs a reference to the canvas.
+					cloned.canvas = canvas
+					;(cloned as fabric.ActiveSelection).forEachObject((obj: fabric.Object) => {
+						canvas.add(obj)
+					})
+					// this should solve the unselectability
+					cloned.setCoords()
+				} else {
+					canvas.add(cloned)
+				}
+				// ??
+				// clipboard!.top = clipboard!.top! + 10
+				// clipboard!.left = clipboard!.left! + 10
+				canvas.setActiveObject(cloned)
+				canvas.requestRenderAll()
+			})
+		}
 		if (e.key === 'Escape') {
 			$action = Action.DEFAULT
 			canvas.discardActiveObject()
@@ -173,13 +207,12 @@
 					}
 				}
 			}
-
 			onDelete()
 		}
 	}
 	function onKeyUp(e: KeyboardEvent) {
 		e.preventDefault()
-		if (e.key === ' ') {
+		if (e.key) {
 			onDraggingEnd()
 		}
 	}
@@ -203,6 +236,7 @@
 	}
 
 	onMount(() => {
+		canvas.on('before:render', () => $control?.setCanvasBoundary())
 		canvas.on('resizing', onResize)
 		canvas.on('mouse:wheel', (e) => onZoom(e))
 		canvas.on('selection:created', () => {

@@ -15,8 +15,8 @@ export class Renderer {
 			stroke: 'rgba(76, 86, 106, 1)',
 
 			strokeWidth: 1,
-			width: 250,
-			height: 100,
+			width: 300 * MM_TO_PX,
+			height: 120 * MM_TO_PX,
 			rx: 10,
 			ry: 10,
 			cornerStyle: 'circle',
@@ -27,7 +27,7 @@ export class Renderer {
 		new fabric.Textbox(text, {
 			fill: 'rgba(76, 86, 106, 1)',
 			stroke: 'rgba(76, 86, 106, 1)',
-			fontSize: 30,
+			fontSize: 50 * MM_TO_PX,
 			strokeWidth: 0,
 			fontFamily: 'Nanum Pen Script',
 			cornerStyle: 'circle',
@@ -40,7 +40,7 @@ export class Renderer {
 			fill: 'rgba(76, 86, 106, 1)',
 			stroke: 'rgba(76, 86, 106, 1)',
 			fontSize: 30,
-			strokeWidth: 0,
+			strokeWidth: 1,
 			fontFamily: 'Nanum Pen Script',
 			cornerStyle: 'circle',
 			originX: 'center',
@@ -71,6 +71,7 @@ export class Renderer {
 		sideBarKey.set(Symbol())
 	}
 	onObjectSelect(e?: fabric.IEvent) {
+		console.log('selected')
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
 			shape.set({
@@ -83,10 +84,12 @@ export class Renderer {
 		}
 	}
 	onObjectSelectUpdate(e: fabric.IEvent) {
+		console.log('updated')
 		this.onObjectSelect()
 		this.changeSideBar()
 	}
 	onObjectSelectClear() {
+		console.log('cleared')
 		this.canvas.discardActiveObject().renderAll()
 		this.onSidebarClose()
 		this.setClearShape()
@@ -102,7 +105,8 @@ export class Renderer {
 			stroke: 'rgba(76, 86, 106, 1)',
 			originX: 'center',
 			originY: 'center',
-			strokeWidth: 1,
+			strokeWidth: 0,
+			subTargetCheck: true,
 		})
 		return group
 	}

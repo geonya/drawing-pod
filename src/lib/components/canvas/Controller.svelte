@@ -53,10 +53,9 @@
 	}
 	onMount(() => {
 		if (!canvas) return
-
-		canvas.on('before:render', () => $control?.setCanvasBoundary())
-		// onLoadStorageData(canvas)
-		// onIntervalAutoSaveWithTimer()
-		// onAutoSaveInLocalStorage(canvas)
+		// 자동 저장 기능
+		onLoadStorageData(canvas)
+		onIntervalAutoSaveWithTimer()
+		onAutoSaveInLocalStorage(canvas)
 	})
 </script>
