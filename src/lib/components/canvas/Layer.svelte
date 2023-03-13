@@ -9,6 +9,7 @@
 	import { control, renderer, sideBarKey, sideBarOpen } from '$lib/store'
 	import { Action, Controller, ShapeRender, Sidebar, Topbar } from '$lib'
 	export let canvas: fabric.Canvas
+	export let staticCanvas: fabric.StaticCanvas
 
 	onMount(() => {
 		if (canvas) {
@@ -18,7 +19,7 @@
 	})
 </script>
 
-<Action {canvas}>
+<Action {canvas} {staticCanvas}>
 	<Controller {canvas} />
 	<ShapeRender {canvas} />
 	<Topbar />

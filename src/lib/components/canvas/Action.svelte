@@ -7,6 +7,7 @@
 	import { setGridOnCanvasWithMM } from '$lib/utils'
 	import { MM_TO_PX } from '$lib/constants'
 	export let canvas: fabric.Canvas
+	export let staticCanvas: fabric.StaticCanvas
 	let prevAction = Action.DEFAULT
 
 	$: {
@@ -193,6 +194,7 @@
 		if (zoom > 5) zoom = 5
 		if (zoom < 1) zoom = 1
 		canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
+		staticCanvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
 		e.e.preventDefault()
 		e.e.stopPropagation()
 	}

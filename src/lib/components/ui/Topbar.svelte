@@ -1,14 +1,27 @@
 <script lang="ts">
 	import Icon from './Icon.svelte'
-	import TopPanel from '../panel/TopPanel.svelte'
+	import MenuPanel from './panel/MenuPanel.svelte'
+	import TopPanel from './panel/TopPanel.svelte'
+
+	let isMenuOpen = false
+
+	function toggleMenu() {
+		isMenuOpen = !isMenuOpen
+	}
+	function closeMenu() {
+		isMenuOpen = false
+	}
 </script>
 
 <div class="fixed top-5 left-0 right-0 z-50 mx-auto w-full ">
 	<div class="">
-		<div class="absolute top-0 left-12">
-			<button class="self-start">
+		<div class="absolute left-20 top-3">
+			<button class="" on:click={toggleMenu}>
 				<Icon name="menu" />
 			</button>
+			{#if isMenuOpen}
+				<MenuPanel on:close={closeMenu} bind:isMenuOpen />
+			{/if}
 		</div>
 		<!-- Top Control Panel -->
 		<TopPanel />

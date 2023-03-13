@@ -58,15 +58,15 @@ export const getDistance = (point1: fabric.Point, point2: fabric.Point) => {
 	return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2))
 }
 
-export function setGridOnCanvasWithMM(canvas: fabric.Canvas) {
+export function setGridOnCanvasWithMM(canvas: fabric.Canvas | fabric.StaticCanvas) {
 	// grid 간격 50mm
 	const gridSpacing = 50 * MM_TO_PX
 	const gridLength = 50 * MM_TO_PX
 	const gridColor = '#cccccc' // 그리드 색상
 
 	if (typeof document === 'undefined') return // 서버사이드 렌더링에서는 실행하지 않음
-	const canvasWidth = canvas.width!
-	const canvasHeight = canvas.height!
+	const canvasWidth = window.innerWidth!
+	const canvasHeight = window.innerHeight!
 
 	// 그리드 그리기
 	for (let i = 0; i < canvasWidth / gridSpacing; i++) {

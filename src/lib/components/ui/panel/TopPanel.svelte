@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Icon from '../ui/Icon.svelte'
+	import Icon from '../Icon.svelte'
 	import { saveProgress, control, renderer, action } from '$lib/store'
 	import { Action, ObjectType } from '$lib/types'
 </script>

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { renderer } from '$lib/store'
 	import { onMount } from 'svelte'
-	import BjsCanvas from '../babylonjs/BJSCanvas.svelte'
 	import { fabric } from 'fabric'
 	import Layer from './Layer.svelte'
-	let canvasElement: HTMLCanvasElement
+
+	import { setGridOnCanvasWithMM } from '$lib/utils'
 	let canvasWrapper: HTMLElement
 	let canvas: fabric.Canvas | null | undefined
+	let staticCanvas: fabric.StaticCanvas | null | undefined
 
 	// async function initCanvas(canvasElement: HTMLCanvasElement) {
 	// 	const canvasFactory = await CanvasFactory.getInstance(canvasElement)
@@ -19,9 +19,7 @@
 			height: canvasWrapper.getBoundingClientRect().height,
 			centeredScaling: true,
 			centeredRotation: true,
-			backgroundColor: 'rgba(255, 255, 255, 0)',
-			// . preserveObjectStacking 옵션
-			// 객체들의 쌓이는 순서를 유지하면서 비율이 일치하도록 자동으로 조정
+			backgroundColor: 'rgba(0, 0, 0, 0)',
 			preserveObjectStacking: true,
 			selection: true,
 			hoverCursor: 'pointer',
@@ -29,21 +27,27 @@
 			defaultCursor: 'default',
 			fireRightClick: true,
 		})
-		// 배경 그리드 추가 TODO : 객체로 만들지 말 것 (STATIC CANVAS.)
-		// setGridOnCanvasWithMM(newCanvas)
 		canvas.zoomToPoint(new fabric.Point(canvas.width! / 2, canvas.height! / 2), 2.7)
 		fabric.ActiveSelection.prototype.cornerStyle = 'circle'
 		fabric.Group.prototype.cornerStyle = 'circle'
 		fabric.Object.prototype.cornerStyle = 'circle'
+
+		staticCanvas = new fabric.StaticCanvas('staticCanvas', {
+			width: canvasWrapper.getBoundingClientRect().width,
+			height: canvasWrapper.getBoundingClientRect().height,
+		})
+		setGridOnCanvasWithMM(staticCanvas)
+		staticCanvas.zoomToPoint(new fabric.Point(canvas.width! / 2, canvas.height! / 2), 2.7)
 	})
 </script>
 
 <svelte:window />
-<div id="canvasWrapper" class="absolute inset-0 h-screen w-full" bind:this={canvasWrapper}>
-	<canvas id="canvas" bind:this={canvasElement} class="block" />
+<div id="canvasWrapper" class="relative h-screen w-full" bind:this={canvasWrapper}>
+	<canvas id="canvas" class="absolute inset-0 z-30 h-full w-full" />
+	<canvas id="staticCanvas" class="absolute inset-0 z-20 h-full w-full" />
 </div>
 {#if canvas}
-	<Layer {canvas} />
+	<Layer {canvas} {staticCanvas} />
 	<!-- <div class="absolute right-32 top-1/2 z-50 -translate-y-1/2 cursor-grab backdrop-blur-lg">
 		<BjsCanvas />
 	</div> -->
