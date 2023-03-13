@@ -217,7 +217,7 @@ export class Control {
 		downloadLink.setAttribute('href', 'data:image/svg+xml;utf8,' + encodeURIComponent(svg))
 		downloadLink.click()
 	}
-	onZoom() {
+	setCanvasBoundary() {
 		const zoom = this.canvas.getZoom()
 		const vp = this.canvas.viewportTransform
 		if (!vp) return

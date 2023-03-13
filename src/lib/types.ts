@@ -40,3 +40,5 @@ export interface IShape {
 	objectType?: ObjectType | null
 	strokeWidth?: number | null
 }
+
+export type MenuTitle = 'about' | 'save' | 'quit' | 'preferences' | 'help'

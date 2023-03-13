@@ -4,8 +4,6 @@
 	import type { IEvent } from 'fabric/fabric-impl'
 	import { onMount } from 'svelte'
 	import { fabric } from 'fabric'
-	import { setGridOnCanvasWithMM } from '$lib/utils'
-	import { MM_TO_PX } from '$lib/constants'
 	export let canvas: fabric.Canvas
 	export let staticCanvas: fabric.StaticCanvas
 	let prevAction = Action.DEFAULT

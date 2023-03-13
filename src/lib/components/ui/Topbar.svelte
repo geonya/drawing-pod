@@ -1,9 +1,13 @@
 <script lang="ts">
+	import type { MenuTitle } from '$lib/types'
 	import Icon from './Icon.svelte'
+	import MenuContentGenerator from './panel/MenuContentGenerator.svelte'
 	import MenuPanel from './panel/MenuPanel.svelte'
 	import TopPanel from './panel/TopPanel.svelte'
 
 	let isMenuOpen = false
+
+	let menuTitle: MenuTitle | null = null
 
 	function toggleMenu() {
 		isMenuOpen = !isMenuOpen
@@ -20,7 +24,7 @@
 				<Icon name="menu" />
 			</button>
 			{#if isMenuOpen}
-				<MenuPanel on:close={closeMenu} bind:isMenuOpen />
+				<MenuPanel on:close={closeMenu} bind:isMenuOpen bind:menuTitle />
 			{/if}
 		</div>
 		<!-- Top Control Panel -->
@@ -54,3 +58,12 @@
 		</div>
 	</div>
 </div>
+{#if isMenuOpen}
+	<button
+		class="fixed inset-0 z-30 h-full w-full"
+		on:click={() => {
+			isMenuOpen = false
+		}}
+	/>
+{/if}
+<MenuContentGenerator bind:menuTitle />

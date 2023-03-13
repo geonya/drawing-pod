@@ -54,7 +54,7 @@
 	onMount(() => {
 		if (!canvas) return
 
-		canvas.on('before:render', () => $control?.onZoom())
+		canvas.on('before:render', () => $control?.setCanvasBoundary())
 		// onLoadStorageData(canvas)
 		// onIntervalAutoSaveWithTimer()
 		// onAutoSaveInLocalStorage(canvas)

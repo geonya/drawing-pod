@@ -5,8 +5,8 @@
 
 	import { setGridOnCanvasWithMM } from '$lib/utils'
 	let canvasWrapper: HTMLElement
-	let canvas: fabric.Canvas | null | undefined
-	let staticCanvas: fabric.StaticCanvas | null | undefined
+	let canvas: fabric.Canvas
+	let staticCanvas: fabric.StaticCanvas
 
 	// async function initCanvas(canvasElement: HTMLCanvasElement) {
 	// 	const canvasFactory = await CanvasFactory.getInstance(canvasElement)
