@@ -1,7 +1,9 @@
 import { canvasSVG } from '$lib/store'
 import {
 	ArcRotateCamera,
+	Color3,
 	Color4,
+	DirectionalLight,
 	DynamicTexture,
 	HemisphericLight,
 	Mesh,
@@ -23,38 +25,41 @@ export class BJSScene {
 	constructor(private readonly engine: Engine, private readonly canvas: HTMLCanvasElement) {
 		this._scene = new Scene(this.engine)
 		this._scene.clearColor = new Color4(0, 0, 0, 0)
-		var camera = new ArcRotateCamera(
-			'Camera',
-			-Math.PI / 1,
-			Math.PI / 3,
-			25,
-			Vector3.Zero(),
-			this._scene,
+		const camera = new ArcRotateCamera(
+			'camera',
+			-Math.PI / 2,
+			Math.PI / 2.5,
+			16,
+			new Vector3(0, 0, 0),
 		)
+		const groundMat = new StandardMaterial('groundMat')
+		groundMat.diffuseColor = new Color3(0, 1, 0)
 		camera.attachControl(canvas, true)
+		new DirectionalLight('light', new Vector3(1, 0, 1), this._scene)
+		new DirectionalLight('light', new Vector3(0, 1, -1), this._scene)
+		const faceUV = []
+		faceUV[0] = new Vector4(0.0, 0.0, 0.0, 0.0)
+		faceUV[1] = new Vector4(0.0, 0.0, 1.0, 1.0)
+		faceUV[2] = new Vector4(0.0, 0.0, 0.0, 0.0)
+		faceUV[3] = new Vector4(0.0, 0.0, 0.0, 0.0)
+		faceUV[4] = new Vector4(0.0, 0.0, 0.0, 0.0)
 
-		// Add lights to the scene
-		var light = new HemisphericLight('light1', new Vector3(0, 1, 0), this._scene)
-		light.intensity = 0.7
-		var groundWidth = 20
-		var groundHeight = 10
+		const box = MeshBuilder.CreateBox('box', {
+			width: 12,
+			height: 8,
+			depth: 0.3,
+			faceUV,
+			wrap: true,
+		})
+		box.position.y = 1
 
-		var ground = MeshBuilder.CreateGround(
-			'ground1',
-			{ width: groundWidth, height: groundHeight, subdivisions: 25 },
-			this._scene,
-		)
+		const myDynamicTexture = new DynamicTexture('svg', { width: 1600, height: 900 }, this._scene)
+		const boxMat = new StandardMaterial('boxMat', this._scene)
+		const textureBox = myDynamicTexture
+		boxMat.diffuseTexture = textureBox
+		box.material = boxMat
 
-		const myDynamicTexture = new DynamicTexture('svg', { width: 500, height: 500 }, this._scene)
-		const mat = new StandardMaterial('', this._scene)
-
-		var textureResolution = 512
-
-		const textureGround = myDynamicTexture
-		var materialGround = new StandardMaterial('Mat', this._scene)
-		materialGround.diffuseTexture = textureGround
-		ground.material = materialGround
-		const ctx = textureGround.getContext()
+		const ctx = textureBox.getContext()
 		canvasSVG.subscribe((newValue) => {
 			this.svgSrc = this.updateSVG(newValue)
 			if (this.svgSrc) {
@@ -63,7 +68,7 @@ export class BJSScene {
 				img.src = src
 				img.onload = () => {
 					ctx.drawImage(img, 0, 0)
-					textureGround.update()
+					textureBox.update()
 				}
 			}
 		})

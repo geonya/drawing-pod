@@ -188,10 +188,15 @@
 		$canvasSVG = svg
 	}
 	onMount(() => {
+		canvas.backgroundColor = 'rgba(255,255,255,1)'
+		const svg = canvas.toSVG()
+		$canvasSVG = svg
 		canvas.on('selection:created', () => ($action = Action.DEFAULT))
 		canvas.on('selection:updated', () => ($action = Action.DEFAULT))
+		canvas.on('selection:cleared', () => onCanvasUpdated())
 		canvas.on('object:added', () => onCanvasUpdated())
 		canvas.on('object:modified', () => onCanvasUpdated())
+		canvas.on('object:scaling', () => onCanvasUpdated())
 		canvas.on('object:moving', () => onCanvasUpdated())
 	})
 </script>

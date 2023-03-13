@@ -12,7 +12,7 @@ export class Renderer {
 		new fabric.Rect({
 			fill: 'rgba(236, 239, 244, 0.8)',
 			stroke: 'rgba(76, 86, 106, 1)',
-			shadow: '0 25px 50px -12px rgb(0 0 0 / 0.25);',
+
 			strokeWidth: 1,
 			width: 250,
 			height: 100,
@@ -50,7 +50,7 @@ export class Renderer {
 		new fabric.Circle({
 			fill: 'rgba(236, 239, 244, 0.8)',
 			stroke: 'rgba(76, 86, 106, 1)',
-			shadow: '0 25px 50px -12px rgb(0 0 0 / 0.25);',
+
 			strokeWidth: 1,
 			radius: 100,
 			cornerStyle: 'circle',
@@ -101,7 +101,7 @@ export class Renderer {
 			originY: 'center',
 			fill: 'rgba(236, 239, 244, 0.9)',
 			stroke: 'rgba(76, 86, 106, 1)',
-			shadow: '0 25px 50px -12px rgb(0 0 0 / 0.25);',
+
 			strokeWidth: 1,
 		})
 		return group
