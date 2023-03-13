@@ -5,7 +5,7 @@
 </script>
 
 <div
-	class="col-span-5 flex h-10 w-full items-center justify-evenly rounded-full border border-base-400 backdrop-blur-md"
+	class="absolute top-0 left-1/2 flex h-10 w-2/3 -translate-x-1/2 items-center justify-evenly rounded-full border border-base-400 backdrop-blur-md"
 >
 	<button id="자물쇠" on:click={() => $control?.onLockCanvas()}>
 		<Icon name="lock" />
@@ -61,7 +61,7 @@
 	<button id="다운로드" on:click={() => $control?.onDownloadAsSVG()}>
 		<Icon name="download" />
 	</button>
-	<button id="저장" class="relative" on:click={() => $renderer?.onAddSignBoard()}>
+	<button id="저장" class="relative" on:click={() => true}>
 		<div class="absolute -top-6 -right-3 z-10 h-3 w-12 overflow-hidden rounded-full border text-xs">
 			{#if $saveProgress >= 1.0}
 				<div class="flex h-full items-center justify-center bg-green-500" style="width:100%">

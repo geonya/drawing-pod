@@ -329,107 +329,108 @@ export class Renderer {
 		})
 	}
 
-	onAddSignBoard() {
-		let dataURL: string = ''
-		fabric.Image.fromURL('/bg_stainless.jpg', (img) => {
-			fabric.loadSVGFromURL('/cloud.svg', (objects, options) => {
-				const signText = new fabric.Textbox('팟플레이스', {
-					fill: 'rgba(255, 255, 255, 1)',
-					stroke: 'rgba(255, 255, 255, 1)',
-					fontSize: 70 * MM_TO_PX,
-					strokeWidth: 0,
-					fontFamily: 'Nanum Pen Script',
-					cornerStyle: 'circle',
-					originX: 'center',
-					textAlign: 'center',
-					left: img.left!,
-					top: img.top! + 50 * MM_TO_PX,
-				})
-				const cloud = objects[0]
-				cloud.set({
-					originX: 'center',
-					originY: 'center',
-					left: img.left!,
-					top: img.top! - 30 * MM_TO_PX,
-					stroke: 'rgba(255, 255, 255, 1)',
-				})
-				cloud.scaleToWidth(100 * MM_TO_PX)
-				cloud.scaleToHeight(100 * MM_TO_PX)
-				img.set({
-					width: 400 * MM_TO_PX,
-					height: 300 * MM_TO_PX,
-					cornerStyle: 'circle',
-					originX: 'center',
-					originY: 'center',
-				})
+	// TODO : Simplify
+	// onAddSignBoard() {
+	// 	let dataURL: string = ''
+	// 	fabric.Image.fromURL('/bg_stainless.jpg', (img) => {
+	// 		fabric.loadSVGFromURL('/cloud.svg', (objects, options) => {
+	// 			const signText = new fabric.Textbox('팟플레이스', {
+	// 				fill: 'rgba(255, 255, 255, 1)',
+	// 				stroke: 'rgba(255, 255, 255, 1)',
+	// 				fontSize: 70 * MM_TO_PX,
+	// 				strokeWidth: 0,
+	// 				fontFamily: 'Nanum Pen Script',
+	// 				cornerStyle: 'circle',
+	// 				originX: 'center',
+	// 				textAlign: 'center',
+	// 				left: img.left!,
+	// 				top: img.top! + 50 * MM_TO_PX,
+	// 			})
+	// 			const cloud = objects[0]
+	// 			cloud.set({
+	// 				originX: 'center',
+	// 				originY: 'center',
+	// 				left: img.left!,
+	// 				top: img.top! - 30 * MM_TO_PX,
+	// 				stroke: 'rgba(255, 255, 255, 1)',
+	// 			})
+	// 			cloud.scaleToWidth(100 * MM_TO_PX)
+	// 			cloud.scaleToHeight(100 * MM_TO_PX)
+	// 			img.set({
+	// 				width: 400 * MM_TO_PX,
+	// 				height: 300 * MM_TO_PX,
+	// 				cornerStyle: 'circle',
+	// 				originX: 'center',
+	// 				originY: 'center',
+	// 			})
 
-				const group = new fabric.Group([img, cloud, signText], {
-					originX: 'center',
-					originY: 'center',
-				})
+	// 			const group = new fabric.Group([img, cloud, signText], {
+	// 				originX: 'center',
+	// 				originY: 'center',
+	// 			})
 
-				const _canvas = new fabric.Canvas(null, {
-					width: group.width,
-					height: group.height,
-					backgroundColor: 'rgba(255,255,255,0)',
-				})
-				_canvas.centerObject(group)
-				_canvas.add(group)
-				dataURL = _canvas.toDataURL({
-					format: 'png',
-					quality: 1,
-				})
-				canvasSVG.set(dataURL)
+	// 			const _canvas = new fabric.Canvas(null, {
+	// 				width: group.width,
+	// 				height: group.height,
+	// 				backgroundColor: 'rgba(255,255,255,0)',
+	// 			})
+	// 			_canvas.centerObject(group)
+	// 			_canvas.add(group)
+	// 			dataURL = _canvas.toDataURL({
+	// 				format: 'png',
+	// 				quality: 1,
+	// 			})
+	// 			canvasSVG.set(dataURL)
 
-				this.canvas.centerObject(group)
-				this.canvas.add(group)
-				this.canvas.renderAll()
+	// 			this.canvas.centerObject(group)
+	// 			this.canvas.add(group)
+	// 			this.canvas.renderAll()
 
-				// signGroup.on('mousedblclick', (e) => {
-				// 	signGroup.toActiveSelection()
-				// 	this.canvas.setActiveObject(signText)
-				// 	signText.enterEditing()
-				// 	signText.selectAll()
+	// 			// signGroup.on('mousedblclick', (e) => {
+	// 			// 	signGroup.toActiveSelection()
+	// 			// 	this.canvas.setActiveObject(signText)
+	// 			// 	signText.enterEditing()
+	// 			// 	signText.selectAll()
 
-				// const tempText = new fabric.Textbox(signText.text || 'Company', {
-				// 	fill: 'rgba(255, 255, 255, 1)',
-				// 	stroke: 'rgba(255, 255, 255, 1)',
-				// 	fontSize: 70 * MM_TO_PX,
-				// 	strokeWidth: 0,
-				// 	fontFamily: 'Nanum Pen Script',
-				// 	cornerStyle: 'circle',
-				// 	originX: 'center',
-				// 	textAlign: 'center',
-				// 	left: img.left!,
-				// 	top: img.top! + 50 * MM_TO_PX,
-				// })
-				// tempText.set({
-				// 	left: e.target!.left,
-				// 	top: e.target!.top! + 50 * MM_TO_PX,
-				// 	width: img.width!,
-				// 	splitByGrapheme: true,
-				// })
-				// signText.visible = false
-				// signGroup.addWithUpdate()
-				// tempText.visible = true
-				// tempText.selectable = false
-				// this.canvas.add(tempText)
-				// this.canvas.setActiveObject(tempText)
-				// tempText.enterEditing()
-				// tempText.selectAll()
+	// 			// const tempText = new fabric.Textbox(signText.text || 'Company', {
+	// 			// 	fill: 'rgba(255, 255, 255, 1)',
+	// 			// 	stroke: 'rgba(255, 255, 255, 1)',
+	// 			// 	fontSize: 70 * MM_TO_PX,
+	// 			// 	strokeWidth: 0,
+	// 			// 	fontFamily: 'Nanum Pen Script',
+	// 			// 	cornerStyle: 'circle',
+	// 			// 	originX: 'center',
+	// 			// 	textAlign: 'center',
+	// 			// 	left: img.left!,
+	// 			// 	top: img.top! + 50 * MM_TO_PX,
+	// 			// })
+	// 			// tempText.set({
+	// 			// 	left: e.target!.left,
+	// 			// 	top: e.target!.top! + 50 * MM_TO_PX,
+	// 			// 	width: img.width!,
+	// 			// 	splitByGrapheme: true,
+	// 			// })
+	// 			// signText.visible = false
+	// 			// signGroup.addWithUpdate()
+	// 			// tempText.visible = true
+	// 			// tempText.selectable = false
+	// 			// this.canvas.add(tempText)
+	// 			// this.canvas.setActiveObject(tempText)
+	// 			// tempText.enterEditing()
+	// 			// tempText.selectAll()
 
-				// tempText.on('editing:exited', () => {
-				// 	const newText = tempText.text
-				// 	signText.text = newText
-				// 	signText.visible = true
-				// 	tempText.visible = false
-				// 	signGroup.addWithUpdate()
-				// 	this.canvas.remove(tempText)
-				// 	this.canvas.setActiveObject(signGroup)
-				// })
-				// })
-			})
-		})
-		return dataURL
-	}
+	// 			// tempText.on('editing:exited', () => {
+	// 			// 	const newText = tempText.text
+	// 			// 	signText.text = newText
+	// 			// 	signText.visible = true
+	// 			// 	tempText.visible = false
+	// 			// 	signGroup.addWithUpdate()
+	// 			// 	this.canvas.remove(tempText)
+	// 			// 	this.canvas.setActiveObject(signGroup)
+	// 			// })
+	// 			// })
+	// 		})
+	// 	})
+	// 	return dataURL
+	// }
 }

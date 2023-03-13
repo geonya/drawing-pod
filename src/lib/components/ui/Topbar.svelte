@@ -3,9 +3,9 @@
 	import TopPanel from '../panel/TopPanel.svelte'
 </script>
 
-<div class="fixed top-5 left-0 right-0 z-40 mx-auto w-full ">
-	<div class="grid w-full grid-cols-10">
-		<div class="col-span-2 ml-5 place-self-center">
+<div class="fixed top-5 left-0 right-0 z-50 mx-auto w-full ">
+	<div class="">
+		<div class="absolute top-0 left-12">
 			<button class="self-start">
 				<Icon name="menu" />
 			</button>
@@ -13,7 +13,7 @@
 		<!-- Top Control Panel -->
 		<TopPanel />
 		<!-- 우측 버튼 모음 -->
-		<div class="col-span-3 hidden h-full w-full md:block">
+		<div class="absolute top-0 right-12 hidden md:block">
 			<div class="flex h-full items-center justify-center space-x-3">
 				<button class="rounded-md bg-blue-400 p-2 text-white">
 					<svg

@@ -7,7 +7,7 @@ export class CanvasFactory {
 	static async getInstance(canvas: HTMLCanvasElement): Promise<CanvasFactory | null> {
 		if (!this.instance && typeof document !== 'undefined') {
 			const newCanvas = new fabric.Canvas(canvas, {
-				width: 980,
+				width: window.innerWidth,
 				height: window.innerHeight,
 				centeredScaling: true,
 				centeredRotation: true,

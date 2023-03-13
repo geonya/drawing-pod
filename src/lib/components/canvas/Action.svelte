@@ -184,27 +184,7 @@
 			onDraggingEnd()
 		}
 	}
-	function onCanvasUpdated() {
-		const objects = canvas.getObjects()
-		const _canvas = new fabric.Canvas(null, {
-			width: 200,
-			height: 100,
-			backgroundColor: 'rgba(255,255,255,0)',
-		})
-		if (!objects || objects.length === 0) return
-		objects.forEach((o: fabric.Object) => {
-			o.clone((_o: fabric.Object) => {
-				_canvas.centerObject(_o)
-				_canvas.add(_o)
-				_canvas.renderAll()
-				const dataURL = _canvas.toDataURL({
-					format: 'png',
-					quality: 10,
-				})
-				canvasSVG.set(dataURL)
-			})
-		})
-	}
+
 	function onZoom(e: IEvent<WheelEvent>) {
 		if (!canvas || !canvas.width || !canvas.height) return
 		const delta = e.e.deltaY
@@ -219,13 +199,7 @@
 	function onResize() {
 		canvas.setWidth(window.innerHeight)
 		canvas.setHeight(window.innerHeight)
-		setGridOnCanvasWithMM(canvas)
-	}
-
-	function setInitSvgOnBabylon() {
-		// canvas.backgroundColor = 'rgba(255,255,255,1)'
-		// const svg = canvas.toSVG()
-		// $canvasSVG = svg
+		// setGridOnCanvasWithMM(canvas)
 	}
 
 	onMount(() => {
@@ -233,29 +207,17 @@
 		canvas.on('mouse:wheel', (e) => onZoom(e))
 		canvas.on('selection:created', () => {
 			$action = Action.DEFAULT
-			onCanvasUpdated()
 		})
 		canvas.on('selection:updated', () => {
 			$action = Action.DEFAULT
-			onCanvasUpdated()
 		})
-		canvas.on('selection:cleared', () => {
-			onCanvasUpdated()
-		})
-		canvas.on('object:added', () => {
-			onCanvasUpdated()
-		})
-		canvas.on('object:modified', () => {
-			onCanvasUpdated()
-		})
-		canvas.on('object:scaling', () => {
-			onCanvasUpdated()
-		})
+		canvas.on('selection:cleared', () => {})
+		canvas.on('object:added', () => {})
+		canvas.on('object:modified', () => {})
+		canvas.on('object:scaling', () => {})
 		canvas.on('object:moving', (e) => {
+			console.log('moving')
 			$control?.onPreventCanvasExit(e)
-			{
-				onCanvasUpdated()
-			}
 		})
 		return () => {
 			canvas.off('resizing')

@@ -38,6 +38,9 @@
 - [x] Background Grid
 - [x] px to mm
 - [x] signboard
+  - [ ] add child canvas X
+  - [ ]
+  - [ ]
 - [ ] Menu
 - [ ] Layer
 - [ ] Lock/Invisible mode with Layer
