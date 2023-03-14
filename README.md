@@ -2,6 +2,8 @@
 
 ## Simple Drawing Canvas
 
+### SvelteKit + FabricJS
+
 ### TODO
 
 - [x] Color (Object Stroke & Fill)
@@ -44,7 +46,9 @@
   - [ ]
 
 - [x] Menu
-- [ ] Ctrl-C / Ctrl-V / Ctrl-Z
+- [x] Ctrl-C / Ctrl-V
+- [x] Refactoring with store
+- [ ] Ctrl-Z
 - [ ] Layer
 - [ ] Lock/Invisible mode with Layer
 - [ ] Connect BabylonJS

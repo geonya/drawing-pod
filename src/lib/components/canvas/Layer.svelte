@@ -7,7 +7,7 @@
 	import { Renderer } from './Renderer'
 	import { Control } from './Control'
 	import { control, renderer, sideBarKey, sideBarOpen } from '$lib/store'
-	import { Action, Controller, ShapeRender, Sidebar, Topbar } from '$lib'
+	import { Action, Controller, Sidebar, Topbar } from '$lib'
 	export let canvas: fabric.Canvas
 	export let staticCanvas: fabric.StaticCanvas
 
@@ -21,7 +21,6 @@
 
 <Action {canvas} {staticCanvas}>
 	<Controller {canvas} />
-	<ShapeRender {canvas} />
 	<Topbar />
 	{#if $sideBarOpen}
 		{#key $sideBarKey}

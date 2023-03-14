@@ -1,26 +1,22 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { DOT_RADIUS } from './constants'
-	import { hsvaToStringRgba, stringRgbaToHsva } from '$lib/utils'
-	import type { HsvaColor } from 'colord'
-
-	export let hsva: HsvaColor
-	export let bgColor: string
+	import { inputColor, paletteColor } from './palette.store'
+	import { get } from 'svelte/store'
 
 	let slider: HTMLElement
 	let isMouseDown = false
 	let sliderRect: DOMRect
 	const dotRadius = DOT_RADIUS
 	let dotRadiusRatio: number
-	let sliderPositionRatio: number
+	let sliderPositionRatio: number | undefined
 
 	const updateColor = (h: number) => {
-		const newHsva = { ...hsva, h }
-		hsva = newHsva
-		const bgHsva = { h, s: 100, v: 100, a: 1 }
-		bgColor = hsvaToStringRgba(bgHsva)
+		paletteColor.update((hsva) => {
+			if (!hsva) return hsva
+			return { ...hsva, h }
+		})
 	}
-
 	const handleMouseDown = () => {
 		isMouseDown = true
 	}
@@ -38,7 +34,8 @@
 		const h = setHValue(sliderPositionRatio)
 		updateColor(h)
 	}
-	const hsvaToSliderPosition = (h: number) => {
+	const hsvaToSliderPosition = (h: number | undefined) => {
+		if (!h) return
 		let vRatio = (h / 360) * 100
 		if (h === 0) {
 			vRatio = dotRadiusRatio
@@ -56,11 +53,12 @@
 	}
 
 	onMount(() => {
+		if (!$inputColor) return
 		sliderRect = slider.getBoundingClientRect()
 		if (!sliderRect.height) return
 		dotRadiusRatio = (dotRadius / sliderRect.height) * 100
 		if (dotRadiusRatio) {
-			sliderPositionRatio = hsvaToSliderPosition(hsva.h)
+			sliderPositionRatio = hsvaToSliderPosition(get(inputColor)?.h)
 		}
 	})
 </script>

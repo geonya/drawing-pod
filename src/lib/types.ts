@@ -4,7 +4,7 @@ export type ColorObj = {
 	color: string
 }
 
-export enum Action {
+export enum ActionType {
 	DEFAULT = 'default',
 	DRAG = 'drag',
 	PENCIL = 'pencil',

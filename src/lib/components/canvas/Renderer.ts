@@ -1,12 +1,8 @@
 import { MM_TO_PX, PX_TO_MM as PX_TO_MM } from '$lib/constants'
-import { canvasSVG, sideBarKey, sideBarOpen } from '$lib/store'
+import { sideBarKey, sideBarOpen } from '$lib/store'
 import type { ColorObj, ObjectType, Shape } from '$lib/types'
-import { getDistance, rgbaChecker } from '$lib/utils'
+import { getDistance } from '$lib/utils'
 import { fabric } from 'fabric'
-import { writable } from 'svelte/store'
-
-export const colorStore = writable<ColorObj | null>(null)
-export const shape = writable<Shape | null>(null)
 
 export class Renderer {
 	getRectObj = () =>
@@ -60,44 +56,6 @@ export class Renderer {
 		})
 
 	constructor(private canvas: fabric.Canvas) {}
-
-	onSideBarOpen() {
-		sideBarOpen.set(true)
-	}
-	onSidebarClose() {
-		sideBarOpen.set(false)
-	}
-	changeSideBar() {
-		sideBarKey.set(Symbol())
-	}
-	onObjectSelect(e?: fabric.IEvent) {
-		console.log('selected')
-		const activeObject = this.canvas.getActiveObject()
-		if (activeObject) {
-			shape.set({
-				fill: rgbaChecker(activeObject.fill) as string,
-				stroke: rgbaChecker(activeObject.stroke) as string,
-				objectType: activeObject.type as ObjectType,
-				strokeWidth: activeObject.strokeWidth as number,
-			})
-			this.onSideBarOpen()
-		}
-	}
-	onObjectSelectUpdate(e: fabric.IEvent) {
-		console.log('updated')
-		this.onObjectSelect()
-		this.changeSideBar()
-	}
-	onObjectSelectClear() {
-		console.log('cleared')
-		this.canvas.discardActiveObject().renderAll()
-		this.onSidebarClose()
-		this.setClearShape()
-	}
-
-	setClearShape() {
-		shape.set(null)
-	}
 
 	onMakeGroup(objects: fabric.Object[]) {
 		const group = new fabric.Group(objects, {

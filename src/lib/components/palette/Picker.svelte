@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { convertStringToRgba, hsvaToStringRgba, rgbaToHsva, stringRgbaToHsva } from '$lib/utils'
 	import type { HsvaColor } from 'colord'
 	import { onMount } from 'svelte'
+	import { get } from 'svelte/store'
 	import { DOT_RADIUS } from './constants'
-	export let hsva: HsvaColor
-	export let bgColor: string
+	import { paletteColor, inputColor, hsvaToStringRgba } from './palette.store'
 
 	interface RatioPositionXY {
 		xRatio: number
@@ -17,6 +16,20 @@
 	let dotRadiusRatio: RatioPositionXY
 	let pickerPosition: RatioPositionXY
 
+	$: if (dotRadiusRatio && $inputColor) {
+		pickerPosition = hsvaToPickerPosition($inputColor)
+	}
+
+	$: bgColor = $paletteColor && hsvaToStringRgba({ ...$paletteColor, s: 100, v: 100, a: 1 })
+
+	const updatePlatteColor = (position: RatioPositionXY) => {
+		const sv = positionToSv(position)
+		paletteColor?.update((hsva) => {
+			if (!hsva) return hsva
+			console.log(hsva)
+			return { ...hsva, s: sv.s, v: sv.v }
+		})
+	}
 	const positionToSv = (position: RatioPositionXY) => {
 		const _position = { ...position }
 		const { xRatio, yRatio } = _position
@@ -37,11 +50,6 @@
 		return { s, v }
 	}
 
-	const updateHsva = (position: RatioPositionXY) => {
-		const sv = positionToSv(position)
-		const newHsva = { ...hsva, ...sv }
-		hsva = newHsva
-	}
 	const handleMouseDown = () => {
 		isMouseDown = true
 	}
@@ -70,10 +78,11 @@
 			offsetY = height - dotRadius
 		}
 		pickerPosition = { xRatio: (offsetX / width) * 100, yRatio: (offsetY / height) * 100 }
-		updateHsva(pickerPosition)
+		updatePlatteColor(pickerPosition)
 	}
 
-	const hsvaToPickerPosition = (hsva: HsvaColor): RatioPositionXY => {
+	const hsvaToPickerPosition = (hsva: HsvaColor | null): RatioPositionXY => {
+		if (!hsva) return { xRatio: 0, yRatio: 0 }
 		const { s, v } = hsva as { s: number; v: number }
 		let xRatio = s
 		let yRatio = ((100 - v) / 100) * 100
@@ -100,10 +109,8 @@
 				xRatio: (dotRadius / pickerBgRect.width) * 100,
 				yRatio: (dotRadius / pickerBgRect.height) * 100,
 			}
-			if (dotRadiusRatio) {
-				pickerPosition = hsvaToPickerPosition(hsva)
-			}
 		}
+		bgColor = $inputColor && hsvaToStringRgba({ h: $inputColor.h, s: 100, v: 100, a: 1 })
 	})
 </script>
 

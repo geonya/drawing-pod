@@ -1,23 +1,22 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { DOT_RADIUS } from './constants'
-	import { colord, type HsvaColor } from 'colord'
-
-	export let hsva: HsvaColor
-	$: rgbColor = colord(hsva).toRgbString()
+	import { hsvaToStringRgba, inputColor, paletteColor } from './palette.store'
+	import { get } from 'svelte/store'
 
 	let slider: HTMLElement
 	let isMouseDown = false
 	let sliderRect: DOMRect
 	const dotRadius = DOT_RADIUS
 	let dotRadiusRatio: number
-	let sliderPositionRatio: number
+	let sliderPositionRatio: number | undefined
 
 	const updateColor = (a: number) => {
-		const newHsva = { ...hsva, a }
-		hsva = newHsva
+		paletteColor.update((hsva) => {
+			if (!hsva) return hsva
+			return { ...hsva, a }
+		})
 	}
-
 	const handleMouseDown = () => {
 		isMouseDown = true
 	}
@@ -35,7 +34,8 @@
 		const a = setAValue(sliderPositionRatio)
 		updateColor(a)
 	}
-	const hsvaToSliderPosition = (a: number) => {
+	const hsvaToSliderPosition = (a: number | undefined) => {
+		if (!a) return
 		let vRatio = a * 100
 		if (a === 0) {
 			vRatio = dotRadiusRatio
@@ -56,7 +56,7 @@
 		if (sliderRect.height) {
 			dotRadiusRatio = (dotRadius / sliderRect.height) * 100
 			if (dotRadiusRatio) {
-				sliderPositionRatio = hsvaToSliderPosition(hsva.a)
+				sliderPositionRatio = hsvaToSliderPosition(get(inputColor)?.a)
 			}
 		}
 	})
@@ -68,7 +68,7 @@
 		bind:this={slider}
 		on:mousedown={handleMouseDown}
 		class="alpha relative h-full w-2.5 rounded-md before:absolute before:inset-0 before:z-0 before:rounded-md before:content-['']"
-		style="--alpha-color: {rgbColor}; --pathern-size:5px"
+		style="--alpha-color: {hsvaToStringRgba($paletteColor)}; --pathern-size:5px"
 	>
 		{#if sliderPositionRatio && dotRadiusRatio}
 			<div

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Icon from '../Icon.svelte'
-	import { saveProgress, control, renderer, action } from '$lib/store'
-	import { Action, ObjectType } from '$lib/types'
+	import { saveProgress, control, renderer } from '$lib/store'
+	import { ActionType, ObjectType } from '$lib/types'
+	import { action } from '$lib/components/canvas/canvas.store'
 </script>
 
 <div
@@ -10,10 +11,10 @@
 	<button id="자물쇠" on:click={() => $control?.onLockCanvas()}>
 		<Icon name="lock" />
 	</button>
-	<button id="마우스" on:click={() => ($action = Action.DEFAULT)}>
+	<button id="마우스" on:click={() => ($action = ActionType.DEFAULT)}>
 		<Icon name="mouse" />
 	</button>
-	<button id="손" on:click={() => ($action = Action.DRAG)}>
+	<button id="손" on:click={() => ($action = ActionType.DRAG)}>
 		<Icon name="hand" />
 	</button>
 	<button
@@ -26,13 +27,13 @@
 	<button id="원" on:click={() => $renderer?.onMakeObject(ObjectType.CIRCLE)}>
 		<Icon name="circle" />
 	</button>
-	<button id="연필" on:click={() => ($action = Action.PENCIL)}>
+	<button id="연필" on:click={() => ($action = ActionType.PENCIL)}>
 		<Icon name="pencil" />
 	</button>
-	<button id="브러쉬" on:click={() => ($action = Action.BRUSH)}>
+	<button id="브러쉬" on:click={() => ($action = ActionType.BRUSH)}>
 		<Icon name="brush" />
 	</button>
-	<button id="라인" on:click={() => ($action = Action.LINE)}>
+	<button id="라인" on:click={() => ($action = ActionType.LINE)}>
 		<Icon name="stickyLine" />
 	</button>
 	<input

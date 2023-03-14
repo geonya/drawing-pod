@@ -1,15 +1,7 @@
 import { writable } from 'svelte/store'
-import { Action } from './types'
+import { ActionType } from './types'
 import type { Renderer } from './components/canvas/Renderer'
 import type { Control } from './components/canvas/Control'
-
-const setAction = () => {
-	const { subscribe, set } = writable(Action.DEFAULT)
-	return {
-		subscribe,
-		set,
-	}
-}
 
 const setRenderer = () => {
 	const { subscribe, set } = writable<Renderer | null>(null)
@@ -71,6 +63,6 @@ export const control = setControl()
 export const sideBarOpen = setSideBarOpen()
 export const sideBarKey = setSideBarKey()
 export const saveProgress = setSaveProgress()
-export const action = setAction()
+
 export const isLocked = setIsLocked()
 export const canvasSVG = setSVG()

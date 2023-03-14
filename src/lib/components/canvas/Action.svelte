@@ -1,38 +1,64 @@
 <script lang="ts">
-	import { action, canvasSVG, control, renderer } from '$lib/store'
-	import { Action, ObjectType } from '$lib/types'
+	import { control, renderer, sideBarKey, sideBarOpen } from '$lib/store'
+	import { ActionType, ObjectType } from '$lib/types'
 	import type { IEvent } from 'fabric/fabric-impl'
 	import { onMount } from 'svelte'
 	import { fabric } from 'fabric'
+	import { action, shape } from './canvas.store'
+	import { outputColor, type OutputColor } from '../palette/palette.store'
 	export let canvas: fabric.Canvas
 	export let staticCanvas: fabric.StaticCanvas
-	let prevAction = Action.DEFAULT
+	let prevAction = ActionType.DEFAULT
 	let clipboard: fabric.Object | null = null
 
 	$: {
+		onColorUpdate($outputColor)
 		onActionHandler($action)
 	}
-	function onActionHandler(action: Action) {
-		if (prevAction !== Action.DEFAULT && $action !== prevAction) {
+
+	function onColorUpdate(color: OutputColor | null) {
+		const activeObject = canvas.getActiveObject()
+
+		if (activeObject && color) {
+			if (activeObject.type === 'group') {
+				const group = activeObject as fabric.Group
+				group.forEachObject((obj) => {
+					if (obj.type === 'rect' || obj.type === 'circle') {
+						color.fill && obj.set('fill', color.fill as string)
+						color.stroke && obj.set('stroke', color.stroke as string)
+					}
+					if (obj.type === 'textbox') {
+						color.stroke && obj.set('stroke', color.stroke as string)
+					}
+				})
+			}
+			color.fill && activeObject.set('fill', color.fill as string)
+			color.stroke && activeObject.set('stroke', color.stroke as string)
+			canvas.requestRenderAll()
+		}
+	}
+
+	function onActionHandler(action: ActionType) {
+		if (prevAction !== ActionType.DEFAULT && $action !== prevAction) {
 			onActionCancel()
 		}
 		switch (action) {
-			case Action.DEFAULT:
+			case ActionType.DEFAULT:
 				onActionCancel()
 				break
-			case Action.DRAG:
+			case ActionType.DRAG:
 				onDraggingStart()
 				break
-			case Action.PENCIL:
+			case ActionType.PENCIL:
 				onPencilDrawingStart()
 				break
-			case Action.BRUSH:
+			case ActionType.BRUSH:
 				onBrushDrawingStart()
 				break
-			case Action.LINE:
+			case ActionType.LINE:
 				$renderer?.onAddStickyLine()
 				break
-			case Action.ERASE:
+			case ActionType.ERASE:
 				onErasingStart()
 				break
 			default:
@@ -42,24 +68,24 @@
 	}
 	function onActionCancel() {
 		switch (prevAction) {
-			case Action.DRAG:
+			case ActionType.DRAG:
 				onDraggingEnd()
 				break
-			case Action.PENCIL:
+			case ActionType.PENCIL:
 				onPencilDrawingEnd()
 				break
-			case Action.BRUSH:
+			case ActionType.BRUSH:
 				onBrushDrawingEnd()
 				break
-			case Action.ERASE:
+			case ActionType.ERASE:
 				onErasingEnd()
 				break
-			case Action.LINE:
+			case ActionType.LINE:
 				break
 			default:
 				break
 		}
-		prevAction = Action.DEFAULT
+		prevAction = ActionType.DEFAULT
 	}
 
 	function onDraggingStart() {
@@ -149,7 +175,6 @@
 	}
 	function onKeyDown(e: KeyboardEvent) {
 		if (e.repeat) return
-		console.log(e)
 		if ((e.key === 'c' && e.ctrlKey) || (e.key === 'c' && e.metaKey)) {
 			canvas.getActiveObject()?.clone((cloned: fabric.Object) => {
 				clipboard = cloned
@@ -183,13 +208,11 @@
 			})
 		}
 		if (e.key === 'Escape') {
-			$action = Action.DEFAULT
+			$action = ActionType.DEFAULT
 			canvas.discardActiveObject()
 		}
 		if (e.key === ' ') {
-			if ($action === Action.DRAG) {
-				onDraggingStart()
-			}
+			$action = ActionType.DRAG
 		}
 
 		if (e.key === 'Backspace' || e.key === 'Delete') {
@@ -211,9 +234,8 @@
 		}
 	}
 	function onKeyUp(e: KeyboardEvent) {
-		e.preventDefault()
-		if (e.key) {
-			onDraggingEnd()
+		if (e.key === ' ') {
+			$action = ActionType.DEFAULT
 		}
 	}
 
@@ -235,15 +257,52 @@
 		// setGridOnCanvasWithMM(canvas)
 	}
 
+	function onObjectSelect(e?: fabric.IEvent) {
+		const activeObject = canvas.getActiveObject()
+		if (activeObject) {
+			shape.set({
+				fill: activeObject.fill as string,
+				stroke: activeObject.stroke as string,
+				objectType: activeObject.type as ObjectType,
+				strokeWidth: activeObject.strokeWidth as number,
+			})
+			onSideBarOpen()
+		}
+	}
+	function onObjectSelectUpdate(e: fabric.IEvent) {
+		onObjectSelect()
+		changeSideBar()
+	}
+	function onObjectSelectClear() {
+		console.log('cleared')
+		canvas.discardActiveObject().renderAll()
+		onSidebarClose()
+		setClearShape()
+	}
+
+	function onSideBarOpen() {
+		sideBarOpen.set(true)
+	}
+	function onSidebarClose() {
+		sideBarOpen.set(false)
+	}
+	function changeSideBar() {
+		sideBarKey.set(Symbol())
+	}
+
+	function setClearShape() {
+		shape.set(null)
+	}
+
 	onMount(() => {
 		canvas.on('before:render', () => $control?.setCanvasBoundary())
 		canvas.on('resizing', onResize)
 		canvas.on('mouse:wheel', (e) => onZoom(e))
 		canvas.on('selection:created', () => {
-			$action = Action.DEFAULT
+			$action = ActionType.DEFAULT
 		})
 		canvas.on('selection:updated', () => {
-			$action = Action.DEFAULT
+			$action = ActionType.DEFAULT
 		})
 		canvas.on('selection:cleared', () => {})
 		canvas.on('object:added', () => {})
@@ -253,6 +312,11 @@
 			console.log('moving')
 			$control?.onPreventCanvasExit(e)
 		})
+		canvas.on('selection:created', (e) => onObjectSelect(e))
+		canvas.on('selection:updated', (e) => onObjectSelectUpdate(e))
+		canvas.on('object:selected', (e) => onObjectSelect(e))
+		canvas.on('object:modified', (e) => onObjectSelectUpdate(e))
+		canvas.on('selection:cleared', () => onObjectSelectClear())
 		return () => {
 			canvas.off('resizing')
 			canvas.off('mouse:wheel')
@@ -263,6 +327,11 @@
 			canvas.off('object:modified')
 			canvas.off('object:scaling')
 			canvas.off('object:moving')
+			canvas.off('selection:created')
+			canvas.off('selection:updated')
+			canvas.off('object:selected')
+			canvas.off('object:modified')
+			canvas.off('selection:cleared')
 		}
 	})
 </script>

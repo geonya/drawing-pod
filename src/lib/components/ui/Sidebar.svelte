@@ -1,36 +1,18 @@
 <script lang="ts">
 	import { ObjectType, PaintType } from '$lib/types'
-	import { stringRgbaToHex } from '$lib/utils'
 	import { fly } from 'svelte/transition'
 	import Icon from './Icon.svelte'
 	import Palette from '../palette/Palette.svelte'
-	import { shape } from '../canvas/Renderer'
 	import { control } from '$lib/store'
-	let fill: string | null = $shape?.fill ?? null
-	let stroke: string | null = $shape?.stroke ?? null
-	let objectType: ObjectType | null = $shape?.objectType ?? null
-	let strokeWidth: number | null = $shape?.strokeWidth ?? null
-	let whichPalette = fill ? PaintType.FILL : PaintType.STROKE
+	import { paintType, stringRgbaToHex, outputColor } from '../palette/palette.store'
+	import { get } from 'svelte/store'
+	import { shape } from '../canvas/canvas.store'
+	import { INITIAL_RGBA } from '$lib/constants'
 
-	$: console.log('fill', fill)
-	$: fillHex = fill ? stringRgbaToHex(fill) : ''
-	$: strokeHex = stroke ? stringRgbaToHex(stroke) : ''
-
-	function onOpenPalette(paintType: PaintType) {
-		whichPalette = paintType
-	}
-	const onColorUpdate = (e: CustomEvent) => {
-		const { color, paintType } = e.detail
-		$shape = { ...$shape, [paintType]: color }
-		if (paintType === PaintType.FILL) {
-			fill = color
-		} else if (paintType === PaintType.STROKE) {
-			stroke = color
-		}
-	}
-	const onUpdateStorkeWidth = () => {
-		$shape = { ...$shape, strokeWidth }
-	}
+	let fill = get(shape)?.fill
+	let stroke = get(shape)?.stroke
+	let objectType = get(shape)?.objectType
+	let strokeWidth = get(shape)?.strokeWidth ?? 0
 </script>
 
 <nav
@@ -39,11 +21,11 @@
 >
 	<div class="scroll-none scroll scrollbar-hide relative h-full w-full">
 		<div class="컨트롤 박스">
-			{#if whichPalette === PaintType.FILL && objectType !== ObjectType.PATH}
-				<Palette paintType={PaintType.FILL} on:colorUpdate={onColorUpdate} />
+			{#if $paintType === PaintType.FILL}
+				<Palette />
 			{/if}
-			{#if whichPalette === PaintType.STROKE}
-				<Palette paintType={PaintType.STROKE} on:colorUpdate={onColorUpdate} />
+			{#if $paintType === PaintType.STROKE}
+				<Palette />
 			{/if}
 			<div class="컬러리뷰박스 space-y-2 px-2">
 				{#if fill && objectType !== ObjectType.PATH && objectType !== ObjectType.IMAGE}
@@ -54,14 +36,17 @@
 						<div class="grid grid-flow-col items-center gap-2">
 							<button
 								class={'샘플컬러 h-7 w-7 rounded-md ' +
-									(whichPalette === PaintType.FILL ? 'ring-2 ring-blue-500' : '')}
-								style="background-color:{fill};"
-								on:click={() => onOpenPalette(PaintType.FILL)}
+									($paintType === PaintType.FILL ? 'ring-2 ring-blue-500' : '')}
+								style="background-color:{$outputColor?.fill || INITIAL_RGBA};"
+								on:click={() => paintType.set(PaintType.FILL)}
 							/>
+
 							<input
-								id="fill"
+								id={PaintType.FILL}
 								type="text"
-								value={fillHex}
+								value={stringRgbaToHex($outputColor?.fill || INITIAL_RGBA).length >= 9
+									? stringRgbaToHex($outputColor?.fill || INITIAL_RGBA).slice(0, -2)
+									: stringRgbaToHex($outputColor?.fill || INITIAL_RGBA)}
 								class="input max-h-7 w-full rounded-md border px-2"
 								disabled
 							/>
@@ -76,14 +61,16 @@
 						<div class="grid grid-flow-col items-center gap-2">
 							<button
 								class={'샘플컬러 h-7 w-7 rounded-md ' +
-									(whichPalette === PaintType.STROKE ? 'ring-2 ring-blue-500' : '')}
-								style="background-color:{stroke};"
-								on:click={() => onOpenPalette(PaintType.STROKE)}
+									($paintType === PaintType.STROKE ? 'ring-2 ring-blue-500' : '')}
+								style="background-color:{$outputColor?.stroke || INITIAL_RGBA};"
+								on:click={() => paintType.set(PaintType.STROKE)}
 							/>
-							{#if strokeWidth !== null && strokeWidth >= 0}
+							{#if strokeWidth !== null}
 								<input
-									id="stroke"
-									value={strokeHex}
+									id={PaintType.STROKE}
+									value={stringRgbaToHex($outputColor?.stroke || INITIAL_RGBA).length >= 9
+										? stringRgbaToHex($outputColor?.stroke || INITIAL_RGBA).slice(0, -2)
+										: stringRgbaToHex($outputColor?.stroke || INITIAL_RGBA)}
 									type="text"
 									class="input max-h-7 w-full rounded-md border px-2"
 									disabled
@@ -106,7 +93,7 @@
 									bind:value={strokeWidth}
 									type="number"
 									class="input w-16 rounded-md border bg-white bg-opacity-40   px-2 text-center"
-									on:input={onUpdateStorkeWidth}
+									on:input={() => ($shape = { ...$shape, strokeWidth })}
 								/>
 								<span>px</span>
 							</div>
