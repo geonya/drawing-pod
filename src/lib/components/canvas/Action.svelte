@@ -10,6 +10,8 @@
 	export let staticCanvas: fabric.StaticCanvas
 	let prevAction = ActionType.DEFAULT
 	let clipboard: fabric.Object | null = null
+	let undoStack: any[] = []
+	let redoStack: any[] = []
 
 	$: {
 		onColorUpdate($outputColor)
@@ -173,6 +175,38 @@
 		canvas.discardActiveObject()
 		canvas.renderAll()
 	}
+	function setUndo(json: any) {
+		const LIMIT = 10
+		undoStack = [json, ...undoStack.splice(0, LIMIT)]
+	}
+
+	function onUnDo() {
+		if (undoStack.length > 0) {
+			redoStack = [undoStack[0], ...redoStack.splice(0, 10)]
+			// current state
+			undoStack = undoStack.slice(1)
+			// previous state
+			const json = undoStack[0]
+			undoStack = undoStack.slice(1)
+			console.log('undo', undoStack)
+			canvas.loadFromJSON(json, () => {
+				canvas.renderAll()
+			})
+		}
+	}
+
+	function onReDo() {
+		if (redoStack.length > 0) {
+			undoStack = [redoStack[0], ...undoStack.splice(0, 10)]
+			// current state
+			const json = redoStack[0]
+			redoStack = redoStack.slice(1)
+			console.log(redoStack)
+			canvas.loadFromJSON(json, () => {
+				canvas.renderAll()
+			})
+		}
+	}
 	function onKeyDown(e: KeyboardEvent) {
 		if (e.repeat) return
 		if ((e.key === 'c' && e.ctrlKey) || (e.key === 'c' && e.metaKey)) {
@@ -207,6 +241,18 @@
 				canvas.requestRenderAll()
 			})
 		}
+		// undo
+		if (
+			(e.key === 'z' && e.ctrlKey && !e.shiftKey) ||
+			(e.key === 'z' && e.metaKey && !e.shiftKey)
+		) {
+			onUnDo()
+		}
+		// redo
+		if ((e.key === 'z' && e.ctrlKey && e.shiftKey) || (e.key === 'z' && e.metaKey && e.shiftKey)) {
+			onReDo()
+		}
+
 		if (e.key === 'Escape') {
 			$action = ActionType.DEFAULT
 			canvas.discardActiveObject()
@@ -295,9 +341,17 @@
 	}
 
 	onMount(() => {
+		// set init undo stack
+		setUndo(canvas.toJSON())
+
 		canvas.on('before:render', () => $control?.setCanvasBoundary())
 		canvas.on('resizing', onResize)
 		canvas.on('mouse:wheel', (e) => onZoom(e))
+
+		// selection
+		canvas.on('selection:created', (e) => onObjectSelect(e))
+		canvas.on('selection:updated', (e) => onObjectSelectUpdate(e))
+		canvas.on('selection:cleared', () => onObjectSelectClear())
 		canvas.on('selection:created', () => {
 			$action = ActionType.DEFAULT
 		})
@@ -305,21 +359,49 @@
 			$action = ActionType.DEFAULT
 		})
 		canvas.on('selection:cleared', () => {})
-		canvas.on('object:added', () => {})
-		canvas.on('object:modified', () => {})
-		canvas.on('object:scaling', () => {})
+
+		// object
+		canvas.on('object:added', () => {
+			// undoStack.push(canvas.toJSON())
+			setUndo(canvas.toJSON())
+		})
+		canvas.on('object:selected', (e) => {
+			onObjectSelect(e)
+		})
+		canvas.on('object:scaling', () => {
+			// undoStack.push(canvas.toJSON())
+		})
+		canvas.on('object:removed', () => {
+			setUndo(canvas.toJSON())
+		})
+		canvas.on('object:modified', (e) => {
+			// undoStack.push(canvas.toJSON())
+			onObjectSelectUpdate(e)
+		})
 		canvas.on('object:moving', (e) => {
-			console.log('moving')
+			setUndo(canvas.toJSON())
 			$control?.onPreventCanvasExit(e)
 		})
-		canvas.on('selection:created', (e) => onObjectSelect(e))
-		canvas.on('selection:updated', (e) => onObjectSelectUpdate(e))
-		canvas.on('object:selected', (e) => onObjectSelect(e))
-		canvas.on('object:modified', (e) => onObjectSelectUpdate(e))
-		canvas.on('selection:cleared', () => onObjectSelectClear())
+		canvas.on('object:rotating', () => {
+			// undoStack.push(canvas.toJSON())
+		})
+		canvas.on('object:skewing', () => {
+			// undoStack.push(canvas.toJSON())
+		})
+		canvas.on('object:resizing', () => {
+			// undoStack.push(canvas.toJSON())
+		})
+
+		setTimeout(() => {
+			undoStack.push(canvas.toJSON())
+		}, 0)
+
 		return () => {
 			canvas.off('resizing')
 			canvas.off('mouse:wheel')
+			canvas.off('selection:created')
+			canvas.off('selection:updated')
+			canvas.off('selection:cleared')
 			canvas.off('selection:created')
 			canvas.off('selection:updated')
 			canvas.off('selection:cleared')
@@ -327,11 +409,11 @@
 			canvas.off('object:modified')
 			canvas.off('object:scaling')
 			canvas.off('object:moving')
-			canvas.off('selection:created')
-			canvas.off('selection:updated')
 			canvas.off('object:selected')
 			canvas.off('object:modified')
-			canvas.off('selection:cleared')
+			canvas.off('object:rotating')
+			canvas.off('object:skewing')
+			canvas.off('object:resizing')
 		}
 	})
 </script>

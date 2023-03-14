@@ -54,8 +54,8 @@
 	onMount(() => {
 		if (!canvas) return
 		// 자동 저장 기능
-		onLoadStorageData(canvas)
-		onIntervalAutoSaveWithTimer()
-		onAutoSaveInLocalStorage(canvas)
+		// onLoadStorageData(canvas)
+		// onIntervalAutoSaveWithTimer()
+		// onAutoSaveInLocalStorage(canvas)
 	})
 </script>

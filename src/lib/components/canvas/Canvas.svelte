@@ -9,11 +9,6 @@
 	let canvas: fabric.Canvas
 	let staticCanvas: fabric.StaticCanvas
 
-	// async function initCanvas(canvasElement: HTMLCanvasElement) {
-	// 	const canvasFactory = await CanvasFactory.getInstance(canvasElement)
-	// 	return canvasFactory?.canvas
-	// }
-
 	onMount(() => {
 		canvas = new fabric.Canvas('canvas', {
 			width: canvasWrapper.getBoundingClientRect().width,
