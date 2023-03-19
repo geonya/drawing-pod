@@ -41,4 +41,4 @@ export interface IShape {
 	strokeWidth?: number | null
 }
 
-export type MenuTitle = 'about' | 'save' | 'quit' | 'preferences' | 'help'
+export type MenuTitle = 'about' | 'save' | 'quit' | 'preferences' | 'help' | 'login'

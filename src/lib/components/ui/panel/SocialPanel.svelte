@@ -1,5 +1,8 @@
 <script lang="ts">
 	import Icon from '../Icon.svelte'
+	import type { Session } from '@supabase/supabase-js'
+
+	// export let session: Session | null
 </script>
 
 <div class="absolute top-0 right-5">

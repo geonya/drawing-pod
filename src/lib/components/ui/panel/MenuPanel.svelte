@@ -38,7 +38,7 @@
 				<span class="">Save</span>
 			</button>
 		</li>
-		<li class="">
+		<!-- <li class="">
 			<button
 				class="flex w-full justify-start px-2 py-1 hover:cursor-pointer hover:bg-base-100"
 				on:click={() => {
@@ -48,13 +48,24 @@
 			>
 				<span class="">Preferences</span>
 			</button>
+		</li> -->
+		<li class="">
+			<button
+				class="flex w-full justify-start px-2 py-1 hover:cursor-pointer hover:bg-base-100"
+				on:click={() => {
+					menuTitle = 'login'
+					isMenuOpen = false
+				}}
+			>
+				<span class="">Login</span>
+			</button>
 		</li>
 
 		<li class="">
 			<button
 				class="flex w-full justify-start px-2 py-1 hover:cursor-pointer hover:bg-base-100"
 				on:click={() => {
-					menuTitle = 'preferences'
+					menuTitle = 'help'
 					isMenuOpen = false
 				}}
 			>

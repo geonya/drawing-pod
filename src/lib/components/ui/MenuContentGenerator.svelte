@@ -83,9 +83,9 @@
 		transition:fade={{ duration: 100 }}
 		class="fixed top-1/2 left-1/2 z-50 grid h-1/2 w-1/2 -translate-x-1/2 -translate-y-1/2 grid-flow-col rounded-md border bg-white shadow-lg backdrop-blur-md"
 	>
-		<div class="flex h-full w-full items-center justify-center">
-			<h1>You can ask help me anytime...!</h1>
+		<div class="flex h-full w-full flex-col items-center justify-center space-y-3">
 			<h3>geony@signpod.co.kr</h3>
+			<a href="https://github.com/geonya">Github : geonya</a>
 		</div>
 		<button class="absolute top-3 right-3 p-2" on:click={() => (menuTitle = null)}> X </button>
 	</div>
