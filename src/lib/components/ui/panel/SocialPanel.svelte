@@ -23,6 +23,7 @@
 	}
 
 	$: if ($user?.avatar_url) downloadAvatar($user?.avatar_url)
+	$: if (!$user) avatarUrl = ''
 </script>
 
 <div class="absolute top-0 right-5">

@@ -57,7 +57,9 @@
 - [x] Login with Google
 - [x] Remove Grid (grid disppear bug)
 - [x] Palette Color Render bug fix
-- [ ] stroke width is not changable bug fix
+- [x] stroke width is not changable bug fix
+- [x] logout avatar default bug fix
 - [ ] Save Canvas Json file in Cloud
+- [ ] Shapre Canvas Image
 - [ ] SVG library
 - [ ] Layer
