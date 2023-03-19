@@ -52,7 +52,9 @@
 - [x] Align Bug Fix
 - [ ] Canvas Clear Button
 - [x] Image Upload Bug Fix (canvas boundary should notice object scale)
-- [ ] DB Setup (PocketBase)
-- [ ] login / register
+- [x] DB Setup (Supabase)
+- [x] login / register
+- [x] Login with Google
+- [ ] Save in Cloud
 - [ ] SVG library
 - [ ]

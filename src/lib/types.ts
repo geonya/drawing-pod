@@ -42,3 +42,10 @@ export interface IShape {
 }
 
 export type MenuTitle = 'about' | 'save' | 'quit' | 'preferences' | 'help' | 'login'
+
+export interface User {
+	username: any
+	full_name: any
+	website: any
+	avatar_url: any
+}

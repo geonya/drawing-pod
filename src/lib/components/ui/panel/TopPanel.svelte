@@ -3,7 +3,6 @@
 	import { saveProgress } from '$lib/store'
 	import { ActionType, ObjectType } from '$lib/types'
 	import { action, control, renderer } from '$lib/components/canvas/canvas.store'
-
 	let canvasClearAlertModal = false
 </script>
 

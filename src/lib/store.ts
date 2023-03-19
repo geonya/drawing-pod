@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store'
+import type { User } from './types'
 
 const setSideBarOpen = () => {
 	const { subscribe, set } = writable<boolean>(false)
@@ -40,9 +41,20 @@ const setSVG = () => {
 	}
 }
 
+const setUser = () => {
+	const { subscribe, set, update } = writable<User | null>(null)
+	return {
+		subscribe,
+		set,
+		update,
+	}
+}
+
 export const sideBarOpen = setSideBarOpen()
 // export const sideBarKey = setSideBarKey()
 export const saveProgress = setSaveProgress()
 
 export const isLocked = setIsLocked()
 export const canvasSVG = setSVG()
+
+export const user = setUser()

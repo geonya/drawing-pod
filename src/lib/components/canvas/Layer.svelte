@@ -9,8 +9,10 @@
 	import { sideBarOpen } from '$lib/store'
 	import { Action, Controller, Sidebar, Topbar } from '$lib'
 	import { control, renderer } from './canvas.store'
+	import type { SupabaseClient } from '@supabase/supabase-js'
 	export let canvas: fabric.Canvas
 	export let staticCanvas: fabric.StaticCanvas
+	export let supabase: SupabaseClient
 
 	onMount(() => {
 		if (canvas) {
@@ -22,7 +24,7 @@
 
 <Action {canvas} {staticCanvas}>
 	<Controller {canvas} />
-	<Topbar />
+	<Topbar {supabase} />
 	{#if $sideBarOpen}
 		<Sidebar />
 	{/if}

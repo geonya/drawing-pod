@@ -5,6 +5,8 @@
 
 	import { setGridOnCanvasWithMM } from '$lib/utils'
 	import BjsCanvas from '../babylonjs/BJSCanvas.svelte'
+	import type { SupabaseClient } from '@supabase/supabase-js'
+	export let supabase: SupabaseClient
 	let canvasWrapper: HTMLElement
 	let canvas: fabric.Canvas
 	let staticCanvas: fabric.StaticCanvas
@@ -43,7 +45,7 @@
 	<canvas id="staticCanvas" class="absolute inset-0 z-20 h-full w-full" />
 </div>
 {#if canvas}
-	<Layer {canvas} {staticCanvas} />
+	<Layer {canvas} {staticCanvas} {supabase} />
 	<div class="absolute right-12 top-24 z-50 cursor-grab rounded-full bg-black bg-opacity-5 p-2">
 		<BjsCanvas />
 	</div>

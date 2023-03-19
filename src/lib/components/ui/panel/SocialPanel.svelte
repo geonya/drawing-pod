@@ -1,9 +1,28 @@
 <script lang="ts">
 	import Icon from '../Icon.svelte'
-	import type { Session } from '@supabase/supabase-js'
+	import type { Session, SupabaseClient } from '@supabase/supabase-js'
 	import { goto } from '$app/navigation'
+	import { user } from '$lib/store'
+	export let supabase: SupabaseClient
 
-	// export let session: Session | null
+	let avatarUrl = ''
+
+	const downloadAvatar = async (path: string) => {
+		try {
+			const { data, error } = await supabase.storage.from('avatars').download(path)
+			if (error) {
+				throw error
+			}
+			const url = URL.createObjectURL(data)
+			avatarUrl = url
+		} catch (error) {
+			if (error instanceof Error) {
+				console.log('Error downloading image: ', error.message)
+			}
+		}
+	}
+
+	$: if ($user?.avatar_url) downloadAvatar($user?.avatar_url)
 </script>
 
 <div class="absolute top-0 right-5">
@@ -34,7 +53,7 @@
 		<!-- Avatar -->
 		<button
 			class="h-8 w-8 rounded-full bg-cover bg-center bg-no-repeat"
-			style="background-image:url('https://api.dicebear.com/5.x/thumbs/svg');"
+			style="background-image:url({avatarUrl || 'https://api.dicebear.com/5.x/thumbs/svg'});"
 			on:click={async () => await goto('/account')}
 		/>
 	</div>

@@ -1,11 +1,12 @@
 <!-- src/routes/account/Avatar.svelte -->
 <script lang="ts">
+	import { user } from '$lib/store'
 	import type { SupabaseClient } from '@supabase/supabase-js'
 	import { createEventDispatcher } from 'svelte'
 
-	export let size = 20
-	export let url: string | null
+	export let url: string | null = null
 	export let supabase: SupabaseClient
+	export let clazz: string
 
 	let avatarUrl: string | null = null
 	let uploading = false
@@ -41,6 +42,12 @@
 			if (error) {
 				throw error
 			}
+			user.update((user) => {
+				if (user) {
+					user.avatar_url = url
+				}
+				return user
+			})
 			dispatch('upload')
 		} catch (error) {
 			if (error instanceof Error) {
@@ -56,11 +63,11 @@
 
 <div class="grid place-content-center">
 	<input type="hidden" name="avatarUrl" value={url} />
-	<label class="" for="single">
+	<label class="cursor-pointer" for="single">
 		<img
 			src={avatarUrl || 'https://api.dicebear.com/5.x/thumbs/svg'}
 			alt={avatarUrl ? 'Avatar' : 'No image'}
-			class="h-24 w-24 rounded-full shadow-md md:h-32 md:w-32"
+			class={'rounded-full shadow-md ' + clazz}
 			style=""
 		/>
 	</label>
