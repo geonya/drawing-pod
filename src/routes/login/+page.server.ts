@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ url, locals: { getSession } }) => {
 }
 
 export const actions: Actions = {
-	login: async ({ request, locals, url }) => {
+	default: async ({ request, locals, url }) => {
 		const provider = url.searchParams.get('provider') as Provider
 		if (provider) {
 			if (!OAUTH_PROVIDERS.includes(provider)) {
@@ -32,8 +32,6 @@ export const actions: Actions = {
 			const { data, error: err } = await locals.supabase.auth.signInWithOAuth({
 				provider: provider,
 			})
-
-			console.log(data, err)
 
 			if (err) {
 				console.log(err)
@@ -47,12 +45,12 @@ export const actions: Actions = {
 
 		const body = Object.fromEntries(await request.formData())
 
-		const { data, error: err } = await locals.supabase.auth.signInWithPassword({
+		const { data, error: err } = await locals.supabase.auth.signInWithOtp({
 			email: body.email as string,
-			password: body.password as string,
+			options: {
+				emailRedirectTo: '/account',
+			},
 		})
-
-		console.log(err)
 
 		if (err) {
 			if (err instanceof AuthApiError && err.status === 400) {
@@ -65,6 +63,8 @@ export const actions: Actions = {
 			})
 		}
 
-		throw redirect(303, '/')
+		return {
+			success: true,
+		}
 	},
 }

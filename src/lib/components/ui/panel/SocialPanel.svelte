@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Icon from '../Icon.svelte'
 	import type { Session } from '@supabase/supabase-js'
+	import { goto } from '$app/navigation'
 
 	// export let session: Session | null
 </script>
@@ -34,6 +35,7 @@
 		<button
 			class="h-8 w-8 rounded-full bg-cover bg-center bg-no-repeat"
 			style="background-image:url('https://api.dicebear.com/5.x/thumbs/svg');"
+			on:click={async () => await goto('/account')}
 		/>
 	</div>
 </div>

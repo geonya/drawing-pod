@@ -5,7 +5,7 @@
 	export let menuTitle: MenuTitle | null = null
 </script>
 
-<button class="fixed inset-0 h-full w-full" on:click={() => (menuTitle = null)} />
+<button class="fixed inset-0 z-40 h-full w-full" on:click={() => (menuTitle = null)} />
 
 {#if menuTitle === 'about'}
 	<div

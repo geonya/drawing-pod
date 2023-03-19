@@ -3,24 +3,21 @@
 	import type { SupabaseClient } from '@supabase/supabase-js'
 	import { createEventDispatcher } from 'svelte'
 
-	export let size = 10
+	export let size = 20
 	export let url: string | null
 	export let supabase: SupabaseClient
 
 	let avatarUrl: string | null = null
 	let uploading = false
 	let files: FileList
-
 	const dispatch = createEventDispatcher()
 
 	const downloadImage = async (path: string) => {
 		try {
 			const { data, error } = await supabase.storage.from('avatars').download(path)
-
 			if (error) {
 				throw error
 			}
-
 			const url = URL.createObjectURL(data)
 			avatarUrl = url
 		} catch (error) {
@@ -37,17 +34,13 @@
 			if (!files || files.length === 0) {
 				throw new Error('You must select an image to upload.')
 			}
-
 			const file = files[0]
 			const fileExt = file.name.split('.').pop()
 			url = `${Math.random()}.${fileExt}`
-
 			let { error } = await supabase.storage.from('avatars').upload(url, file)
-
 			if (error) {
 				throw error
 			}
-
 			dispatch('upload')
 		} catch (error) {
 			if (error instanceof Error) {
@@ -61,31 +54,23 @@
 	$: if (url) downloadImage(url)
 </script>
 
-<div>
-	{#if avatarUrl}
-		<img
-			src={avatarUrl}
-			alt={avatarUrl ? 'Avatar' : 'No image'}
-			class="avatar image"
-			style="height: {size}em; width: {size}em;"
-		/>
-	{:else}
-		<div class="avatar no-image" style="height: {size}em; width: {size}em;" />
-	{/if}
+<div class="grid place-content-center">
 	<input type="hidden" name="avatarUrl" value={url} />
-
-	<div style="width: {size}em;">
-		<label class="button primary block" for="single">
-			{uploading ? 'Uploading ...' : 'Upload'}
-		</label>
-		<input
-			style="visibility: hidden; position:absolute;"
-			type="file"
-			id="single"
-			accept="image/*"
-			bind:files
-			on:change={uploadAvatar}
-			disabled={uploading}
+	<label class="" for="single">
+		<img
+			src={avatarUrl || 'https://api.dicebear.com/5.x/thumbs/svg'}
+			alt={avatarUrl ? 'Avatar' : 'No image'}
+			class="h-24 w-24 rounded-full shadow-md md:h-32 md:w-32"
+			style=""
 		/>
-	</div>
+	</label>
+	<input
+		style="visibility: hidden; position:absolute;"
+		type="file"
+		id="single"
+		accept="image/*"
+		bind:files
+		on:change={uploadAvatar}
+		disabled={uploading}
+	/>
 </div>
