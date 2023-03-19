@@ -3,6 +3,10 @@
 import { SupabaseClient, Session } from '@supabase/supabase-js'
 
 declare global {
+	interface Window {
+		Kakao: any
+		kakao: any
+	}
 	namespace App {
 		// interface Error {}
 		interface Locals {

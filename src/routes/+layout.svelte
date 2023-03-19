@@ -5,6 +5,7 @@
 	import type { LayoutData } from './$types'
 	import { Canvas } from '$lib'
 	import { user } from '$lib/store'
+	import { PUBLIC_KAKAO_KEY } from '$env/static/public'
 	export let data: LayoutData
 
 	$: ({ supabase, session, profile } = data)
@@ -16,6 +17,9 @@
 			console.log('Auth state change detected')
 			invalidate('supabase:auth')
 		})
+		if (!window?.kakao?.isInitialized()) {
+			window?.kakao?.init(PUBLIC_KAKAO_KEY)
+		}
 		return () => data.subscription.unsubscribe()
 	})
 </script>

@@ -22,13 +22,37 @@
 		}
 	}
 
+	function onKakaoShare() {
+		window?.Kakao?.Share?.sendDefault({
+			objectType: 'feed',
+			content: {
+				title: '드로잉팟',
+				description: '오늘 내가 그린고 어때?',
+				imageUrl: '',
+				link: {
+					mobileWebUrl: 'https://drawingpod.vercel.app',
+					webUrl: 'https://drawingpod.vercel.app',
+				},
+			},
+			buttons: [
+				{
+					title: '크게 보기',
+					link: {
+						mobileWebUrl: 'https://drawingpod.vercel.app',
+						webUrl: 'https://drawingpod.vercel.app',
+					},
+				},
+			],
+		})
+	}
+
 	$: if ($user?.avatar_url) downloadAvatar($user?.avatar_url)
 	$: if (!$user) avatarUrl = ''
 </script>
 
 <div class="absolute top-0 right-5">
 	<div class="flex h-full items-center justify-center space-x-3">
-		<button class="rounded-md bg-blue-400 p-2 text-white">
+		<button class="rounded-md bg-blue-400 p-2 text-white" on:click={onKakaoShare}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"

@@ -59,6 +59,7 @@
 - [x] Palette Color Render bug fix
 - [x] stroke width is not changable bug fix
 - [x] logout avatar default bug fix
+- [ ] Share with kakao talk
 - [ ] Save Canvas Json file in Cloud
 - [ ] Shapre Canvas Image
 - [ ] SVG library
