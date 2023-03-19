@@ -50,11 +50,12 @@
 - [x] Lock/Invisible mode with Layer
 - [x] Connect BabylonJS
 - [x] Align Bug Fix
-- [ ] Canvas Clear Button
+- [x] Canvas Clear Button
 - [x] Image Upload Bug Fix (canvas boundary should notice object scale)
 - [x] DB Setup (Supabase)
 - [x] login / register
 - [x] Login with Google
+- [x] Remove Grid (grid disppear bug)
 - [ ] Save in Cloud
 - [ ] SVG library
 - [ ]
