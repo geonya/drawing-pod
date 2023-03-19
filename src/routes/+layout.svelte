@@ -17,9 +17,6 @@
 			console.log('Auth state change detected')
 			invalidate('supabase:auth')
 		})
-		if (!window?.kakao?.isInitialized()) {
-			window?.kakao?.init(PUBLIC_KAKAO_KEY)
-		}
 		return () => data.subscription.unsubscribe()
 	})
 </script>
