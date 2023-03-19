@@ -1,13 +1,47 @@
 <script lang="ts">
-	import { Auth } from '@supabase/auth-ui-svelte'
-	import { ThemeSupa } from '@supabase/auth-ui-shared'
-	import type { PageData } from './$types'
+	import type { Provider } from '@supabase/supabase-js'
+	import { enhance, type SubmitFunction } from '$app/forms'
+	import type { LayoutData } from '../$types'
 
-	export let data: PageData
+	export let data: LayoutData
+
+	$: ({ supabase } = data)
+
+	const signInWithProvider = async (provider: Provider) => {
+		const { data, error } = await supabase.auth.signInWithOAuth({
+			provider: provider,
+			options: {
+				queryParams: {
+					access_type: 'offline',
+					prompt: 'consent',
+				},
+			},
+		})
+		console.log(data)
+		console.log(error)
+	}
+	const submitSocialLogin: SubmitFunction = async ({ action, cancel }) => {
+		switch (action.searchParams.get('provider')) {
+			case 'google':
+				await signInWithProvider('google')
+				break
+			default:
+				break
+		}
+		cancel()
+	}
 </script>
 
-<div class="row flex-center flex">
-	<div class="col-6 form-widget">
-		<Auth supabaseClient={data.supabase} providers={['google']} appearance={{ theme: ThemeSupa }} />
-	</div>
+<div>
+	<h1>Login</h1>
+	<form method="post">
+		<label for=""> Email </label>
+		<input type="text" name="email" />
+		<label for=""> Password </label>
+		<input type="password" name="password" />
+		<button type="submit" class="">Login</button>
+	</form>
+	<form class="socials" method="POST" use:enhance={submitSocialLogin}>
+		<button formaction="?/login&provider=google" class="border px-3 py-1">Google</button>
+	</form>
 </div>

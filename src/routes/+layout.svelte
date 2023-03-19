@@ -10,9 +10,9 @@
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange(() => {
+			console.log('Auth state change detected')
 			invalidate('supabase:auth')
 		})
-
 		return () => data.subscription.unsubscribe()
 	})
 </script>
