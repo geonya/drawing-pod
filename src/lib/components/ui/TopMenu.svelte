@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { MenuTitle } from '$lib/types'
+	import type { SupabaseClient } from '@supabase/supabase-js'
 	import Icon from './Icon.svelte'
 	import MenuContentGenerator from './MenuContentGenerator.svelte'
 	import MenuPanel from './panel/MenuPanel.svelte'
+	export let supabase: SupabaseClient
 	let isMenuOpen = false
 	let menuTitle: MenuTitle | null = null
 	function toggleMenu() {

@@ -21,6 +21,7 @@
 			loading = false
 			if (result.type === 'success') {
 				await goto('/login')
+				$user = null
 			}
 		}
 	}
@@ -28,10 +29,10 @@
 
 <button class="fixed inset-0 z-40 h-full w-full" on:click={async () => await goto('/')} />
 <div
-	class="fixed top-1/2 left-1/2 z-50 grid max-w-lg -translate-x-1/2 -translate-y-1/2 grid-flow-col rounded-md border p-3 shadow-lg backdrop-blur-2xl md:w-1/2"
+	class="fixed top-1/2  left-1/2 z-50 grid w-[300px] max-w-lg -translate-x-1/2 -translate-y-1/2 grid-flow-col rounded-md border p-3 shadow-lg backdrop-blur-2xl md:w-1/2"
 >
 	<form
-		class="w-[300px] space-y-2 md:w-full"
+		class="space-y-2 md:w-full"
 		method="post"
 		action="?/update"
 		use:enhance={handleSubmit}
@@ -91,12 +92,12 @@
 		<div class="flex justify-between">
 			<button
 				type="submit"
-				class="w-full rounded-lg bg-blue-500 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 sm:w-auto"
+				class="rounded-lg bg-blue-500 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 "
 				value={loading ? 'Loading...' : 'Update'}
 				disabled={loading}>업데이트</button
 			>
 			<button
-				class="w-full rounded-lg bg-red-500 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 sm:w-auto"
+				class="rounded-lg bg-red-500 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 "
 				disabled={loading}
 				formaction="?/signout">로그아웃</button
 			>

@@ -4,7 +4,7 @@ import { derived, writable, type Readable, type Writable } from 'svelte/store'
 import { shape } from '../canvas/canvas.store'
 
 export type OutputColor = {
-	[key in PaintType]: string | null
+	[key in PaintType]: string | null | undefined
 }
 
 export const paintType = writable(PaintType.FILL)
@@ -29,10 +29,10 @@ export const inputColor: Readable<HsvaColor | null> = derived(
 
 export const paletteColor = writable<HsvaColor | null>(null)
 export const outputColor: Readable<OutputColor | null> = derived(
-	[paletteColor, paintType],
-	([$paltteColor, $paintType], set) => {
-		const fill = $paintType === PaintType.FILL ? hsvaToStringRgba($paltteColor) : null
-		const stroke = $paintType === PaintType.STROKE ? hsvaToStringRgba($paltteColor) : null
+	[paletteColor, paintType, shape],
+	([$paltteColor, $paintType, $shape], set) => {
+		const fill = $paintType === PaintType.FILL ? hsvaToStringRgba($paltteColor) : $shape?.fill
+		const stroke = $paintType === PaintType.STROKE ? hsvaToStringRgba($paltteColor) : $shape?.stroke
 		set({ fill, stroke })
 		return () => set(null)
 	},

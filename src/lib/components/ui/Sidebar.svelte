@@ -5,14 +5,17 @@
 	import Palette from '../palette/Palette.svelte'
 
 	import { paintType, stringRgbaToHex, outputColor } from '../palette/palette.store'
-	import { get } from 'svelte/store'
 	import { control, shape } from '../canvas/canvas.store'
 	import { INITIAL_RGBA } from '$lib/constants'
 
-	let fill = get(shape)?.fill
-	let stroke = get(shape)?.stroke
-	let objectType = get(shape)?.objectType
-	let strokeWidth = get(shape)?.strokeWidth ?? 0
+	let fill = $shape?.fill
+	let stroke = $shape?.stroke
+	let objectType = $shape?.objectType
+	let strokeWidth = $shape?.strokeWidth ?? 0
+
+	$: fill = $outputColor?.fill
+	$: stroke = $outputColor?.stroke
+	$: strokeWidth, shape.update((shape) => ({ ...shape, strokeWidth }))
 </script>
 
 <nav
@@ -37,7 +40,7 @@
 							<button
 								class={'샘플컬러 h-7 w-7 rounded-md ' +
 									($paintType === PaintType.FILL ? 'ring-2 ring-blue-500' : '')}
-								style="background-color:{$outputColor?.fill || INITIAL_RGBA};"
+								style="background-color:{fill || INITIAL_RGBA};"
 								on:click={() => paintType.set(PaintType.FILL)}
 							/>
 
@@ -62,7 +65,7 @@
 							<button
 								class={'샘플컬러 h-7 w-7 rounded-md ' +
 									($paintType === PaintType.STROKE ? 'ring-2 ring-blue-500' : '')}
-								style="background-color:{$outputColor?.stroke || INITIAL_RGBA};"
+								style="background-color:{stroke || INITIAL_RGBA};"
 								on:click={() => paintType.set(PaintType.STROKE)}
 							/>
 							{#if strokeWidth !== null}

@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { sideBarOpen } from '$lib/store'
-	import { ActionType, ObjectType } from '$lib/types'
+	import { ActionType, ObjectType, type Shape } from '$lib/types'
 	import type { IEvent } from 'fabric/fabric-impl'
 	import { onMount } from 'svelte'
 	import { fabric } from 'fabric'
 	import { action, control, renderer, shape } from './canvas.store'
 	import { outputColor, type OutputColor } from '../palette/palette.store'
 	export let canvas: fabric.Canvas
-	export let staticCanvas: fabric.StaticCanvas
 	let prevAction = ActionType.DEFAULT
 	let clipboard: fabric.Object | null = null
 	let undoStack: any[] = []
@@ -16,6 +15,7 @@
 	$: {
 		onColorUpdate($outputColor)
 		onActionHandler($action)
+		onStrokeWidthUpdate($shape)
 	}
 
 	function onColorUpdate(color: OutputColor | null) {
@@ -36,6 +36,27 @@
 			} else {
 				color.fill && activeObject.set('fill', color.fill as string)
 				color.stroke && activeObject.set('stroke', color.stroke as string)
+			}
+			canvas.requestRenderAll()
+		}
+	}
+
+	function onStrokeWidthUpdate(shape: Shape) {
+		if (!shape || !shape.strokeWidth) return
+		const activeObject = canvas.getActiveObject()
+		if (activeObject) {
+			if (activeObject.type === 'group') {
+				const group = activeObject as fabric.Group
+				group.forEachObject((obj) => {
+					if (obj.type === 'rect' || obj.type === 'circle') {
+						obj.set('strokeWidth', shape.strokeWidth!)
+					}
+					if (obj.type === 'textbox' || obj.type === 'i-text') {
+						obj.set('strokeWidth', shape.strokeWidth!)
+					}
+				})
+			} else {
+				activeObject.set('strokeWidth', shape.strokeWidth)
 			}
 			canvas.requestRenderAll()
 		}
@@ -259,16 +280,17 @@
 		}
 		if (e.key === ' ') {
 			const activeObjects = canvas.getActiveObjects()
-			if (!activeObjects || activeObjects.length === 0) return
-			for (const activeObject of activeObjects) {
-				if (activeObject instanceof fabric.IText || activeObject instanceof fabric.Textbox) {
-					const textObject = activeObject as fabric.IText
-					if (textObject.isEditing === true) {
-						console.log('editing')
-						return
-					}
-					if (textObject.text && textObject.text.length === 0) {
-						return
+			if (activeObjects) {
+				for (const activeObject of activeObjects) {
+					if (activeObject instanceof fabric.IText || activeObject instanceof fabric.Textbox) {
+						const textObject = activeObject as fabric.IText
+						if (textObject.isEditing === true) {
+							console.log('editing')
+							return
+						}
+						if (textObject.text && textObject.text.length === 0) {
+							return
+						}
 					}
 				}
 			}
@@ -307,7 +329,7 @@
 		if (zoom > 5) zoom = 5
 		if (zoom < 1) zoom = 1
 		canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
-		staticCanvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
+		// staticCanvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom)
 		e.e.preventDefault()
 		e.e.stopPropagation()
 	}

@@ -11,7 +11,6 @@
 	import { control, renderer } from './canvas.store'
 	import type { SupabaseClient } from '@supabase/supabase-js'
 	export let canvas: fabric.Canvas
-	export let staticCanvas: fabric.StaticCanvas
 	export let supabase: SupabaseClient
 
 	onMount(() => {
@@ -22,7 +21,7 @@
 	})
 </script>
 
-<Action {canvas} {staticCanvas}>
+<Action {canvas}>
 	<Controller {canvas} />
 	<Topbar {supabase} />
 	{#if $sideBarOpen}

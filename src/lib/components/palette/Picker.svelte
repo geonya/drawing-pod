@@ -26,7 +26,6 @@
 		const sv = positionToSv(position)
 		paletteColor?.update((hsva) => {
 			if (!hsva) return hsva
-			console.log(hsva)
 			return { ...hsva, s: sv.s, v: sv.v }
 		})
 	}

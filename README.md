@@ -6,6 +6,8 @@
 
 ### TODO
 
+- [x] setup sveltekit project
+- [x] setup fabricjs Canvas
 - [x] Color (Object Stroke & Fill)
   - [x] Palette
   - [x] Color Picker
@@ -29,7 +31,7 @@
 - [x] sticky line
   - [x] arrow line
   - [x] stick to near object
-  - [ ] To attach the center of the corner
+  - [x] To attach the center of the corner
 - [x] Group
 - [x] selected item delete
 - [x] Delete Static Canvas
@@ -43,10 +45,8 @@
 - [x] Menu
 - [x] Ctrl-C / Ctrl-V
 - [x] Refactoring with store
-- [ ] Palette Color Render Bug Fix
-- [x] Ctrl-Z
+- [x] Undo + Redo
 - [x] Group Refactoring : don't use group things...
-- [ ] Layer
 - [x] Lock/Invisible mode with Layer
 - [x] Connect BabylonJS
 - [x] Align Bug Fix
@@ -56,6 +56,8 @@
 - [x] login / register
 - [x] Login with Google
 - [x] Remove Grid (grid disppear bug)
-- [ ] Save in Cloud
+- [x] Palette Color Render bug fix
+- [ ] stroke width is not changable bug fix
+- [ ] Save Canvas Json file in Cloud
 - [ ] SVG library
-- [ ]
+- [ ] Layer

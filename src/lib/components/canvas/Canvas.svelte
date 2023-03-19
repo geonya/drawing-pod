@@ -45,7 +45,7 @@
 	<!-- <canvas id="staticCanvas" class="absolute inset-0 z-20 h-full w-full" /> -->
 </div>
 {#if canvas}
-	<Layer {canvas} {staticCanvas} {supabase} />
+	<Layer {canvas} {supabase} />
 	<div class="absolute right-12 top-24 z-50 cursor-grab rounded-full bg-black bg-opacity-5 p-2">
 		<BjsCanvas />
 	</div>
