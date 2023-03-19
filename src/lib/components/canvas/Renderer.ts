@@ -1,36 +1,34 @@
 import { MM_TO_PX, PX_TO_MM as PX_TO_MM } from '$lib/constants'
-import { sideBarKey, sideBarOpen } from '$lib/store'
-import type { ColorObj, ObjectType, Shape } from '$lib/types'
+
+import type { ObjectType, Shape } from '$lib/types'
 import { getDistance } from '$lib/utils'
 import { fabric } from 'fabric'
 
 export class Renderer {
+	constructor(private canvas: fabric.Canvas) {}
+
 	getRectObj = () =>
 		new fabric.Rect({
 			fill: 'rgba(236, 239, 244, 0.8)',
 			stroke: 'rgba(76, 86, 106, 1)',
-
 			strokeWidth: 1,
 			width: 300 * MM_TO_PX,
 			height: 120 * MM_TO_PX,
 			rx: 10,
 			ry: 10,
 			cornerStyle: 'circle',
-			originX: 'center',
-			originY: 'center',
 		})
 	getTextBoxObj = (text: string = 'hello world') =>
-		new fabric.Textbox(text, {
+		new fabric.IText(text, {
 			fill: 'rgba(76, 86, 106, 1)',
 			stroke: 'rgba(76, 86, 106, 1)',
 			fontSize: 50 * MM_TO_PX,
 			strokeWidth: 0,
 			fontFamily: 'Nanum Pen Script',
 			cornerStyle: 'circle',
-			originX: 'center',
-			originY: 'center',
 			textAlign: 'center',
 		})
+	// should I use IText ?
 	getITextObj = (text: string = 'hello world') =>
 		new fabric.IText(text, {
 			fill: 'rgba(76, 86, 106, 1)',
@@ -39,24 +37,47 @@ export class Renderer {
 			strokeWidth: 1,
 			fontFamily: 'Nanum Pen Script',
 			cornerStyle: 'circle',
-			originX: 'center',
-			originY: 'center',
 			textAlign: 'center',
 		})
 	getCircleObj = () =>
 		new fabric.Circle({
 			fill: 'rgba(236, 239, 244, 0.8)',
 			stroke: 'rgba(76, 86, 106, 1)',
-
 			strokeWidth: 1,
-			radius: 100,
+			radius: 150 * MM_TO_PX,
 			cornerStyle: 'circle',
-			originX: 'center',
-			originY: 'center',
 		})
 
-	constructor(private canvas: fabric.Canvas) {}
+	onAddRectnText() {
+		const rect = this.getRectObj()
+		const text = this.getTextBoxObj()
+		this.canvas.centerObject(rect)
+		this.canvas.centerObject(text)
+		this.canvas.add(rect, text)
+		this.canvas.discardActiveObject()
+		const selectedItems = new fabric.ActiveSelection([rect, text], {
+			canvas: this.canvas,
+		})
+		this.canvas.setActiveObject(selectedItems)
+		// selectedItems.forEachObject((obj) => {})
+		this.canvas.requestRenderAll()
+	}
+	onAddCirclenText() {
+		const circle = this.getCircleObj()
+		const text = this.getTextBoxObj()
+		this.canvas.centerObject(circle)
+		this.canvas.centerObject(text)
+		this.canvas.add(circle, text)
+		this.canvas.discardActiveObject()
+		const selectedItems = new fabric.ActiveSelection([circle, text], {
+			canvas: this.canvas,
+		})
+		this.canvas.setActiveObject(selectedItems)
+		// selectedItems.forEachObject((obj) => {})
+		this.canvas.requestRenderAll()
+	}
 
+	// don't use group
 	onMakeGroup(objects: fabric.Object[]) {
 		const group = new fabric.Group(objects, {
 			fill: 'rgba(236, 239, 244, 0.9)',
@@ -68,7 +89,6 @@ export class Renderer {
 		})
 		return group
 	}
-
 	onMakeObject(type: ObjectType) {
 		switch (type) {
 			case 'rect':
@@ -79,7 +99,6 @@ export class Renderer {
 					left: rect.left!,
 					top: rect.top!,
 					width: rect.width!,
-					splitByGrapheme: true,
 				})
 				const rectGroup = this.onMakeGroup([rect, rectText])
 				rectGroup.on('mousedblclick', (e) => {
@@ -88,7 +107,6 @@ export class Renderer {
 						left: e.target!.left,
 						top: e.target!.top,
 						width: rect.width!,
-						splitByGrapheme: true,
 					})
 					rectText.visible = false
 					rectGroup.addWithUpdate()
@@ -127,7 +145,6 @@ export class Renderer {
 						left: e.target!.left,
 						top: e.target!.top,
 						width: circle.width!,
-						splitByGrapheme: true,
 					})
 
 					circleText.visible = false
@@ -199,10 +216,9 @@ export class Renderer {
 			const image = new Image()
 			image.src = e.target.result
 			image.onload = () => {
-				const img = new fabric.Image(image)
+				const img = new fabric.Image(image, {})
 				img.scaleToWidth(300)
 				this.canvas.add(img)
-				this.canvas.setActiveObject(img)
 				this.canvas.centerObject(img)
 				this.canvas.renderAll()
 			}
@@ -231,10 +247,8 @@ export class Renderer {
 					x2: pointer.x,
 					y2: pointer.y,
 					stroke: 'rgba(0,0,0,1)',
-					strokeWidth: 3,
+					strokeWidth: 5 * MM_TO_PX,
 					strokeLineCap: 'round',
-					originX: 'center',
-					originY: 'center',
 					selectable: true,
 				})
 
@@ -253,21 +267,26 @@ export class Renderer {
 			if (closestObject) {
 				const object = closestObject as fabric.Object
 				if (closestDistance <= Math.sqrt(object!.width! ** 2 + object!.height! ** 2) + 30) {
-					const bound = object.getBoundingRect()
-					const tl = new fabric.Point(bound.left, bound.top)
-					const tr = new fabric.Point(bound.left + bound.width, bound.top)
-					const bl = new fabric.Point(bound.left, bound.top + bound.height)
-					const br = new fabric.Point(bound.left + bound.width, bound.top + bound.height)
+					const tl = new fabric.Point(object.left!, object.top!)
+					const tr = new fabric.Point(object.left! + object.width!, object.top!)
+					const bl = new fabric.Point(object.left!, object.top! + object.height!)
+					const br = new fabric.Point(object.left! + object.width!, object.top! + object.height!)
 					const center = new fabric.Point(
-						bound.left + bound.width / 2,
-						bound.top + bound.height / 2,
+						object.left! + object.width! / 2,
+						object.top! + object.height! / 2,
 					)
-					const tc = new fabric.Point(bound.left + bound.width / 2, bound.top)
-					const bc = new fabric.Point(bound.left + bound.width / 2, bound.top + bound.height)
-					const lc = new fabric.Point(bound.left, bound.top + bound.height / 2)
-					const rc = new fabric.Point(bound.left + bound.width, bound.top + bound.height / 2)
+					const tc = new fabric.Point(object.left! + object.width! / 2, object.top!)
+					const bc = new fabric.Point(
+						object.left! + object.width! / 2,
+						object.top! + object.height!,
+					)
+					const lc = new fabric.Point(object.left!, object.top! + object.height! / 2)
+					const rc = new fabric.Point(
+						object.left! + object.width!,
+						object.top! + object.height! / 2,
+					)
 
-					const closestPoint = [tc, bc, lc, rc, center].reduce((prev, curr) =>
+					const closestPoint = [tl, tr, bl, br, tc, bc, lc, rc, center].reduce((prev, curr) =>
 						getDistance(prev, point) > getDistance(curr, point) ? curr : prev,
 					)
 					const diffX = point.x - closestPoint.x
@@ -290,6 +309,12 @@ export class Renderer {
 			this.canvas.off('mouse:move')
 			this.canvas.off('mouse:up')
 		})
+
+		return () => {
+			this.canvas.off('mouse:down')
+			this.canvas.off('mouse:move')
+			this.canvas.off('mouse:up')
+		}
 	}
 
 	// TODO : Simplify

@@ -170,6 +170,8 @@ export class Control {
 		if (!this.canvas) return
 		const objWidth = e.target.width && e.target.scaleX && e.target.width * e.target.scaleX
 		const objHeight = e.target.height && e.target.scaleY && e.target.height * e.target.scaleY
+		const objScaleX = e.target.scaleX
+		const objScaleY = e.target.scaleY
 		if (
 			!e.target.top ||
 			!e.target.height ||
@@ -181,24 +183,20 @@ export class Control {
 			!objWidth
 		)
 			return
-		e.target.top = e.target.top <= e.target.height / 2 ? e.target.height / 2 : e.target.top
+		e.target.top = e.target.top <= 0 ? 0 : e.target.top
 		e.target.top =
-			e.target.top >= this.canvas.height - e.target.height / 2
-				? this.canvas.height - e.target.height / 2
+			e.target.top >= this.canvas.height - e.target.height * objScaleY!
+				? this.canvas.height - e.target.height * objScaleY!
 				: e.target.top
-		e.target.left = e.target.left <= e.target.width / 2 ? e.target.width / 2 : e.target.left
+		e.target.left = e.target.left <= 0 ? 0 : e.target.left
 		e.target.left =
-			e.target.left >= this.canvas.width - e.target.width / 2
-				? this.canvas.width - e.target.width / 2
+			e.target.left >= this.canvas.width - e.target.width * objScaleX!
+				? this.canvas.width - e.target.width * objScaleX!
 				: e.target.left
 	}
 	onSave() {
-		const storageString = localStorage.getItem(CANVAS_DATA)
-		if (storageString) {
-			this.canvas.loadFromJSON(JSON.parse(storageString), () => {
-				console.log('Saved Data Loaded')
-			})
-		}
+		const json = this.canvas.toJSON()
+		localStorage.setItem(CANVAS_DATA, JSON.stringify(json))
 	}
 	onDelete() {
 		const activeObjects = this.canvas.getActiveObjects()
@@ -206,11 +204,7 @@ export class Control {
 		this.canvas.discardActiveObject()
 		this.canvas.renderAll()
 	}
-	onAutoSave(time: number) {
-		return setInterval(() => {
-			this.onSave()
-		}, time)
-	}
+
 	onDownloadAsSVG() {
 		this.canvas.backgroundColor = 'rgba(255,255,255,1)'
 		const svg = this.canvas.toSVG()
@@ -229,5 +223,9 @@ export class Control {
 		vp[5] = Math.max(vp[5], this.canvas.getHeight() - this.canvas.getHeight() * zoom)
 		vp[4] = Math.min(vp[4], 0)
 		vp[5] = Math.min(vp[5], 0)
+	}
+
+	onCanvasClear() {
+		this.canvas.clear()
 	}
 }

@@ -13,13 +13,6 @@ export class BJSApp {
 	}
 
 	private async initialize() {
-		// this.engine.displayLoadingUI();
-
-		// await new Promise((resolve) => {
-		// 	this.moveNextAppState(AppStates.LOADING);
-		// 	setTimeout(resolve, 100);
-		// });
-
 		this.engine.hideLoadingUI()
 		this.engine.getAudioContext()?.resume()
 	}

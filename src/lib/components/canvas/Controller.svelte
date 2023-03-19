@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { AUTO_SAVE_DELAY, CANVAS_DATA } from '$lib/constants'
-	import { control, saveProgress } from '$lib/store'
+	import { saveProgress } from '$lib/store'
 	import { onMount } from 'svelte'
 	export let canvas: fabric.Canvas
 
@@ -53,9 +53,9 @@
 	}
 	onMount(() => {
 		if (!canvas) return
-		// 자동 저장 기능
-		// onLoadStorageData(canvas)
-		// onIntervalAutoSaveWithTimer()
-		// onAutoSaveInLocalStorage(canvas)
+		// auto saving
+		onLoadStorageData(canvas)
+		onIntervalAutoSaveWithTimer()
+		onAutoSaveInLocalStorage(canvas)
 	})
 </script>

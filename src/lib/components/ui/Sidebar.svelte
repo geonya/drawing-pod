@@ -3,10 +3,10 @@
 	import { fly } from 'svelte/transition'
 	import Icon from './Icon.svelte'
 	import Palette from '../palette/Palette.svelte'
-	import { control } from '$lib/store'
+
 	import { paintType, stringRgbaToHex, outputColor } from '../palette/palette.store'
 	import { get } from 'svelte/store'
-	import { shape } from '../canvas/canvas.store'
+	import { control, shape } from '../canvas/canvas.store'
 	import { INITIAL_RGBA } from '$lib/constants'
 
 	let fill = get(shape)?.fill

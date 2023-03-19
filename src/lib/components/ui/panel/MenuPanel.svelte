@@ -7,7 +7,7 @@
 
 <nav
 	transition:fade={{ duration: 100 }}
-	class="absolute top-9 -left-10 z-50 grid w-28 grid-flow-row rounded-md border shadow-lg backdrop-blur-md"
+	class="absolute top-11 -left-10 z-50 grid w-28 grid-flow-row rounded-md border shadow-lg backdrop-blur-md"
 >
 	<ul class="flex flex-col overflow-hidden">
 		<li class="">

@@ -1,23 +1,4 @@
 import { writable } from 'svelte/store'
-import { ActionType } from './types'
-import type { Renderer } from './components/canvas/Renderer'
-import type { Control } from './components/canvas/Control'
-
-const setRenderer = () => {
-	const { subscribe, set } = writable<Renderer | null>(null)
-	return {
-		subscribe,
-		set,
-	}
-}
-
-const setControl = () => {
-	const { subscribe, set } = writable<Control | null>(null)
-	return {
-		subscribe,
-		set,
-	}
-}
 
 const setSideBarOpen = () => {
 	const { subscribe, set } = writable<boolean>(false)
@@ -27,13 +8,13 @@ const setSideBarOpen = () => {
 	}
 }
 
-const setSideBarKey = () => {
-	const { subscribe, set } = writable<symbol>(Symbol())
-	return {
-		subscribe,
-		set,
-	}
-}
+// const setSideBarKey = () => {
+// 	const { subscribe, set } = writable<symbol>(Symbol())
+// 	return {
+// 		subscribe,
+// 		set,
+// 	}
+// }
 
 const setSaveProgress = () => {
 	const { subscribe, set } = writable<number>(0)
@@ -58,10 +39,9 @@ const setSVG = () => {
 		set,
 	}
 }
-export const renderer = setRenderer()
-export const control = setControl()
+
 export const sideBarOpen = setSideBarOpen()
-export const sideBarKey = setSideBarKey()
+// export const sideBarKey = setSideBarKey()
 export const saveProgress = setSaveProgress()
 
 export const isLocked = setIsLocked()

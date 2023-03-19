@@ -40,18 +40,18 @@
 - [x] Background Grid
 - [x] px to mm
 - [x] signboard
-
-  - [ ] add child canvas X
-  - [ ]
-  - [ ]
-
 - [x] Menu
 - [x] Ctrl-C / Ctrl-V
 - [x] Refactoring with store
-- [ ] Ctrl-Z
+- [ ] Palette Color Render Bug Fix
+- [x] Ctrl-Z
+- [x] Group Refactoring : don't use group things...
 - [ ] Layer
-- [ ] Lock/Invisible mode with Layer
-- [ ] Connect BabylonJS
+- [x] Lock/Invisible mode with Layer
+- [x] Connect BabylonJS
+- [x] Align Bug Fix
+- [ ] Canvas Clear Button
+- [x] Image Upload Bug Fix (canvas boundary should notice object scale)
 - [ ] DB Setup (PocketBase)
 - [ ] login / register
 - [ ] SVG library

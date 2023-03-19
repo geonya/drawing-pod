@@ -9,4 +9,4 @@
 	})
 </script>
 
-<canvas bind:this={canvas} id="canvas" class="h-96 w-96 outline-none" />
+<canvas bind:this={canvas} id="canvas" class="h-48 w-48 outline-none" />

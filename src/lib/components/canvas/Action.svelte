@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { control, renderer, sideBarKey, sideBarOpen } from '$lib/store'
+	import { sideBarOpen } from '$lib/store'
 	import { ActionType, ObjectType } from '$lib/types'
 	import type { IEvent } from 'fabric/fabric-impl'
 	import { onMount } from 'svelte'
 	import { fabric } from 'fabric'
-	import { action, shape } from './canvas.store'
+	import { action, control, renderer, shape } from './canvas.store'
 	import { outputColor, type OutputColor } from '../palette/palette.store'
 	export let canvas: fabric.Canvas
 	export let staticCanvas: fabric.StaticCanvas
@@ -20,7 +20,6 @@
 
 	function onColorUpdate(color: OutputColor | null) {
 		const activeObject = canvas.getActiveObject()
-
 		if (activeObject && color) {
 			if (activeObject.type === 'group') {
 				const group = activeObject as fabric.Group
@@ -30,12 +29,14 @@
 						color.stroke && obj.set('stroke', color.stroke as string)
 					}
 					if (obj.type === 'textbox') {
+						color.stroke && obj.set('fill', color.fill as string)
 						color.stroke && obj.set('stroke', color.stroke as string)
 					}
 				})
+			} else {
+				color.fill && activeObject.set('fill', color.fill as string)
+				color.stroke && activeObject.set('stroke', color.stroke as string)
 			}
-			color.fill && activeObject.set('fill', color.fill as string)
-			color.stroke && activeObject.set('stroke', color.stroke as string)
 			canvas.requestRenderAll()
 		}
 	}
@@ -188,7 +189,7 @@
 			// previous state
 			const json = undoStack[0]
 			undoStack = undoStack.slice(1)
-			console.log('undo', undoStack)
+			console.log(json)
 			canvas.loadFromJSON(json, () => {
 				canvas.renderAll()
 			})
@@ -219,8 +220,8 @@
 			clipboard.clone((cloned: fabric.Object) => {
 				canvas.discardActiveObject()
 				cloned.set({
-					left: cloned.left! + 10,
-					top: cloned.top! + 10,
+					left: cloned.left! + 15,
+					top: cloned.top! + 15,
 					evented: true,
 				})
 				if (cloned.type === 'activeSelection') {
@@ -234,9 +235,6 @@
 				} else {
 					canvas.add(cloned)
 				}
-				// ??
-				// clipboard!.top = clipboard!.top! + 10
-				// clipboard!.left = clipboard!.left! + 10
 				canvas.setActiveObject(cloned)
 				canvas.requestRenderAll()
 			})
@@ -256,8 +254,24 @@
 		if (e.key === 'Escape') {
 			$action = ActionType.DEFAULT
 			canvas.discardActiveObject()
+			canvas.defaultCursor = 'default'
+			canvas.renderAll()
 		}
 		if (e.key === ' ') {
+			const activeObjects = canvas.getActiveObjects()
+			if (!activeObjects || activeObjects.length === 0) return
+			for (const activeObject of activeObjects) {
+				if (activeObject instanceof fabric.IText || activeObject instanceof fabric.Textbox) {
+					const textObject = activeObject as fabric.IText
+					if (textObject.isEditing === true) {
+						console.log('editing')
+						return
+					}
+					if (textObject.text && textObject.text.length === 0) {
+						return
+					}
+				}
+			}
 			$action = ActionType.DRAG
 		}
 
@@ -303,6 +317,7 @@
 		// setGridOnCanvasWithMM(canvas)
 	}
 
+	// object selected
 	function onObjectSelect(e?: fabric.IEvent) {
 		const activeObject = canvas.getActiveObject()
 		if (activeObject) {
@@ -317,11 +332,11 @@
 	}
 	function onObjectSelectUpdate(e: fabric.IEvent) {
 		onObjectSelect()
-		changeSideBar()
+		onSidebarClose()
+		onSideBarOpen()
 	}
 	function onObjectSelectClear() {
-		console.log('cleared')
-		canvas.discardActiveObject().renderAll()
+		canvas.discardActiveObject()
 		onSidebarClose()
 		setClearShape()
 	}
@@ -332,18 +347,12 @@
 	function onSidebarClose() {
 		sideBarOpen.set(false)
 	}
-	function changeSideBar() {
-		sideBarKey.set(Symbol())
-	}
 
 	function setClearShape() {
 		shape.set(null)
 	}
 
 	onMount(() => {
-		// set init undo stack
-		setUndo(canvas.toJSON())
-
 		canvas.on('before:render', () => $control?.setCanvasBoundary())
 		canvas.on('resizing', onResize)
 		canvas.on('mouse:wheel', (e) => onZoom(e))
@@ -368,32 +377,28 @@
 		canvas.on('object:selected', (e) => {
 			onObjectSelect(e)
 		})
-		canvas.on('object:scaling', () => {
-			// undoStack.push(canvas.toJSON())
-		})
+		canvas.on('object:scaling', () => {})
 		canvas.on('object:removed', () => {
 			setUndo(canvas.toJSON())
 		})
 		canvas.on('object:modified', (e) => {
-			// undoStack.push(canvas.toJSON())
 			onObjectSelectUpdate(e)
 		})
 		canvas.on('object:moving', (e) => {
-			setUndo(canvas.toJSON())
 			$control?.onPreventCanvasExit(e)
 		})
-		canvas.on('object:rotating', () => {
-			// undoStack.push(canvas.toJSON())
+		canvas.on('object:removed', () => {
+			setUndo(canvas.toJSON())
 		})
-		canvas.on('object:skewing', () => {
-			// undoStack.push(canvas.toJSON())
+		canvas.on('obeject:moved', () => {
+			setUndo(canvas.toJSON())
 		})
-		canvas.on('object:resizing', () => {
-			// undoStack.push(canvas.toJSON())
-		})
+		canvas.on('object:rotating', () => {})
+		canvas.on('object:skewing', () => {})
+		canvas.on('object:resizing', () => {})
 
-		setTimeout(() => {
-			undoStack.push(canvas.toJSON())
+		const undoTimeoutId = setTimeout(() => {
+			setUndo(canvas.toJSON())
 		}, 0)
 
 		return () => {
@@ -414,6 +419,8 @@
 			canvas.off('object:rotating')
 			canvas.off('object:skewing')
 			canvas.off('object:resizing')
+
+			clearTimeout(undoTimeoutId)
 		}
 	})
 </script>

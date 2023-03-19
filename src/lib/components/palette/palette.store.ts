@@ -1,11 +1,10 @@
-import { INITIAL_RGBA } from '$lib/constants'
 import { PaintType } from '$lib/types'
 import { colord, type HsvaColor, type RgbaColor } from 'colord'
 import { derived, writable, type Readable, type Writable } from 'svelte/store'
 import { shape } from '../canvas/canvas.store'
 
 export type OutputColor = {
-	[key in PaintType]: string
+	[key in PaintType]: string | null
 }
 
 export const paintType = writable(PaintType.FILL)
@@ -22,20 +21,18 @@ export const inputColor: Readable<HsvaColor | null> = derived(
 			const _hsva = stringRgbaToHsva(_sRgba)
 			set(_hsva)
 		}
+		return () => {
+			set(null)
+		}
 	},
 )
 
 export const paletteColor = writable<HsvaColor | null>(null)
 export const outputColor: Readable<OutputColor | null> = derived(
-	[paletteColor, paintType, shape],
-	([$paltteColor, $paintType, $shape], set) => {
-		const fill =
-			$paintType === PaintType.FILL ? hsvaToStringRgba($paltteColor) : $shape?.fill ?? INITIAL_RGBA
-		const stroke =
-			$paintType === PaintType.STROKE
-				? hsvaToStringRgba($paltteColor)
-				: $shape?.stroke ?? INITIAL_RGBA
-
+	[paletteColor, paintType],
+	([$paltteColor, $paintType], set) => {
+		const fill = $paintType === PaintType.FILL ? hsvaToStringRgba($paltteColor) : null
+		const stroke = $paintType === PaintType.STROKE ? hsvaToStringRgba($paltteColor) : null
 		set({ fill, stroke })
 		return () => set(null)
 	},
@@ -62,8 +59,8 @@ function convertStringToRgba(color: string) {
 	return rgba
 }
 
-export function hsvaToStringRgba(hsva: HsvaColor | null): string {
-	if (!hsva) return INITIAL_RGBA
+export function hsvaToStringRgba(hsva: HsvaColor | null) {
+	if (!hsva) return null
 	return stringifyRgba(hsvaToRgba(hsva))
 }
 function hsvaToRgba(hsva: HsvaColor): RgbaColor {
@@ -87,6 +84,6 @@ export function stringRgbaToHex(color: string): string {
 function rgbaChecker(color: any) {
 	if (!color) return null
 	if (color.includes('rgb(')) return color.replace(')', ',1)')
-	if (typeof color === 'object') return INITIAL_RGBA
+	if (typeof color === 'object') return null
 	return color
 }

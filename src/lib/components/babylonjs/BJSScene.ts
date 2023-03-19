@@ -27,30 +27,32 @@ export class BJSScene {
 	constructor(private readonly engine: Engine, private readonly canvas: HTMLCanvasElement) {
 		this._scene = new Scene(this.engine)
 		this._scene.clearColor = new Color4(0, 0, 0, 0)
-		var scene = new Scene(engine)
 
-		var camera = new ArcRotateCamera(
+		const ZOOM_RADIUS = 7
+		const camera = new ArcRotateCamera(
 			'Camera',
 			-Math.PI / 3,
 			Math.PI / 4,
-			10,
+			ZOOM_RADIUS,
 			Vector3.Zero(),
 			this._scene,
 		)
+		camera.attachControl(this.canvas, true)
+		// prevent zoom
+		camera.lowerRadiusLimit = ZOOM_RADIUS
+		camera.upperRadiusLimit = ZOOM_RADIUS
 
-		camera.attachControl(canvas, true)
-
-		var light1 = new DirectionalLight('DirectionalLight', new Vector3(0, -1, 1), this._scene)
-		var light2 = new HemisphericLight('HemiLight', new Vector3(0, 1, 0), this._scene)
+		const light1 = new DirectionalLight('DirectionalLight', new Vector3(0, -1, 1), this._scene)
+		const light2 = new HemisphericLight('HemiLight', new Vector3(0, 1, 0), this._scene)
 		light1.intensity = 0.7
 		light2.intensity = 0.6
 
-		var box = MeshBuilder.CreateBox(
+		const box = MeshBuilder.CreateBox(
 			'box',
 			{
-				width: 2,
-				height: 2,
-				depth: 2,
+				width: 3,
+				height: 3,
+				depth: 3,
 				faceColors: [
 					new Color4(1, 0, 0, 1),
 					new Color4(0, 1, 0, 1),
@@ -62,13 +64,13 @@ export class BJSScene {
 			},
 			this._scene,
 		)
-		box.position.y = 2
+		box.position.y = 0
 
-		var frameRate = 10
+		const frameRate = 10
 		//Position Animation
 
 		//Rotation Animation
-		var yRot = new Animation(
+		const yRot = new Animation(
 			'yRot',
 			'rotation.y',
 			frameRate,
@@ -76,7 +78,7 @@ export class BJSScene {
 			Animation.ANIMATIONLOOPMODE_CYCLE,
 		)
 
-		var keyFramesR = []
+		const keyFramesR = []
 
 		keyFramesR.push({
 			frame: 0,

@@ -1,5 +1,7 @@
 import { ActionType, type Shape } from '$lib/types'
-import { writable } from 'svelte/store'
+import { readable, writable } from 'svelte/store'
+import type { Renderer } from './Renderer'
+import type { Control } from './Control'
 
 export const shape = writable<Shape | null>(null)
 export const action = writable(ActionType.DEFAULT)
@@ -34,3 +36,21 @@ const setRedoStack = () => {
 	}
 }
 export const redoStack = setRedoStack()
+
+const setRenderer = () => {
+	const { subscribe, set } = writable<Renderer | null>(null)
+	return {
+		subscribe,
+		set,
+	}
+}
+export const renderer = setRenderer()
+
+const setControl = () => {
+	const { subscribe, set } = writable<Control | null>(null)
+	return {
+		subscribe,
+		set,
+	}
+}
+export const control = setControl()
