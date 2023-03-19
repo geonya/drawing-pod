@@ -8,12 +8,6 @@
 
 <div class="row flex-center flex">
 	<div class="col-6 form-widget">
-		<Auth
-			supabaseClient={data.supabase}
-			providers={['google']}
-			redirectTo={`${data.url}/logging-in?redirect=/`}
-			showLinks={false}
-			appearance={{ theme: ThemeSupa, style: { input: 'color: #fff' } }}
-		/>
+		<Auth supabaseClient={data.supabase} providers={['google']} appearance={{ theme: ThemeSupa }} />
 	</div>
 </div>
