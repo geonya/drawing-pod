@@ -9,7 +9,6 @@
 	import { sideBarOpen, sideBarKey } from '$lib/store'
 	import { Action, Controller, Sidebar, Topbar } from '$lib'
 	import { control, renderer } from './canvas.store'
-	import type { SupabaseClient } from '@supabase/supabase-js'
 	export let canvas: fabric.Canvas
 
 	onMount(() => {

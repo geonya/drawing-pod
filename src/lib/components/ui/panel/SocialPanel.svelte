@@ -18,8 +18,8 @@
 			window.Kakao.Share.sendDefault({
 				objectType: 'feed',
 				content: {
-					title: '오늘 내가 그린고 어때?',
-					description: '드로잉팟에서 그려보아떠 👍',
+					title: '드로잉팟 그림 공유 😇',
+					description: '이쁘게 그려보아요 🎨',
 					imageUrl: publicUrl,
 					link: {
 						mobileWebUrl: publicUrl,

@@ -234,6 +234,10 @@ export class Control {
 		return file
 	}
 
+	getCanvas() {
+		return this.canvas
+	}
+
 	async getUser(sb: SupabaseClient) {
 		const {
 			data: { user },
@@ -241,7 +245,15 @@ export class Control {
 		return user
 	}
 
-	async getCanvasPNGPublicUrl(sb: SupabaseClient | null) {
+	async uploadCanvasPNG(sb: SupabaseClient | null, url: string, file: File) {
+		if (!sb) return
+		let { data: pathData, error } = await sb.storage.from('canvas').upload(url, file)
+		if (error) {
+			console.error('upload error', error)
+		}
+	}
+
+	async getCanvasPNGStoragePath(sb: SupabaseClient | null) {
 		if (!sb) return null
 		const file = this.getCanvasPNGFile()
 		if (!file) return
@@ -253,8 +265,15 @@ export class Control {
 		}
 		if (!pathData?.path) return
 		const { path } = pathData
+		return path
+	}
+
+	async getCanvasPNGPublicUrl(sb: SupabaseClient | null) {
+		if (!sb) return null
+		const path = await this.getCanvasPNGStoragePath(sb)
+		if (!path) return null
 		const { data } = sb.storage.from('canvas').getPublicUrl(path)
-		if (!data?.publicUrl) return
+		if (!data?.publicUrl) return null
 		const { publicUrl } = data
 		return publicUrl
 	}

@@ -69,6 +69,5 @@
 - [x] load canvas data when login
 - [x] Save Canvas Json file in Cloud
 - [x] user avatar bug fix
-- [ ] SVG library
-- [ ]
+- [x] Storage
 - [ ] Layer

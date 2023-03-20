@@ -3,6 +3,7 @@
 	import { saveProgress, sb } from '$lib/store'
 	import { ActionType, ObjectType } from '$lib/types'
 	import { action, control, renderer } from '$lib/components/canvas/canvas.store'
+	import { goto } from '$app/navigation'
 
 	let canvasClearAlertModal = false
 
@@ -13,25 +14,34 @@
 			data: { user },
 		} = await $sb?.auth.getUser()
 		if (!user) {
+			console.error('User is not logged in.')
+			await goto('/login')
 			return
 		}
 		const canvasData = $control?.getCanvasJSON()
 		if (!canvasData) return
-		const { data, error: canvasIdError } = await $sb.from('canvas').select('id').eq('user', user.id)
-		if (canvasIdError || !data) {
-			console.error(canvasIdError)
-			return
-		}
-		const canvasId = data[0].id
-		if (canvasId) {
-			const { error } = await $sb.from('canvas').update({ data: canvasData }).eq('id', canvasId)
-			if (error) {
-				console.error(error)
-			}
-			return
-		}
+
+		const path = await $control?.getCanvasPNGStoragePath($sb)
+		// not allowed multiple canvas for a user
+		// const { data, error: canvasIdError } = await $sb.from('canvas').select('id').eq('user', user.id)
+		// if (canvasIdError || !data) {
+		// 	console.error(canvasIdError)
+		// 	return
+		// }
+		// const canvasId = data[0].id
+		// if (canvasId) {
+		// 	const { error } = await $sb
+		// 		.from('canvas')
+		// 		.update({ data: canvasData, path })
+		// 		.eq('id', canvasId)
+		// 	if (error) {
+		// 		console.error(error)
+		// 	}
+		// 	return
+		// }
 		const { error } = await $sb.from('canvas').insert({
-			data,
+			data: canvasData,
+			path,
 			user: user?.id,
 		})
 		if (error) {
