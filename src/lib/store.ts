@@ -9,13 +9,13 @@ const setSideBarOpen = () => {
 	}
 }
 
-// const setSideBarKey = () => {
-// 	const { subscribe, set } = writable<symbol>(Symbol())
-// 	return {
-// 		subscribe,
-// 		set,
-// 	}
-// }
+const setSideBarKey = () => {
+	const { subscribe, set } = writable<symbol>(Symbol())
+	return {
+		subscribe,
+		set,
+	}
+}
 
 const setSaveProgress = () => {
 	const { subscribe, set } = writable<number>(0)
@@ -51,7 +51,7 @@ const setUser = () => {
 }
 
 export const sideBarOpen = setSideBarOpen()
-// export const sideBarKey = setSideBarKey()
+export const sideBarKey = setSideBarKey()
 export const saveProgress = setSaveProgress()
 
 export const isLocked = setIsLocked()

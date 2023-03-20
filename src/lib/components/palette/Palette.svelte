@@ -3,12 +3,8 @@
 	import Slider from './Slider.svelte'
 	import AlphaSlider from './AlphaSlider.svelte'
 	import { inputColor, paletteColor } from './palette.store'
-	import { get } from 'svelte/store'
-	import { onMount } from 'svelte'
 
-	onMount(() => {
-		paletteColor.set(get(inputColor))
-	})
+	$: $paletteColor = $inputColor
 </script>
 
 <div id="baseModal" class="z-10 grid h-40 w-full grid-cols-7 space-x-2 rounded-md p-1 ">

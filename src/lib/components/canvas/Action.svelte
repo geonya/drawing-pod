@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { sideBarOpen } from '$lib/store'
+	import { sideBarKey, sideBarOpen } from '$lib/store'
 	import { ActionType, ObjectType, type Shape } from '$lib/types'
 	import type { IEvent } from 'fabric/fabric-impl'
 	import { onMount } from 'svelte'
 	import { fabric } from 'fabric'
 	import { action, control, renderer, shape } from './canvas.store'
-	import { outputColor, type OutputColor } from '../palette/palette.store'
+	import { outputColor, paintType, paletteColor, type OutputColor } from '../palette/palette.store'
 	export let canvas: fabric.Canvas
 	let prevAction = ActionType.DEFAULT
 	let clipboard: fabric.Object | null = null
@@ -341,6 +341,7 @@
 
 	// object selected
 	function onObjectSelect(e?: fabric.IEvent) {
+		console.log('select')
 		const activeObject = canvas.getActiveObject()
 		if (activeObject) {
 			shape.set({
@@ -353,25 +354,31 @@
 		}
 	}
 	function onObjectSelectUpdate(e: fabric.IEvent) {
+		console.log('update')
+		setColorClear()
 		onObjectSelect()
-		onSidebarClose()
-		onSideBarOpen()
+		onSideBarRefresh()
 	}
 	function onObjectSelectClear() {
+		console.log('clear')
 		canvas.discardActiveObject()
-		onSidebarClose()
-		setClearShape()
+		setColorClear()
+		onSideBarClose()
 	}
 
 	function onSideBarOpen() {
 		sideBarOpen.set(true)
 	}
-	function onSidebarClose() {
+	function onSideBarClose() {
 		sideBarOpen.set(false)
 	}
+	function onSideBarRefresh() {
+		sideBarKey.set(Symbol())
+	}
 
-	function setClearShape() {
+	function setColorClear() {
 		shape.set(null)
+		paletteColor.set(null)
 	}
 
 	onMount(() => {

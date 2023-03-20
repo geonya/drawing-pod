@@ -6,7 +6,7 @@
 	import { onMount } from 'svelte'
 	import { Renderer } from './Renderer'
 	import { Control } from './Control'
-	import { sideBarOpen } from '$lib/store'
+	import { sideBarOpen, sideBarKey } from '$lib/store'
 	import { Action, Controller, Sidebar, Topbar } from '$lib'
 	import { control, renderer } from './canvas.store'
 	import type { SupabaseClient } from '@supabase/supabase-js'
@@ -25,6 +25,8 @@
 	<Controller {canvas} />
 	<Topbar {supabase} />
 	{#if $sideBarOpen}
-		<Sidebar />
+		{#key $sideBarKey}
+			<Sidebar />
+		{/key}
 	{/if}
 </Action>
