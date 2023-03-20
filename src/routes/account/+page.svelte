@@ -8,6 +8,8 @@
 	export let data: PageData
 	export let form: ActionData
 	let { session, profile, supabase } = data
+	$: $user = profile
+
 	let profileForm: HTMLFormElement
 	let loading = false
 	let fullName: string | null = profile?.full_name
@@ -21,7 +23,6 @@
 			loading = false
 			if (result.type === 'success') {
 				await goto('/login')
-				$user = null
 			}
 		}
 	}

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Icon from '../Icon.svelte'
-	import type { Session, SupabaseClient } from '@supabase/supabase-js'
 	import { goto } from '$app/navigation'
 	import { sb, user } from '$lib/store'
 	import { control } from '$lib/components/canvas/canvas.store'
@@ -8,6 +7,8 @@
 
 	let avatarUrl = ''
 	let openStorage = false
+
+	$: if ($user) downloadAvatar($user.avatar_url)
 
 	const downloadAvatar = async (path: string) => {
 		if (!$sb) return
@@ -25,6 +26,31 @@
 		}
 	}
 
+	async function getCanvasPNGPublicUrl() {
+		if (!$sb) return
+		const {
+			data: { user },
+		} = await $sb?.auth.getUser()
+		if (!user) {
+			await goto('/login')
+			return
+		}
+		const file = $control?.getCanvasPNGFile()
+		if (!file) return
+		const fileExt = file.name.split('.').pop()
+		const url = `${Math.random()}.${fileExt}`
+		let { data: pathData, error } = await $sb.storage.from('canvas').upload(url, file)
+		if (error) {
+			console.error('upload error', error)
+		}
+		if (!pathData?.path) return
+		const { path } = pathData
+		const { data } = $sb.storage.from('canvas').getPublicUrl(path)
+		if (!data?.publicUrl) return
+		const { publicUrl } = data
+		return publicUrl
+	}
+
 	async function onKakaoShare() {
 		if (!$sb) return
 		if (!window.Kakao) {
@@ -32,25 +58,8 @@
 			return
 		}
 		try {
-			const {
-				data: { user },
-			} = await $sb?.auth.getUser()
-			if (!user) {
-				await goto('/login')
-			}
-			const file = $control?.getCanvasPNGFile()
-			if (!file) return
-			const fileExt = file.name.split('.').pop()
-			const url = `${Math.random()}.${fileExt}`
-			let { data: pathData, error } = await $sb.storage.from('canvas').upload(url, file)
-			if (error) {
-				console.error('upload error', error)
-			}
-			if (!pathData?.path) return
-			const { path } = pathData
-			const { data } = $sb.storage.from('canvas').getPublicUrl(path)
-			if (!data?.publicUrl) return
-			const { publicUrl } = data
+			const publicUrl = await getCanvasPNGPublicUrl()
+			if (!publicUrl) return
 			window.Kakao.Share.sendDefault({
 				objectType: 'feed',
 				content: {
@@ -81,9 +90,6 @@
 			console.error(err)
 		}
 	}
-
-	$: if ($user?.avatar_url) downloadAvatar($user?.avatar_url)
-	$: if (!$user) avatarUrl = ''
 </script>
 
 <div class="absolute top-0 right-5">

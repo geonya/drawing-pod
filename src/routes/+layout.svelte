@@ -8,13 +8,13 @@
 	export let data: LayoutData
 
 	$: ({ supabase, session, profile } = data)
-
-	$: if (profile) $user = profile
 	$: if (supabase) $sb = supabase
+	$: $user = profile
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange(() => {
 			console.log('Auth state change detected')
+
 			invalidate('supabase:auth')
 		})
 		return () => data.subscription.unsubscribe()

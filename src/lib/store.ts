@@ -43,7 +43,7 @@ const setSVG = () => {
 }
 
 const setUser = () => {
-	const { subscribe, set, update } = writable<User | null>(null)
+	const { subscribe, set, update } = writable<User | null | undefined>(null)
 	return {
 		subscribe,
 		set,
