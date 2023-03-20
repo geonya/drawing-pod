@@ -4,10 +4,27 @@
 	import { sb, user } from '$lib/store'
 	import { control } from '$lib/components/canvas/canvas.store'
 	import Storage from '$lib/components/Storage.svelte'
-	import { onMount } from 'svelte'
 
 	let avatarUrl: string | undefined = undefined
 	let openStorage = false
+
+	$: if ($user) downloadImage($user.avatar_url)
+
+	const downloadImage = async (path: string) => {
+		if (!$sb) return
+		try {
+			const { data, error } = await $sb.storage.from('avatars').download(path)
+			if (error) {
+				throw error
+			}
+			const url = URL.createObjectURL(data)
+			avatarUrl = url
+		} catch (error) {
+			if (error instanceof Error) {
+				console.log('Error downloading image: ', error.message)
+			}
+		}
+	}
 
 	async function onKakaoShare() {
 		if (!window.Kakao) {
@@ -47,11 +64,6 @@
 			console.error(err)
 		}
 	}
-
-	onMount(async () => {
-		if (!$sb || !$user) return
-		avatarUrl = await $control?.getDownloadAvatarUrl($sb, $user?.avatar_url)
-	})
 </script>
 
 <div class="absolute top-0 right-5">

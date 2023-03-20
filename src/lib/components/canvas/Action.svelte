@@ -337,6 +337,7 @@
 		canvas.setWidth(window.innerHeight)
 		canvas.setHeight(window.innerHeight)
 		// setGridOnCanvasWithMM(canvas)
+		canvas.requestRenderAll()
 	}
 
 	// object selected

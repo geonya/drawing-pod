@@ -122,7 +122,7 @@
 </div>
 {#if imageModal}
 	<div
-		class="fixed top-1/2 left-1/2 z-50 h-[50vh] w-2/3 -translate-x-1/2 -translate-y-1/2 rounded-md border bg-white bg-cover bg-center bg-no-repeat shadow-lg"
+		class="fixed top-1/2 left-1/2 z-50 h-[60vh] w-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md border bg-white bg-cover bg-center bg-no-repeat shadow-lg"
 		style="background-image:url({imageModal.url});"
 	>
 		<div class="flex h-full w-full items-end justify-center text-lg">
