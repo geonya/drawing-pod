@@ -60,6 +60,9 @@
 - [x] stroke width is not changable bug fix
 - [x] logout avatar default bug fix
 - [ ] Share with kakao talk
+  - [x] sdk setup
+  - [ ] make canvas image
+- [ ]
 - [ ] Save Canvas Json file in Cloud
 - [ ] Shapre Canvas Image
 - [ ] SVG library

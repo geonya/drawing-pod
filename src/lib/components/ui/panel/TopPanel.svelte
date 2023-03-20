@@ -3,7 +3,27 @@
 	import { saveProgress } from '$lib/store'
 	import { ActionType, ObjectType } from '$lib/types'
 	import { action, control, renderer } from '$lib/components/canvas/canvas.store'
+	import type { SupabaseClient } from '@supabase/supabase-js'
+
 	let canvasClearAlertModal = false
+	export let supabase: SupabaseClient
+
+	async function onSaveInCloud() {
+		$control?.onSave()
+		const {
+			data: { user },
+		} = await supabase.auth.getUser()
+		console.log(user)
+		const data = $control?.getCanvasJSON()
+		if (!user || !data) return
+		const { error } = await supabase.from('canvas').insert({
+			data,
+			user: user?.id,
+		})
+		if (error) {
+			console.error(error)
+		}
+	}
 </script>
 
 <div
@@ -71,7 +91,7 @@
 	<button id="다운로드" on:click={() => $control?.onDownloadAsSVG()}>
 		<Icon name="download" class="h-5 w-5 transition-all duration-500 ease-in-out hover:scale-110" />
 	</button>
-	<button id="저장" class="relative" on:click={() => $control?.onSave()}>
+	<button id="저장" class="relative" on:click={async () => await onSaveInCloud()}>
 		<div class="absolute -top-6 -right-3 z-10 h-3 w-12 overflow-hidden rounded-full border text-xs">
 			{#if $saveProgress >= 1.0}
 				<div class="flex h-full items-center justify-center bg-green-500" style="width:100%">

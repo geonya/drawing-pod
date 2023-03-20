@@ -3,6 +3,10 @@ import { isLocked } from '$lib/store'
 export class Control {
 	isLocked = false
 	constructor(private readonly canvas: fabric.Canvas) {}
+	getCanvasJSON() {
+		return this.canvas.toJSON()
+	}
+
 	onBringForward() {
 		const activeObject = this.canvas.getActiveObject()
 		if (activeObject) {
@@ -195,7 +199,7 @@ export class Control {
 				: e.target.left
 	}
 	onSave() {
-		const json = this.canvas.toJSON()
+		const json = this.getCanvasJSON()
 		localStorage.setItem(CANVAS_DATA, JSON.stringify(json))
 	}
 	onDelete() {
