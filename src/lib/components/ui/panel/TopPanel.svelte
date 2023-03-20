@@ -3,7 +3,6 @@
 	import { saveProgress, sb } from '$lib/store'
 	import { ActionType, ObjectType } from '$lib/types'
 	import { action, control, renderer } from '$lib/components/canvas/canvas.store'
-	import type { SupabaseClient } from '@supabase/supabase-js'
 
 	let canvasClearAlertModal = false
 
@@ -13,8 +12,11 @@
 		const {
 			data: { user },
 		} = await $sb?.auth.getUser()
+		if (!user) {
+			return
+		}
 		const canvasData = $control?.getCanvasJSON()
-		if (!user || !canvasData) return
+		if (!canvasData) return
 		const { data, error: canvasIdError } = await $sb.from('canvas').select('id').eq('user', user.id)
 		if (canvasIdError || !data) {
 			console.error(canvasIdError)

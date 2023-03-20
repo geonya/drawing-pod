@@ -7,6 +7,8 @@
 
 	let avatarUrl = ''
 
+	let openStorage = false
+
 	const downloadAvatar = async (path: string) => {
 		if (!$sb) return
 		try {
@@ -30,6 +32,12 @@
 			return
 		}
 		try {
+			const {
+				data: { user },
+			} = await $sb?.auth.getUser()
+			if (!user) {
+				await goto('/login')
+			}
 			const file = $control?.getCanvasPNGFile()
 			if (!file) return
 			const fileExt = file.name.split('.').pop()
@@ -80,7 +88,10 @@
 
 <div class="absolute top-0 right-5">
 	<div class="flex h-full items-center justify-center space-x-3">
-		<button class="rounded-md bg-blue-400 p-2 text-white" on:click={onKakaoShare}>
+		<button
+			class="rounded-md bg-blue-400 p-2 text-white"
+			on:click={async () => await onKakaoShare()}
+		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -98,6 +109,9 @@
 		</button>
 		<button
 			class="flex flex-shrink items-center space-x-2 rounded-md border px-2 py-1 hover:bg-base-100"
+			on:click={() => {
+				openStorage = !openStorage
+			}}
 		>
 			<Icon name="storage" />
 			<span>창꼬</span>
@@ -111,3 +125,37 @@
 		/>
 	</div>
 </div>
+
+<!-- Storage -->
+{#if openStorage}
+	<div class="absolute top-0 right-0 z-50 h-96 w-96 rounded-md bg-base-100 shadow-lg">
+		<div class="flex h-full flex-col">
+			<div class="flex items-center justify-between border-b px-4 py-2">
+				<span>창꼬</span>
+				<button
+					class="flex h-6 w-6 items-center justify-center rounded-full hover:bg-base-200"
+					on:click={() => {
+						openStorage = false
+					}}
+				/>
+			</div>
+			<div class="flex-1 overflow-y-auto">
+				<div class="flex flex-col space-y-2 p-4">
+					<!-- {#each $user?.storage || [] as item}
+						<div class="flex items-center justify-between">
+							<span>{item.name}</span>
+							<button
+								class="flex h-6 w-6 items-center justify-center rounded-full hover:bg-base-200"
+								on:click={() => {
+									$sb?.storage.from('canvas').remove(item.path)
+								}}
+							>
+								<Icon name="trash" />
+							</button>
+						</div>
+					{/each} -->
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}

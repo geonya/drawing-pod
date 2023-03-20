@@ -4,10 +4,30 @@
 	import Layer from './Layer.svelte'
 	import BjsCanvas from '../babylonjs/BJSCanvas.svelte'
 	import Spinner from '../Spinner.svelte'
+	import { sb } from '$lib/store'
 	let canvasWrapper: HTMLElement
 	let canvas: fabric.Canvas
+	async function onLoadCloudCanvas() {
+		if (!$sb) return
+		const {
+			data: { user },
+		} = await $sb?.auth.getUser()
+		if (!user) return
+		const { data, error } = await $sb.from('canvas').select('*').eq('user', user.id).single()
+		if (error) {
+			console.log(error)
+			return
+		}
+		if (!data) return
+		const canvasData = data.data
+		if (canvasData) {
+			canvas.loadFromJSON(canvasData, () => {
+				canvas.renderAll()
+			})
+		}
+	}
 
-	onMount(() => {
+	onMount(async () => {
 		canvas = new fabric.Canvas('canvas', {
 			width: canvasWrapper.getBoundingClientRect().width,
 			height: canvasWrapper.getBoundingClientRect().height,
@@ -25,6 +45,9 @@
 		fabric.ActiveSelection.prototype.cornerStyle = 'circle'
 		fabric.Group.prototype.cornerStyle = 'circle'
 		fabric.Object.prototype.cornerStyle = 'circle'
+
+		// load cloud canvas json file
+		await onLoadCloudCanvas()
 	})
 </script>
 

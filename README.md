@@ -64,10 +64,9 @@
   - [x] make canvas image
   - [x] upload image to bucket
   - [x] get public url
-- [ ] ondestroy delete local storage
-- [ ] ondestroy upload canvas json file
-- [ ] load canvas data when login
-- [ ] Save Canvas Json file in Cloud
-- [ ] Shapre Canvas Image
+- [x] ondestroy delete local storage
+- [x] ondestroy upload canvas json file
+- [x] load canvas data when login
+- [x] Save Canvas Json file in Cloud
 - [ ] SVG library
 - [ ] Layer
