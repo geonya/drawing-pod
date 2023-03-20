@@ -2,15 +2,15 @@
 	import Icon from '../Icon.svelte'
 	import type { Session, SupabaseClient } from '@supabase/supabase-js'
 	import { goto } from '$app/navigation'
-	import { user } from '$lib/store'
+	import { sb, user } from '$lib/store'
 	import { control } from '$lib/components/canvas/canvas.store'
-	export let supabase: SupabaseClient
 
 	let avatarUrl = ''
 
 	const downloadAvatar = async (path: string) => {
+		if (!$sb) return
 		try {
-			const { data, error } = await supabase.storage.from('avatars').download(path)
+			const { data, error } = await $sb.storage.from('avatars').download(path)
 			if (error) {
 				throw error
 			}
@@ -24,6 +24,7 @@
 	}
 
 	async function onKakaoShare() {
+		if (!$sb) return
 		if (!window.Kakao) {
 			console.error('Kakao is not loaded.')
 			return
@@ -33,13 +34,13 @@
 			if (!file) return
 			const fileExt = file.name.split('.').pop()
 			const url = `${Math.random()}.${fileExt}`
-			let { data: pathData, error } = await supabase.storage.from('canvas').upload(url, file)
+			let { data: pathData, error } = await $sb.storage.from('canvas').upload(url, file)
 			if (error) {
 				console.error('upload error', error)
 			}
 			if (!pathData?.path) return
 			const { path } = pathData
-			const { data } = supabase.storage.from('canvas').getPublicUrl(path)
+			const { data } = $sb.storage.from('canvas').getPublicUrl(path)
 			if (!data?.publicUrl) return
 			const { publicUrl } = data
 			window.Kakao.Share.sendDefault({

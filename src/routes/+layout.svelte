@@ -4,13 +4,13 @@
 	import { onMount } from 'svelte'
 	import type { LayoutData } from './$types'
 	import { Canvas } from '$lib'
-	import { user } from '$lib/store'
-	import { PUBLIC_KAKAO_KEY } from '$env/static/public'
+	import { user, sb } from '$lib/store'
 	export let data: LayoutData
 
 	$: ({ supabase, session, profile } = data)
 
 	$: if (profile) $user = profile
+	$: if (supabase) $sb = supabase
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange(() => {
@@ -21,7 +21,7 @@
 	})
 </script>
 
-<Canvas {supabase} />
+<Canvas />
 <slot />
 <footer class="fixed bottom-0 right-0 left-0 grid h-12 w-full place-content-center">
 	Copyright Geony 2023. All rights reserved.

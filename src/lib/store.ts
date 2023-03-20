@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { writable } from 'svelte/store'
 import type { User } from './types'
 
@@ -50,11 +51,10 @@ const setUser = () => {
 	}
 }
 
+export const sb = writable<SupabaseClient | null>(null)
 export const sideBarOpen = setSideBarOpen()
 export const sideBarKey = setSideBarKey()
 export const saveProgress = setSaveProgress()
-
 export const isLocked = setIsLocked()
 export const canvasSVG = setSVG()
-
 export const user = setUser()

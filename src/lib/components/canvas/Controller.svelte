@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { AUTO_SAVE_DELAY, CANVAS_DATA } from '$lib/constants'
 	import { saveProgress } from '$lib/store'
-	import { onMount } from 'svelte'
+	import { onDestroy, onMount } from 'svelte'
 	export let canvas: fabric.Canvas
 
 	const onLoadStorageData = (canvas: fabric.Canvas) => {
@@ -57,5 +57,8 @@
 		onLoadStorageData(canvas)
 		onIntervalAutoSaveWithTimer()
 		onAutoSaveInLocalStorage(canvas)
+	})
+	onDestroy(() => {
+		localStorage.removeItem(CANVAS_DATA)
 	})
 </script>

@@ -1,40 +1,34 @@
 <script lang="ts">
 	import Icon from '../Icon.svelte'
-	import { saveProgress } from '$lib/store'
+	import { saveProgress, sb } from '$lib/store'
 	import { ActionType, ObjectType } from '$lib/types'
 	import { action, control, renderer } from '$lib/components/canvas/canvas.store'
 	import type { SupabaseClient } from '@supabase/supabase-js'
 
 	let canvasClearAlertModal = false
-	export let supabase: SupabaseClient
 
 	async function onSaveInCloud() {
+		if (!$sb) return
 		$control?.onSave()
 		const {
 			data: { user },
-		} = await supabase.auth.getUser()
+		} = await $sb?.auth.getUser()
 		const canvasData = $control?.getCanvasJSON()
 		if (!user || !canvasData) return
-		const { data, error: canvasIdError } = await supabase
-			.from('canvas')
-			.select('id')
-			.eq('user', user.id)
+		const { data, error: canvasIdError } = await $sb.from('canvas').select('id').eq('user', user.id)
 		if (canvasIdError || !data) {
 			console.error(canvasIdError)
 			return
 		}
 		const canvasId = data[0].id
 		if (canvasId) {
-			const { error } = await supabase
-				.from('canvas')
-				.update({ data: canvasData })
-				.eq('id', canvasId)
+			const { error } = await $sb.from('canvas').update({ data: canvasData }).eq('id', canvasId)
 			if (error) {
 				console.error(error)
 			}
 			return
 		}
-		const { error } = await supabase.from('canvas').insert({
+		const { error } = await $sb.from('canvas').insert({
 			data,
 			user: user?.id,
 		})
