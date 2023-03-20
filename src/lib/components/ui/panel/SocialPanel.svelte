@@ -24,15 +24,30 @@
 
 	function onKakaoShare() {
 		window.Kakao.Share.sendDefault({
-			objectType: 'text',
-			text: '간단한 JavaScript SDK 샘플과 함께 카카오 플랫폼 서비스 개발을 시작해 보세요.',
-			link: {
-				mobileWebUrl: 'https://developers.kakao.com',
-				webUrl: 'https://developers.kakao.com',
+			objectType: 'feed',
+			content: {
+				title: '오늘 내가 그린고 어때?',
+				description: '드로잉팟에서 그려보아떠 👍',
+				imageUrl: 'https://avatars.githubusercontent.com/u',
+				link: {
+					mobileWebUrl: 'https://drawingpod.vercel.app',
+					webUrl: 'https://drawingpod.vercel.app',
+				},
 			},
-			serverCallbackArgs: {
-				key: 'value', // 사용자 정의 파라미터 설정
+			social: {
+				likeCount: 10,
+				commentCount: 20,
+				sharedCount: 30,
 			},
+			buttons: [
+				{
+					title: '웹으로 이동',
+					link: {
+						mobileWebUrl: 'https://drawingpod.vercel.app',
+						webUrl: 'https://drawingpod.vercel.app',
+					},
+				},
+			],
 		})
 	}
 
