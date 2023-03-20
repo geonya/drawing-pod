@@ -4,9 +4,11 @@
 	import { sb, user } from '$lib/store'
 	import { control } from '$lib/components/canvas/canvas.store'
 	import Storage from '$lib/components/Storage.svelte'
+	import { onMount } from 'svelte'
 
-	let avatarUrl = ''
+	let avatarUrl: string | undefined = undefined
 	let openStorage = false
+
 	async function onKakaoShare() {
 		if (!window.Kakao) {
 			console.error('Kakao is not loaded.')
@@ -45,6 +47,11 @@
 			console.error(err)
 		}
 	}
+
+	onMount(async () => {
+		if (!$sb || !$user) return
+		avatarUrl = await $control?.getDownloadAvatarUrl($sb, $user?.avatar_url)
+	})
 </script>
 
 <div class="absolute top-0 right-5">

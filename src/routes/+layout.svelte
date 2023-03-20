@@ -5,18 +5,19 @@
 	import type { LayoutData } from './$types'
 	import { Canvas } from '$lib'
 	import { user, sb } from '$lib/store'
+	import { control } from '$lib/components/canvas/canvas.store'
 	export let data: LayoutData
 
 	$: ({ supabase, session, profile } = data)
 	$: if (supabase) $sb = supabase
 	$: $user = profile
 
-	onMount(() => {
+	onMount(async () => {
 		const { data } = supabase.auth.onAuthStateChange(() => {
 			console.log('Auth state change detected')
-
 			invalidate('supabase:auth')
 		})
+
 		return () => data.subscription.unsubscribe()
 	})
 </script>

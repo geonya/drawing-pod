@@ -5,6 +5,7 @@
 	import BjsCanvas from '../babylonjs/BJSCanvas.svelte'
 	import Spinner from '../Spinner.svelte'
 	import { sb } from '$lib/store'
+
 	let canvasWrapper: HTMLElement
 	let canvas: fabric.Canvas
 	async function onLoadCloudCanvas() {
@@ -47,7 +48,7 @@
 		fabric.Object.prototype.cornerStyle = 'circle'
 
 		// load cloud canvas json file
-		await onLoadCloudCanvas()
+		// await onLoadCloudCanvas()
 	})
 </script>
 

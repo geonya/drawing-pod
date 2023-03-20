@@ -70,4 +70,5 @@
 - [x] Save Canvas Json file in Cloud
 - [x] user avatar bug fix
 - [x] Cloud Storage
+- [x] Avatar SocialPanel Bug Fix
 - [ ] Layer
