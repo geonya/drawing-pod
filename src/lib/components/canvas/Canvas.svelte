@@ -57,7 +57,7 @@
 </div>
 {#if canvas}
 	<Layer {canvas} />
-	<div class="absolute right-12 top-24 z-50 cursor-grab rounded-full bg-black bg-opacity-5 p-2">
+	<div class="absolute right-12 top-24 z-40 cursor-grab rounded-full bg-black bg-opacity-5 p-2">
 		<BjsCanvas />
 	</div>
 {:else}

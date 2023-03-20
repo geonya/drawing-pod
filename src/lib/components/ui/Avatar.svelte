@@ -15,6 +15,7 @@
 
 	const downloadImage = async (path: string) => {
 		try {
+			console.log(path)
 			const { data, error } = await supabase.storage.from('avatars').download(path)
 			if (error) {
 				throw error
