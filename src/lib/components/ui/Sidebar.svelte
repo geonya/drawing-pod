@@ -40,16 +40,16 @@
 							<button
 								class={'샘플컬러 h-7 w-7 rounded-md ' +
 									($paintType === PaintType.FILL ? 'ring-2 ring-blue-500' : '')}
-								style="background-color:{fill || INITIAL_RGBA};"
+								style="background-color:{fill};"
 								on:click={() => paintType.set(PaintType.FILL)}
 							/>
 
 							<input
 								id={PaintType.FILL}
 								type="text"
-								value={stringRgbaToHex($outputColor?.fill || INITIAL_RGBA).length >= 9
-									? stringRgbaToHex($outputColor?.fill || INITIAL_RGBA).slice(0, -2)
-									: stringRgbaToHex($outputColor?.fill || INITIAL_RGBA)}
+								value={stringRgbaToHex($outputColor?.fill || '').length >= 9
+									? stringRgbaToHex($outputColor?.fill || '').slice(0, -2)
+									: stringRgbaToHex($outputColor?.fill || '')}
 								class="input max-h-7 w-full rounded-md border px-2"
 								disabled
 							/>
@@ -65,7 +65,7 @@
 							<button
 								class={'샘플컬러 h-7 w-7 rounded-md ' +
 									($paintType === PaintType.STROKE ? 'ring-2 ring-blue-500' : '')}
-								style="background-color:{stroke || INITIAL_RGBA};"
+								style="background-color:{stroke};"
 								on:click={() => paintType.set(PaintType.STROKE)}
 							/>
 							{#if strokeWidth !== null}

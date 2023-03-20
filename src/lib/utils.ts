@@ -1,5 +1,4 @@
-import { colord, type HsvaColor, type RgbaColor } from 'colord'
-import { INITIAL_RGBA, MM_TO_PX } from './constants'
+import { MM_TO_PX } from './constants'
 import { fabric } from 'fabric'
 
 export const getDistance = (point1: fabric.Point, point2: fabric.Point) => {

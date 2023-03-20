@@ -100,6 +100,10 @@
 			</button>
 		</div>
 	{/if}
+	<div class="mb-3 text-center">
+		<h1 class="text-lg">드로잉팟에 오신걸 환영합니다🎉</h1>
+		<h3 class="text-xs">Google / Github 로 로그인하거나 이메일 링크로 로그인 해주세요</h3>
+	</div>
 	<form method="POST" use:enhance={submitSocialLogin} class="mb-3 flex w-full justify-around">
 		<button
 			formaction="?/login&provider=google"

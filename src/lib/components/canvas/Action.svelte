@@ -198,8 +198,7 @@
 		canvas.renderAll()
 	}
 	function setUndo(json: any) {
-		const LIMIT = 10
-		undoStack = [json, ...undoStack.splice(0, LIMIT)]
+		undoStack = [json, ...undoStack.splice(0, 10)]
 	}
 
 	function onUnDo() {
@@ -210,7 +209,6 @@
 			// previous state
 			const json = undoStack[0]
 			undoStack = undoStack.slice(1)
-			console.log(json)
 			canvas.loadFromJSON(json, () => {
 				canvas.renderAll()
 			})
@@ -265,10 +263,12 @@
 			(e.key === 'z' && e.ctrlKey && !e.shiftKey) ||
 			(e.key === 'z' && e.metaKey && !e.shiftKey)
 		) {
+			console.log('undo')
 			onUnDo()
 		}
 		// redo
 		if ((e.key === 'z' && e.ctrlKey && e.shiftKey) || (e.key === 'z' && e.metaKey && e.shiftKey)) {
+			console.log('redo')
 			onReDo()
 		}
 
@@ -384,12 +384,16 @@
 		canvas.on('selection:updated', (e) => onObjectSelectUpdate(e))
 		canvas.on('selection:cleared', () => onObjectSelectClear())
 		canvas.on('selection:created', () => {
+			setUndo(canvas.toJSON())
 			$action = ActionType.DEFAULT
 		})
 		canvas.on('selection:updated', () => {
+			setUndo(canvas.toJSON())
 			$action = ActionType.DEFAULT
 		})
-		canvas.on('selection:cleared', () => {})
+		canvas.on('selection:cleared', () => {
+			setUndo(canvas.toJSON())
+		})
 
 		// object
 		canvas.on('object:added', () => {
@@ -404,6 +408,7 @@
 			setUndo(canvas.toJSON())
 		})
 		canvas.on('object:modified', (e) => {
+			setUndo(canvas.toJSON())
 			onObjectSelectUpdate(e)
 		})
 		canvas.on('object:moving', (e) => {
@@ -415,9 +420,15 @@
 		canvas.on('obeject:moved', () => {
 			setUndo(canvas.toJSON())
 		})
-		canvas.on('object:rotating', () => {})
-		canvas.on('object:skewing', () => {})
-		canvas.on('object:resizing', () => {})
+		canvas.on('object:rotating', () => {
+			setUndo(canvas.toJSON())
+		})
+		canvas.on('object:skewing', () => {
+			setUndo(canvas.toJSON())
+		})
+		canvas.on('object:resizing', () => {
+			setUndo(canvas.toJSON())
+		})
 
 		const undoTimeoutId = setTimeout(() => {
 			setUndo(canvas.toJSON())
@@ -441,7 +452,8 @@
 			canvas.off('object:rotating')
 			canvas.off('object:skewing')
 			canvas.off('object:resizing')
-
+			undoStack = []
+			redoStack = []
 			clearTimeout(undoTimeoutId)
 		}
 	})

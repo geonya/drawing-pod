@@ -8,7 +8,15 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
-	<meta name="viewport" content="width=device-width" />
+	<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.1.0/kakao.min.js"
+		integrity="sha384-dpu02ieKC6NUeKFoGMOKz6102CLEWi9+5RQjWSV0ikYSFFd8M3Wp2reIcquJOemx"
+		crossorigin="anonymous"></script>
+	<script>
+		// SDK를 초기화 합니다. 사용할 앱의 JavaScript 키를 설정해야 합니다.
+		Kakao.init('82191d7d0d0ff44b84cc5dc4057b9d73');
+		// SDK 초기화 여부를 판단합니다.
+		console.log('Kakao Social App Init : ', Kakao.isInitialized());
+	</script>
 	%sveltekit.head%
 </head>
 

@@ -22,13 +22,27 @@
 		}
 	}
 
+	function onKakaoShare() {
+		window.Kakao.Share.sendDefault({
+			objectType: 'text',
+			text: '간단한 JavaScript SDK 샘플과 함께 카카오 플랫폼 서비스 개발을 시작해 보세요.',
+			link: {
+				mobileWebUrl: 'https://developers.kakao.com',
+				webUrl: 'https://developers.kakao.com',
+			},
+			serverCallbackArgs: {
+				key: 'value', // 사용자 정의 파라미터 설정
+			},
+		})
+	}
+
 	$: if ($user?.avatar_url) downloadAvatar($user?.avatar_url)
 	$: if (!$user) avatarUrl = ''
 </script>
 
 <div class="absolute top-0 right-5">
 	<div class="flex h-full items-center justify-center space-x-3">
-		<button class="rounded-md bg-blue-400 p-2 text-white" on:click={() => true}>
+		<button class="rounded-md bg-blue-400 p-2 text-white" on:click={onKakaoShare}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
