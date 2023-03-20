@@ -13,9 +13,27 @@
 		const {
 			data: { user },
 		} = await supabase.auth.getUser()
-		console.log(user)
-		const data = $control?.getCanvasJSON()
-		if (!user || !data) return
+		const canvasData = $control?.getCanvasJSON()
+		if (!user || !canvasData) return
+		const { data, error: canvasIdError } = await supabase
+			.from('canvas')
+			.select('id')
+			.eq('user', user.id)
+		if (canvasIdError || !data) {
+			console.error(canvasIdError)
+			return
+		}
+		const canvasId = data[0].id
+		if (canvasId) {
+			const { error } = await supabase
+				.from('canvas')
+				.update({ data: canvasData })
+				.eq('id', canvasId)
+			if (error) {
+				console.error(error)
+			}
+			return
+		}
 		const { error } = await supabase.from('canvas').insert({
 			data,
 			user: user?.id,
@@ -102,6 +120,7 @@
 			{/if}
 		</div>
 		<Icon name="save" class="h-5 w-5 transition-all duration-500 ease-in-out hover:scale-110" />
+		<div class="absolute top-5 left-0.5 text-xs">저장</div>
 	</button>
 	<button id="전체 삭제" on:click={() => (canvasClearAlertModal = true)}>
 		<Icon name="clear" class="h-5 w-5 transition-all duration-500 ease-in-out hover:scale-110" />

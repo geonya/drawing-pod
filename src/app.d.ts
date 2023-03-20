@@ -3,6 +3,7 @@
 import { SupabaseClient, Session } from '@supabase/supabase-js'
 
 declare global {
+	Buffer: typeof Buffer
 	interface Window {
 		Kakao: any
 		kakao: any

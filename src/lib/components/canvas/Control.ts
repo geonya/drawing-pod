@@ -1,5 +1,8 @@
 import { CANVAS_DATA } from '$lib/constants'
-import { isLocked } from '$lib/store'
+import { Buffer as BufferPolyfill } from 'buffer'
+declare var Buffer: typeof BufferPolyfill
+globalThis.Buffer = BufferPolyfill
+
 export class Control {
 	isLocked = false
 	constructor(private readonly canvas: fabric.Canvas) {}
@@ -207,6 +210,27 @@ export class Control {
 		this.canvas.remove(...activeObjects)
 		this.canvas.discardActiveObject()
 		this.canvas.renderAll()
+	}
+	getCanvasPNGUrl() {
+		this.canvas.backgroundColor = 'rgba(255,255,255,1)'
+		const pngUrl = this.canvas.toDataURL({
+			format: 'png',
+		})
+		this.canvas.backgroundColor = 'rgba(255,255,255,0)'
+		return pngUrl
+	}
+	getCanvasPNGFile() {
+		const pngUrl = this.getCanvasPNGUrl()
+		const byteString = Buffer.from(pngUrl.split(',')[1], 'base64')
+		const mimeString = pngUrl.split(',')[0].split(':')[1].split(';')[0]
+		const ab = new ArrayBuffer(byteString.length)
+		const ia = new Uint8Array(ab)
+		for (let i = 0; i < byteString.length; i++) {
+			ia[i] = byteString[i]
+		}
+		const blob = new Blob([ab], { type: mimeString })
+		const file = new File([blob], 'canvas.png', { type: mimeString })
+		return file
 	}
 
 	onDownloadAsSVG() {

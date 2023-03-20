@@ -3,6 +3,7 @@
 	import type { Session, SupabaseClient } from '@supabase/supabase-js'
 	import { goto } from '$app/navigation'
 	import { user } from '$lib/store'
+	import { control } from '$lib/components/canvas/canvas.store'
 	export let supabase: SupabaseClient
 
 	let avatarUrl = ''
@@ -22,33 +23,54 @@
 		}
 	}
 
-	function onKakaoShare() {
-		window.Kakao.Share.sendDefault({
-			objectType: 'feed',
-			content: {
-				title: '오늘 내가 그린고 어때?',
-				description: '드로잉팟에서 그려보아떠 👍',
-				imageUrl: 'https://avatars.githubusercontent.com/u',
-				link: {
-					mobileWebUrl: 'https://drawingpod.vercel.app',
-					webUrl: 'https://drawingpod.vercel.app',
-				},
-			},
-			social: {
-				likeCount: 10,
-				commentCount: 20,
-				sharedCount: 30,
-			},
-			buttons: [
-				{
-					title: '웹으로 이동',
+	async function onKakaoShare() {
+		if (!window.Kakao) {
+			console.error('Kakao is not loaded.')
+			return
+		}
+		try {
+			const file = $control?.getCanvasPNGFile()
+			if (!file) return
+			const fileExt = file.name.split('.').pop()
+			const url = `${Math.random()}.${fileExt}`
+			let { data: pathData, error } = await supabase.storage.from('canvas').upload(url, file)
+			if (error) {
+				console.error('upload error', error)
+			}
+			if (!pathData?.path) return
+			const { path } = pathData
+			const { data } = supabase.storage.from('canvas').getPublicUrl(path)
+			if (!data?.publicUrl) return
+			const { publicUrl } = data
+			window.Kakao.Share.sendDefault({
+				objectType: 'feed',
+				content: {
+					title: '오늘 내가 그린고 어때?',
+					description: '드로잉팟에서 그려보아떠 👍',
+					imageUrl: publicUrl,
 					link: {
-						mobileWebUrl: 'https://drawingpod.vercel.app',
-						webUrl: 'https://drawingpod.vercel.app',
+						mobileWebUrl: publicUrl,
+						webUrl: publicUrl,
 					},
 				},
-			],
-		})
+				social: {
+					likeCount: 10,
+					commentCount: 20,
+					sharedCount: 30,
+				},
+				buttons: [
+					{
+						title: '드로잉팟으로 그려보기',
+						link: {
+							mobileWebUrl: publicUrl,
+							webUrl: publicUrl,
+						},
+					},
+				],
+			})
+		} catch (err) {
+			console.error(err)
+		}
 	}
 
 	$: if ($user?.avatar_url) downloadAvatar($user?.avatar_url)
