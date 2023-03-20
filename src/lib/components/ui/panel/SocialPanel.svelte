@@ -7,58 +7,13 @@
 
 	let avatarUrl = ''
 	let openStorage = false
-
-	$: if ($user) downloadAvatar($user.avatar_url)
-
-	const downloadAvatar = async (path: string) => {
-		if (!$sb) return
-		try {
-			const { data, error } = await $sb.storage.from('avatars').download(path)
-			if (error) {
-				throw error
-			}
-			const url = URL.createObjectURL(data)
-			avatarUrl = url
-		} catch (error) {
-			if (error instanceof Error) {
-				console.log('Error downloading image: ', error.message)
-			}
-		}
-	}
-
-	async function getCanvasPNGPublicUrl() {
-		if (!$sb) return
-		const {
-			data: { user },
-		} = await $sb?.auth.getUser()
-		if (!user) {
-			await goto('/login')
-			return
-		}
-		const file = $control?.getCanvasPNGFile()
-		if (!file) return
-		const fileExt = file.name.split('.').pop()
-		const url = `${Math.random()}.${fileExt}`
-		let { data: pathData, error } = await $sb.storage.from('canvas').upload(url, file)
-		if (error) {
-			console.error('upload error', error)
-		}
-		if (!pathData?.path) return
-		const { path } = pathData
-		const { data } = $sb.storage.from('canvas').getPublicUrl(path)
-		if (!data?.publicUrl) return
-		const { publicUrl } = data
-		return publicUrl
-	}
-
 	async function onKakaoShare() {
-		if (!$sb) return
 		if (!window.Kakao) {
 			console.error('Kakao is not loaded.')
 			return
 		}
 		try {
-			const publicUrl = await getCanvasPNGPublicUrl()
+			const publicUrl = await $control?.getCanvasPNGPublicUrl($sb)
 			if (!publicUrl) return
 			window.Kakao.Share.sendDefault({
 				objectType: 'feed',

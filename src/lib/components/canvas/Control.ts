@@ -1,4 +1,5 @@
 import { CANVAS_DATA } from '$lib/constants'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { Buffer as BufferPolyfill } from 'buffer'
 declare var Buffer: typeof BufferPolyfill
 globalThis.Buffer = BufferPolyfill
@@ -233,6 +234,31 @@ export class Control {
 		return file
 	}
 
+	async getUser(sb: SupabaseClient) {
+		const {
+			data: { user },
+		} = await sb?.auth.getUser()
+		return user
+	}
+
+	async getCanvasPNGPublicUrl(sb: SupabaseClient | null) {
+		if (!sb) return null
+		const file = this.getCanvasPNGFile()
+		if (!file) return
+		const fileExt = file.name.split('.').pop()
+		const url = `${Math.random()}.${fileExt}`
+		let { data: pathData, error } = await sb.storage.from('canvas').upload(url, file)
+		if (error) {
+			console.error('upload error', error)
+		}
+		if (!pathData?.path) return
+		const { path } = pathData
+		const { data } = sb.storage.from('canvas').getPublicUrl(path)
+		if (!data?.publicUrl) return
+		const { publicUrl } = data
+		return publicUrl
+	}
+
 	onDownloadAsSVG() {
 		this.canvas.backgroundColor = 'rgba(255,255,255,1)'
 		const svg = this.canvas.toSVG()
@@ -251,6 +277,22 @@ export class Control {
 		vp[5] = Math.max(vp[5], this.canvas.getHeight() - this.canvas.getHeight() * zoom)
 		vp[4] = Math.min(vp[4], 0)
 		vp[5] = Math.min(vp[5], 0)
+	}
+
+	async getDownloadAvatarUrl(sb: SupabaseClient, path: string) {
+		if (!sb) return
+		try {
+			const { data, error } = await sb.storage.from('avatars').download(path)
+			if (error) {
+				throw error
+			}
+			const url = URL.createObjectURL(data)
+			return url
+		} catch (error) {
+			if (error instanceof Error) {
+				console.log('Error downloading image: ', error.message)
+			}
+		}
 	}
 
 	onCanvasClear() {
